@@ -1,9 +1,10 @@
-package guipackage.gui.components;
+package guipackage.gui.components.basecomponents;
 
 import guipackage.general.GetterSubmitter;
 import guipackage.general.Point;
 import guipackage.general.Rectangle;
 import guipackage.gui.GUI;
+import guipackage.gui.components.Component;
 import guipackage.threads.AnimationFactory;
 import guipackage.threads.AnimationFactory.Animations;
 import guipackage.threads.ThreadController;

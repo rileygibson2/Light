@@ -1,4 +1,4 @@
-package guipackage.gui.components;
+package guipackage.gui.components.basecomponents;
 
 import java.awt.Color;
 import java.awt.Font;
@@ -8,6 +8,7 @@ import java.util.List;
 import guipackage.general.Point;
 import guipackage.general.Rectangle;
 import guipackage.gui.GUI;
+import guipackage.gui.components.Component;
 import guipackage.threads.AnimationFactory;
 import guipackage.threads.AnimationFactory.Animations;
 import guipackage.threads.ThreadController;
@@ -45,8 +46,8 @@ public class MessageBox extends Component {
 		label.setCentered(true);
 		mainBox.addComponent(label);
 		
-		double w = GUI.getInstance().getScreenUtils().getStringWidthAsPerc(label.font, label.text)+5;
-		double h = GUI.getInstance().getScreenUtils().getStringHeightAsPerc(label.font, label.text)+5;
+		double w = label.getWidth()+5;
+		double h = label.getHeight()+5;
 		setX((100-w)/2);
 		setWidth(w);
 		setHeight(h);

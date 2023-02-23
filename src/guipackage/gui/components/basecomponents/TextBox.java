@@ -1,4 +1,4 @@
-package guipackage.gui.components;
+package guipackage.gui.components.basecomponents;
 
 import java.awt.Color;
 import java.awt.Cursor;
@@ -10,9 +10,11 @@ import guipackage.general.Getter;
 import guipackage.general.GetterSubmitter;
 import guipackage.general.Point;
 import guipackage.general.Rectangle;
+import guipackage.general.Submitter;
 import guipackage.general.Utils;
 import guipackage.gui.GUI;
 import guipackage.gui.IO;
+import guipackage.gui.components.Component;
 import guipackage.threads.AnimationFactory;
 import guipackage.threads.AnimationFactory.Animations;
 import guipackage.threads.ThreadController;
@@ -48,7 +50,7 @@ public class TextBox extends Component {
 	public void setDescriptionAction(Getter<String> d) {
 		description = d;
 		if (text.isEmpty()) {
-			descriptionLabel.text = description.get();
+			descriptionLabel.setText(description.get());
 			descriptionLabel.setVisible(true);
 		}
 		else descriptionLabel.setVisible(false);
@@ -59,7 +61,13 @@ public class TextBox extends Component {
 	@Override
 	public void doClick(Point p) {
 		setSelected(true);
-		IO.getInstance().registerKeyListener(this);
+		TextBox t = this;
+		IO.getInstance().registerKeyListener(this, new Submitter<KeyEvent>() {
+			@Override
+			public void submit(KeyEvent e) {
+				t.doKeyPress(e);
+			}
+		});
 		
 		cursorAni = AnimationFactory.getAnimation(this, Animations.CursorBlip);
 		cursorAni.start();
@@ -77,10 +85,10 @@ public class TextBox extends Component {
 		if (actions!=null) {
 			actions.submit(text); //Submit input
 			text = actions.get(); //Update text
-			textLabel.text = text;
+			textLabel.setText(text);
 		}
 		if (text.isEmpty()&&description!=null) {
-			descriptionLabel.text = description.get();
+			descriptionLabel.setText(description.get());
 			descriptionLabel.setVisible(true);
 		}
 		else descriptionLabel.setVisible(false);
@@ -107,7 +115,7 @@ public class TextBox extends Component {
 	public void doKeyPress(KeyEvent e) {
 		if (e.getExtendedKeyCode()==8&&!text.isEmpty()) text = text.substring(0, text.length()-1);
 		else text += e.getKeyChar();
-		textLabel.text = text+cursor;
+		textLabel.setText(text+cursor);
 	}
 
 	@Override

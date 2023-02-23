@@ -1,4 +1,4 @@
-package guipackage.gui.components;
+package guipackage.gui.components.basecomponents;
 
 import java.awt.Color;
 import java.awt.Font;
@@ -10,6 +10,7 @@ import java.util.Set;
 import guipackage.general.Point;
 import guipackage.general.Rectangle;
 import guipackage.gui.GUI;
+import guipackage.gui.components.Component;
 
 public class PopUp extends Component {
 

@@ -10,8 +10,11 @@ import java.awt.GraphicsEnvironment;
 import java.awt.MultipleGradientPaint.CycleMethod;
 import java.awt.RadialGradientPaint;
 import java.awt.font.FontRenderContext;
+import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
+import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
+import java.awt.RenderingHints;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
@@ -25,11 +28,11 @@ import guipackage.general.Point;
 import guipackage.general.Rectangle;
 import guipackage.general.Utils;
 import guipackage.gui.components.Component;
-import guipackage.gui.components.GradientButton;
-import guipackage.gui.components.Image;
-import guipackage.gui.components.Label;
-import guipackage.gui.components.SimpleBox;
-import guipackage.gui.components.TextBox;
+import guipackage.gui.components.basecomponents.GradientButton;
+import guipackage.gui.components.basecomponents.Image;
+import guipackage.gui.components.basecomponents.Label;
+import guipackage.gui.components.basecomponents.SimpleBox;
+import guipackage.gui.components.basecomponents.TextBox;
 import guipackage.threads.ThreadController;
 
 public class ScreenUtils {
@@ -41,6 +44,8 @@ public class ScreenUtils {
 		loadFonts();
 	}
 
+	public void updateScreen(Rectangle screen) {this.screen = screen;}
+
 	public void loadFonts() {
 		try {
 			GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
@@ -48,7 +53,7 @@ public class ScreenUtils {
 			//            ge.registerFont(Font.createFont(Font.TRUETYPE_FONT, Utils.getInputStream("assets/fonts/neoteric-bold.ttf")));
 			//            ge.registerFont(Font.createFont(Font.TRUETYPE_FONT, Utils.getInputStream("assets/fonts/aloevera.ttf")));
 			//            ge.registerFont(Font.createFont(Font.TRUETYPE_FONT, Utils.getInputStream("assets/fonts/blackpast.ttf")));
-			ge.registerFont(Font.createFont(Font.TRUETYPE_FONT, Utils.getInputStream("assets/fonts/suezone.ttf")));
+			// ge.registerFont(Font.createFont(Font.TRUETYPE_FONT, Utils.getInputStream("assets/fonts/suezone.ttf")));
 		} catch (Exception e) {CLI.error("Error loading fonts - "+e.getMessage());}
 	}
 
@@ -75,8 +80,10 @@ public class ScreenUtils {
 		Color col = new Color(l.col.getRed(), l.col.getGreen(), l.col.getBlue(), percToCol(l.getOpacity()));
 		g.setFont(l.font);
 
-		if (l.isCentered()) drawCenteredString(g, l.font, l.text, col, new Rectangle(r.x, r.y, 1, 1));
-		else drawStringFromPoint(g, l.font, l.text, col, new Point(r.x, r.y));
+		if (l.isXCentered()&&l.isYCentered()) drawCenteredString(g, l.font, l.getText(), col, new Rectangle(r.x, r.y, 1, 1));
+		else if (l.isXCentered()) drawXCenteredString(g, l.font, l.getText(), col, new Rectangle(r.x, r.y, r.width, 1));
+		else if (l.isYCentered()) drawYCenteredString(g, l.font, l.getText(), col, new Rectangle(r.x, r.y, 1, r.height));
+		else drawStringFromPoint(g, l.font, l.getText(), col, new Point(r.x, r.y));
 	}
 
 	public void drawTextBox(Graphics2D g, TextBox t) {
@@ -97,7 +104,17 @@ public class ScreenUtils {
 		}
 		if (i.getOpacity()<100) g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, (float) (i.getOpacity()/100)));
 
-		g.drawImage(img, cW(r.x), cH(r.y), cW(r.width), cH(r.height), null);
+		//Scale to rectangle
+		double scale = Math.min(cW(r.width)/(double) img.getWidth(), cH(r.height)/(double) img.getHeight());
+		int scaledWidth = (int) (img.getWidth()*scale);
+		int scaledHeight = (int) (img.getHeight()*scale);
+
+		BufferedImage scaledImg = new BufferedImage(scaledWidth, scaledHeight, BufferedImage.TYPE_INT_ARGB);
+		g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+		AffineTransform affineTransform = AffineTransform.getScaleInstance(scale, scale);
+		AffineTransformOp affineTransformOp = new AffineTransformOp(affineTransform, AffineTransformOp.TYPE_BILINEAR);
+		affineTransformOp.filter(img, scaledImg);
+		g.drawImage(scaledImg, cW(r.x)+(cW(r.width)-scaledImg.getWidth())/2, cH(r.y), null);
 
 		//Reset alpha
 		g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1f));
@@ -240,6 +257,23 @@ public class ScreenUtils {
 		g.drawString(s, x, y);
 	}
 
+	public void drawXCenteredString(Graphics2D g, Font f, String s, Color c, Rectangle r) {
+		FontMetrics metrics = g.getFontMetrics(f);
+		int x = (int) (cW(r.x)+(cW(r.width)-metrics.stringWidth(s))/2);
+		int y = (int) (cH(r.y)+(-metrics.getHeight()/2))+metrics.getAscent();
+		g.setFont(f);
+		g.setColor(c);
+		g.drawString(s, x, y);
+	}
+
+	public void drawYCenteredString(Graphics2D g, Font f, String s, Color c, Rectangle r) {
+		FontMetrics metrics = g.getFontMetrics(f);
+		int y = (int) (cH(r.y)+((cH(r.height)-metrics.getHeight())/2)+metrics.getAscent());
+		g.setFont(f);
+		g.setColor(c);
+		g.drawString(s, cW(r.x), y);
+	}
+
 	public void drawStringFromPoint(Graphics2D g, Font f, String s, Color c, Point p) {
 		FontMetrics metrics = g.getFontMetrics(f);
 		int y = (int) (cH(p.y)+(-metrics.getHeight()/2))+metrics.getAscent();
@@ -315,5 +349,17 @@ public class ScreenUtils {
 	 */
 	public double cHR(double p) {
 		return (p/screen.height)*100;
+	}
+
+	/**
+	 * Takes a width percentage value, scales it to root and returns the equivilent percentage
+	 * value if for the height. Useful for making squares
+	 * @param c
+	 * @return realive height percentage
+	 */
+	public double rHP(Component c, double width) {
+		Rectangle r = c.getRealRec(new Rectangle(0, 0, width, 0));
+		int real = cW(r.width);
+		return cHR(real);
 	}
 }

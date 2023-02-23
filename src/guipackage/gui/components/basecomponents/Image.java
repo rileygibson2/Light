@@ -1,9 +1,10 @@
-package guipackage.gui.components;
+package guipackage.gui.components.basecomponents;
 
 import java.awt.Graphics2D;
 
 import guipackage.general.Rectangle;
 import guipackage.gui.GUI;
+import guipackage.gui.components.Component;
 
 public class Image extends Component {
 

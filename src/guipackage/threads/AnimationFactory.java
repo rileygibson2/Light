@@ -14,7 +14,7 @@ import guipackage.general.Pair;
 import guipackage.general.Point;
 import guipackage.general.Rectangle;
 import guipackage.gui.components.Component;
-import guipackage.gui.components.TextBox;
+import guipackage.gui.components.basecomponents.TextBox;
 
 public class AnimationFactory {
 
@@ -235,14 +235,14 @@ public class AnimationFactory {
 				while (isRunning()) {
 					if (t.cursor.isEmpty()) t.cursor = "_";
 					else t.cursor = "";
-					t.textLabel.text = t.getText()+t.cursor;
+					t.textLabel.setText(t.getText()+t.cursor);
 
 					iterate();
 				}
 
 				//Reset
 				t.cursor = "";
-				t.textLabel.text = t.getText();
+				t.textLabel.setText(t.getText());
 				finish();
 			}
 		};

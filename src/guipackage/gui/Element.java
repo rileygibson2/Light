@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import guipackage.cli.CLI;
 import guipackage.general.Point;
 import guipackage.general.Rectangle;
 import guipackage.gui.components.Component;

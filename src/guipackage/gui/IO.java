@@ -9,20 +9,18 @@ import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.time.Instant;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 import guipackage.cli.CLI;
 import guipackage.general.Point;
-import guipackage.gui.components.Component;
+import guipackage.general.Submitter;
 import guipackage.threads.ThreadController;
 
 public class IO implements MouseListener, MouseMotionListener, MouseWheelListener, KeyListener {
 	
 	static IO singleton;
 	
-	private Set<Component> keyListeners;
+	private Map<Object, Submitter<KeyEvent>> keyListeners;
 	private Map<KeyEvent, Runnable> keyActions;
 	private Point dragPoint;
 	
@@ -31,7 +29,7 @@ public class IO implements MouseListener, MouseMotionListener, MouseWheelListene
 	private final static int paintTimeout = 2;
 	
 	private IO() {
-		this.keyListeners = new HashSet<Component>();
+		this.keyListeners = new HashMap<Object, Submitter<KeyEvent>>();
 		this.keyActions = new HashMap<KeyEvent, Runnable>();
 		dragPoint = null;
 		startPaintThread();
@@ -42,13 +40,9 @@ public class IO implements MouseListener, MouseMotionListener, MouseWheelListene
 		return singleton;
 	}
 	
-	public void registerKeyListener(Component c) {
-		if (!keyListeners.contains(c)) keyListeners.add(c);
-	}
+	public void registerKeyListener(Object listener, Submitter<KeyEvent> s) {keyListeners.put(listener, s);}
 	
-	public void deregisterKeyListener(Component c) {
-		if (keyListeners.contains(c)) keyListeners.remove(c);
-	}
+	public void deregisterKeyListener(Object listener) {keyListeners.remove(listener);}
 
 	public void registerKeyAction(KeyEvent e, Runnable r) {keyActions.put(e, r);}
 
@@ -117,7 +111,8 @@ public class IO implements MouseListener, MouseMotionListener, MouseWheelListene
 	
 	@Override
 	public void keyTyped(KeyEvent e) {
-		for (Component c : keyListeners) c.doKeyPress(e);
+		for (Submitter<KeyEvent> s : keyListeners.values()) s.submit(e);
+
 		if (e.getExtendedKeyCode()==KeyEvent.VK_C) {
 			if (CLI.viewerActive()) CLI.showViewer(false);
 			else CLI.showViewer(true);

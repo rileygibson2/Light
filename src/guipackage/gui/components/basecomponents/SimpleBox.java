@@ -1,10 +1,12 @@
-package guipackage.gui.components;
+package guipackage.gui.components.basecomponents;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
 
+import guipackage.cli.CLI;
 import guipackage.general.Rectangle;
 import guipackage.gui.GUI;
+import guipackage.gui.components.Component;
 
 public class SimpleBox extends Component {
 
@@ -13,13 +15,13 @@ public class SimpleBox extends Component {
 	private boolean rounded;
 	private boolean oval;
 	private int[] roundedCorners;
+
+	private boolean draw;
 	
 	public SimpleBox(Rectangle r) {
 		super(r);
 		filled = true;
-		rounded = false;
-		oval = false;
-		setVisible(false);
+		draw = false;
 	}
 	
 	public SimpleBox(Rectangle r, Color col) {
@@ -28,6 +30,7 @@ public class SimpleBox extends Component {
 		filled = true;
 		rounded = false;
 		oval = false;
+		draw = true;
 	}
 	
 	public Color getColor() {return col;}
@@ -49,7 +52,7 @@ public class SimpleBox extends Component {
 	
 	@Override
 	public void draw(Graphics2D g) {
-		GUI.getInstance().getScreenUtils().drawSimpleBox(g, this);
+		if (draw) GUI.getInstance().getScreenUtils().drawSimpleBox(g, this);
 		super.draw(g);
 	}
 }
