@@ -6,9 +6,8 @@ import java.awt.Graphics2D;
 
 import guipackage.general.UnitRectangle;
 import guipackage.gui.GUI;
-import guipackage.gui.components.Component;
 
-public class Label extends Component {
+public class Label extends SimpleBox {
 
 	private String text;
 	public Font font;
@@ -33,6 +32,8 @@ public class Label extends Component {
 		text = t;
 		r.width.v = GUI.getScreenUtils().getStringWidthAsPerc(font, text);
 	}
+
+	public void setLabelColor(Color col) {this.col = col;}
 	
 	public boolean isXCentered() {return xCentered;}
 
@@ -42,8 +43,6 @@ public class Label extends Component {
 		xCentered = c;
 		yCentered = c;
 	}
-
-	public void setColor(Color col) {this.col = col;}
 
 	public void setXCentered(boolean c) {xCentered = c;}
 
@@ -59,7 +58,7 @@ public class Label extends Component {
 
 	@Override
 	public void draw(Graphics2D g) {
-		GUI.getScreenUtils().drawLabel(g, this);
 		super.draw(g);
+		GUI.getScreenUtils().drawLabel(g, this);
 	}
 }

@@ -23,7 +23,6 @@ public class SimpleBox extends Component {
 	
 	public SimpleBox(UnitRectangle r) {
 		super(r);
-		filled = false;
 		draw = false;
 	}
 	
@@ -43,6 +42,7 @@ public class SimpleBox extends Component {
 
 	public Color getColor() {return col;}
 	public void setColor(Color c) {
+		draw = true;
 		filled = true;
 		col = c;
 	}

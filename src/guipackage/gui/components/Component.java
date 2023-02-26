@@ -2,6 +2,7 @@ package guipackage.gui.components;
 
 import guipackage.general.Point;
 import guipackage.general.UnitRectangle;
+import guipackage.general.UnitValue;
 import guipackage.gui.Element;
 
 public abstract class Component extends Element {
@@ -107,26 +108,26 @@ public abstract class Component extends Element {
 	}
 
 	@Override
-	public void setX(double x) {
+	public void setX(UnitValue x) {
 		super.setX(x);
-		if (!freezeShadow) shadowR.x.v = x;
+		if (!freezeShadow) shadowR.x.v = x.v;
 	}
 
 	@Override
-	public void setY(double y) {
+	public void setY(UnitValue y) {
 		super.setY(y);
-		if (!freezeShadow) shadowR.y.v = y;
+		if (!freezeShadow) shadowR.y.v = y.v;
 	}
 
 	@Override
-	public void setWidth(double width) {
+	public void setWidth(UnitValue width) {
 		super.setWidth(width);
-		if (!freezeShadow) shadowR.width.v = width;
+		if (!freezeShadow) shadowR.width = width;
 	}
 
 	@Override
-	public void setHeight(double height) {
+	public void setHeight(UnitValue height) {
 		super.setHeight(height);
-		if (!freezeShadow) shadowR.height.v = height;
+		if (!freezeShadow) shadowR.height = height;
 	}
 }

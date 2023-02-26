@@ -7,21 +7,22 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import guipackage.cli.CLI;
 import guipackage.general.UnitRectangle;
+import guipackage.general.UnitValue;
 import guipackage.general.UnitValue.Unit;
 import guipackage.gui.GUI;
 import guipackage.gui.components.Component;
 
-public class TempBox extends Component {
+public class TempBox extends FlexBox {
 
 	private Runnable onClose;
-	SimpleBox mainBox;
 	Set<Component> addedComponents; //Components that are not part of the core box
 	List<SimpleBox> tabs; //Tabs added to this popup;
+
+	public SimpleBox b;
 	
 	public TempBox(String label) {
-		super(new UnitRectangle(10, Unit.vw, 10, Unit.vh, 50, Unit.vw, 50, Unit.vh));
+		super(new UnitRectangle(10, Unit.vw, 10, Unit.vh, 0, Unit.vw, 0, Unit.vh));
 		addedComponents = new HashSet<Component>();
 		tabs = new ArrayList<SimpleBox>();
 
@@ -31,41 +32,37 @@ public class TempBox extends Component {
 		mainBox.increasePriority();
 		addComponent(mainBox);*/
 
+		SimpleBox b = new SimpleBox(new UnitRectangle(0, 0, 100, 100), Color.RED);
+		addComponent(b);
+
 		//Top bar
 		/*SimpleBox tB = new SimpleBox(new Rectangle(0, 0, 0, 0), Color.RED);
 		tB.setRounded(new int[]{1, 4});
 		tB.setPosition(Position.Relative);
 		addComponent(tB);*/
 
-		SimpleBox b = new SimpleBox(new UnitRectangle(0, 0, 100, 100), Color.yellow);
-		addComponent(b);
+		FlexBox topBar = new FlexBox(new UnitRectangle(0, 0, 0, 0, Unit.px));
+		topBar.setMinWidth(new UnitValue(50, Unit.vw));
+		topBar.setMinHeight(new UnitValue(5, Unit.vh));
+		addComponent(topBar);
 
-		FlexBox f = new FlexBox(new UnitRectangle(0, 0, 0, 10, Unit.px));
-		addComponent(f);
-		b = new SimpleBox(new UnitRectangle(0, 0, 10, 10, Unit.vw, Unit.vh), Color.red);
-		f.addComponent(b);
-		b = new SimpleBox(new UnitRectangle(20, 0, 15, 10, Unit.vw, Unit.vh), Color.green);
-		f.addComponent(b);
-		b = new SimpleBox(new UnitRectangle(0, 0, 100, 100), Color.PINK);
-		f.addComponent(b);
-		CLI.debug("added");
+		Label title = new Label(new UnitRectangle(0, 0, 80, 100, Unit.pc), label, new Font(GUI.baseFont, Font.BOLD, 18), new Color(230, 230, 230));
+		title.setColor(new Color(0, 0, 180));
+		title.setBorder(1, new Color(10, 100, 255));
+		title.setRounded(10);
+		title.setXCentered(true);
+		title.setYCentered(true);
+		topBar.addComponent(title);
 
-		//Label
-		/*Label l = new Label(new Rectangle(0, 0, 0 , 0), label, new Font(GUI.baseFont, Font.BOLD, 16), new Color(230, 230, 230));
-		l.setCentered(true);
-		tB.addComponent(l);
+		Image exit = new Image(new UnitRectangle(80, 0, 20, 100, Unit.pc), "exit.png");
+		exit.setColor(GUI.bg);
+		exit.setBorder(1, new Color(80, 80, 80));
+		exit.setRounded(10);
+		topBar.addComponent(exit);
 
-		Button b = new Button(new Rectangle(0, 0, 10, 10), GUI.focus, "exit.png");
-		tB.addComponent(b);*/
-	}
-
-	@Override
-	public void addComponent(Component c) {
-		super.addComponent(c);
-
-		//Re-position to center
-		//setX(100-getWidth()/2);
-		//setY(100-getHeight()/2);
+		SimpleBox content = new SimpleBox(new UnitRectangle(0, Unit.pc, 5, Unit.vh, 100, Unit.pc, 20, Unit.vh), GUI.fg);
+		content.setRounded(10);
+		addComponent(content);
 	}
 
 	public void addSmother(double opacity) {
@@ -78,13 +75,13 @@ public class TempBox extends Component {
 	
 	public void setCloseAction(Runnable r) {this.onClose = r;}
 	
-	public void addTab(String name, Runnable clickAction) {
+	/*public void addTab(String name, Runnable clickAction) {
 		//Tabs
 		Font f = new Font(GUI.baseFont, Font.BOLD, 14);
-		double w = GUI.getInstance().getScreenUtils().getStringWidthAsPerc(f, name)+10;
-		double h = GUI.getInstance().getScreenUtils().getStringHeightAsPerc(f, name)+5;
+		double w = GUI.getScreenUtils().getStringWidthAsPerc(f, name)+10;
+		double h = GUI.getScreenUtils().getStringHeightAsPerc(f, name)+5;
 		double x = 0;
-		if (!tabs.isEmpty()) x = tabs.get(tabs.size()-1).getX()+tabs.get(tabs.size()-1).getWidth();
+		if (!tabs.isEmpty()) x = tabs.get(tabs.size()-1).getX().v+tabs.get(tabs.size()-1).getWidth().v;
 		
 		SimpleBox tab = new SimpleBox(new UnitRectangle(x, 16-h, w, h), GUI.fg);
 		tab.setClickAction(() -> {
@@ -111,7 +108,7 @@ public class TempBox extends Component {
 	public void cleanPopupComponents() {
 		mainBox.removeComponents(addedComponents);
 		addedComponents.clear();
-	}
+	}*/
 
 	private void close(boolean cancelled) {
 		if (onClose!=null) onClose.run();

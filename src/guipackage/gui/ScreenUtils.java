@@ -81,9 +81,9 @@ public class ScreenUtils {
 		Color col = new Color(l.col.getRed(), l.col.getGreen(), l.col.getBlue(), percToCol(l.getOpacity()));
 		g.setFont(l.font);
 
-		if (l.isXCentered()&&l.isYCentered()) drawCenteredString(g, l.font, l.getText(), col, new Rectangle(r.x, r.y, 1, 1));
-		else if (l.isXCentered()) drawXCenteredString(g, l.font, l.getText(), col, new Rectangle(r.x, r.y, r.width, 1));
-		else if (l.isYCentered()) drawYCenteredString(g, l.font, l.getText(), col, new Rectangle(r.x, r.y, 1, r.height));
+		if (l.isXCentered()&&l.isYCentered()) drawCenteredString(g, l.font, l.getText(), col, r);
+		else if (l.isXCentered()) drawXCenteredString(g, l.font, l.getText(), col, r);
+		else if (l.isYCentered()) drawYCenteredString(g, l.font, l.getText(), col, r);
 		else drawStringFromPoint(g, l.font, l.getText(), col, new Point(r.x, r.y));
 	}
 
@@ -212,6 +212,7 @@ public class ScreenUtils {
 		FontMetrics metrics = g.getFontMetrics(f);
 		int x = (int) (r.x+(r.width-metrics.stringWidth(s))/2);
 		int y = (int) (r.y+((r.height-metrics.getHeight())/2)+metrics.getAscent());
+		CLI.debug(x+", "+y);
 		g.setFont(f);
 		g.setColor(c);
 		g.drawString(s, x, y);
@@ -221,6 +222,7 @@ public class ScreenUtils {
 		FontMetrics metrics = g.getFontMetrics(f);
 		int x = (int) (r.x+(r.width-metrics.stringWidth(s))/2);
 		int y = (int) (r.y+(-metrics.getHeight()/2))+metrics.getAscent();
+		CLI.debug("x: "+x);
 		g.setFont(f);
 		g.setColor(c);
 		g.drawString(s, x, y);

@@ -3,8 +3,8 @@ package guipackage.gui.components.basecomponents;
 import java.awt.Color;
 
 import guipackage.general.Point;
-import guipackage.general.Rectangle;
 import guipackage.general.UnitRectangle;
+import guipackage.general.UnitValue;
 import guipackage.gui.components.Component;
 
 public class Slider extends Component {
@@ -31,11 +31,11 @@ public class Slider extends Component {
 		mainBox.addComponent(groove);
 		
 		//Coloured Groove
-		grooveFill = new SimpleBox(new UnitRectangle(groove.getX(), groove.getY(), 0, groove.getHeight()), new Color(150, 100, 100));
+		grooveFill = new SimpleBox(new UnitRectangle(groove.getX(), groove.getY(), new UnitValue(0), groove.getHeight()), new Color(150, 100, 100));
 		mainBox.addComponent(grooveFill);
 
 		//Ball
-		ball = new SimpleBox(new UnitRectangle(groove.getX(), 20, 14, 60), new Color(255, 100, 100));
+		ball = new SimpleBox(new UnitRectangle(groove.getX().v, 20, 14, 60), new Color(255, 100, 100));
 		ball.setOval(true);
 		mainBox.addComponent(ball);
 	}
@@ -43,8 +43,8 @@ public class Slider extends Component {
 	public void setValue(double v) {
 		value = v;
 		v /= 100;
-		ball.setX(groove.getX()+(v*groove.getWidth())-ball.getWidth()/2);
-		grooveFill.setWidth(v*groove.getWidth());
+		ball.setX(new UnitValue(groove.getX().v+(v*groove.getWidth().v)-ball.getWidth().v/2));
+		grooveFill.setWidth(new UnitValue(v*groove.getWidth().v));
 	}
 	
 	public double getValue() {return value;}
@@ -55,10 +55,10 @@ public class Slider extends Component {
 	public void doClick(Point p) {
 		double x = scalePoint(p).x*100;
 		
-		if (x>=groove.getX()&&x<=groove.getX()+groove.getWidth()) { //Check within bounds of groove
-			value = ((x-groove.getX())/groove.getWidth())*100;
-			ball.setX(x-ball.getWidth()/2);
-			grooveFill.setWidth(x-grooveFill.getX());
+		if (x>=groove.getX().v&&x<=groove.getX().v+groove.getWidth().v) { //Check within bounds of groove
+			value = ((x-groove.getX().v)/groove.getWidth().v)*100;
+			ball.setX(new UnitValue(x-ball.getWidth().v/2));
+			grooveFill.setWidth(new UnitValue(x-grooveFill.getX().v));
 		}
 		
 		if (onUpdate!=null) onUpdate.run();
@@ -69,10 +69,10 @@ public class Slider extends Component {
 	public void doDrag(Point entry, Point current) {
 		double x = scalePoint(current).x*100;
 		
-		if (x>=groove.getX()&&x<=groove.getX()+groove.getWidth()) { //Check within bounds of groove
-			value = ((x-groove.getX())/groove.getWidth())*100;
-			ball.setX(x-ball.getWidth()/2);
-			grooveFill.setWidth(x-grooveFill.getX());
+		if (x>=groove.getX().v&&x<=groove.getX().v+groove.getWidth().v) { //Check within bounds of groove
+			value = ((x-groove.getX().v)/groove.getWidth().v)*100;
+			ball.setX(new UnitValue(x-ball.getWidth().v/2));
+			grooveFill.setWidth(new UnitValue(x-grooveFill.getX().v));
 		}
 		
 		if (onUpdate!=null) onUpdate.run();

@@ -14,6 +14,11 @@ public class UnitValue {
 
     public UnitValue() {}
 
+    public UnitValue(double v) {
+        this.v = v;
+        this.u = Unit.pc;
+    }
+
     public UnitValue(double v, Unit u) {
         this.v = v;
         this.u = u;

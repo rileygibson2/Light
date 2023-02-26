@@ -12,6 +12,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import guipackage.general.Point;
 import guipackage.general.Rectangle;
+import guipackage.general.UnitPoint;
 import guipackage.general.UnitRectangle;
 import guipackage.general.UnitValue;
 import guipackage.general.UnitValue.Unit;
@@ -22,6 +23,8 @@ public abstract class Element {
 	private Element parent;
 	protected UnitRectangle r; //Current values
 	private UnitRectangle rO; //Original values
+	private UnitPoint minSize;
+	private UnitPoint maxSize;
 	private List<Component> components;
 	private Lock componentsLock; //Primitive lock on components list
 	
@@ -36,34 +39,67 @@ public abstract class Element {
 		Fixed //Dimensions taken from top left of screen
 	}
 	private Position position;
+
+	/*public enum Float {
+		Left, //Position is taken from top left of parent (if absolute) and from top right of sibling (if relative)
+		Right //Position is taken from top right of parent (if absolute) and from top left of sibling (if relative)
+	}*/
 	
 	public Element(UnitRectangle r) {
 		this.r = r;
 		this.rO = r.clone();
+		this.minSize = new UnitPoint(0, Unit.px, 0, Unit.px);
+		this.maxSize = new UnitPoint(GUI.screen.width, Unit.px, GUI.screen.height, Unit.px);
 		this.components = new ArrayList<Component>();
 		componentsLock = new ReentrantLock();
 		position = Position.Absolute;
 	}
 	
-	public void setX(double x) {r.x.v = x;}
-	public void setY(double y) {r.y.v = y;}
-	public void setWidth(double width) {r.width.v = width;}
-	public void setHeight(double height) {r.height.v = height;}
+	public void setX(UnitValue p) {
+		r.x = p;
+		checkSize();
+		if (parent!=null) parent.childUpdated();
+	}
+	public void setY(UnitValue p) {
+		r.y = p;
+		checkSize();
+		if (parent!=null) parent.childUpdated();
+	}
+	public void setWidth(UnitValue p) {
+		r.width = p;
+		checkSize();
+		if (parent!=null) parent.childUpdated();
+	}
+	public void setHeight(UnitValue p) {
+		r.height = p;
+		checkSize();
+		if (parent!=null) parent.childUpdated();
+	}
+	public void setMinWidth(UnitValue p) {
+		minSize.x = p;
+		if (parent!=null) parent.childUpdated();
+	}
+	public void setMinHeight(UnitValue p) {
+		minSize.y = p;
+		if (parent!=null) parent.childUpdated();
+	}
+	public void setMaxWidth(UnitValue p) {
+		maxSize.x = p;
+		if (parent!=null) parent.childUpdated();
+	}
+	public void setMaxHeight(UnitValue p) {
+		maxSize.y = p;
+		if (parent!=null) parent.childUpdated();
+	}
 	
-	public void setXPair(UnitValue p) {r.x = p;}
-	public void setYPair(UnitValue p) {r.y = p;}
-	public void setWidthPair(UnitValue p) {r.width = p;}
-	public void setHeightPair(UnitValue p) {r.height = p;}
-	
-	public double getX() {return r.x.v;}
-	public double getY() {return r.y.v;}
-	public double getWidth() {return r.width.v;}
-	public double getHeight() {return r.height.v;}
-	
-	public UnitValue getXPair() {return r.x;}
-	public UnitValue getYPair() {return r.y;}
-	public UnitValue getWidthPair() {return r.width;}
-	public UnitValue getHeightPair() {return r.height;}
+	public UnitValue getX() {return r.x;}
+	public UnitValue getY() {return r.y;}
+	public UnitValue getWidth() {return r.width;}
+	public UnitValue getHeight() {return r.height;}
+	public UnitValue getMinWidth() {return minSize.x;}
+	public UnitValue getMinHeight() {return minSize.y;}
+	public UnitValue getMaxWidth() {return maxSize.x;}
+	public UnitValue getMaxHeight() {return maxSize.y;}
 	
 	public void setRec(UnitRectangle r) {this.r = r;}
 	public void setRecToOriginal() {r = rO.clone();}
@@ -71,6 +107,9 @@ public abstract class Element {
 	public UnitRectangle getOriginalRec() {return rO;}
 	public void changeOriginalRec(UnitRectangle r) {rO = r;}
 	public void updateOriginalRec() {rO = r.clone();}
+
+	public void setMinSize(UnitPoint p) {this.minSize = p;}
+	public void setMaxSize(UnitPoint p) {this.maxSize = p;}
 	
 	public Element getParent() {return parent;}
 	public void setParent(Element e) {parent = e;}
@@ -130,17 +169,22 @@ public abstract class Element {
 			Component lastRelativeSibling = null;
 			for (int i=components.size()-1; i>-1; i--) {
 				Component sibling = components.get(i);
-				if (sibling.getPosition()==Position.Relative&&!sibling.getRec().hasUnit(Unit.pc)) {
+				if (sibling!=c&&sibling.getPosition()==Position.Relative&&!sibling.getRec().hasUnit(Unit.pc)) {
 					lastRelativeSibling = sibling;
 					break;
 				}
-				componentsLock.unlock();
+			}
+			componentsLock.unlock();
+			
+			if (lastRelativeSibling!=null) {
+				//Adjust this elements position values to base off siblings
 				
-				if (lastRelativeSibling!=null) {
-					//Adjust this elements position values to base off siblings
-					c.setXPair(GUI.getScreenUtils().translateToUnit(lastRelativeSibling.getXPair(), c.getXPair().u));
-					c.setYPair(GUI.getScreenUtils().translateToUnit(lastRelativeSibling.getYPair(), c.getYPair().u));
-				}
+				UnitValue pos = GUI.getScreenUtils().translateToUnit(lastRelativeSibling.getX(), c.getX().u);
+				UnitValue size = GUI.getScreenUtils().translateToUnit(lastRelativeSibling.getWidth(), c.getX().u);
+				c.setX(new UnitValue(c.getX().v+pos.v+size.v, c.getX().u));
+
+				pos = GUI.getScreenUtils().translateToUnit(lastRelativeSibling.getY(), c.getY().u);
+				c.setY(new UnitValue(c.getY().v+pos.v, c.getY().u));
 			}
 		}
 	}
@@ -191,6 +235,37 @@ public abstract class Element {
 	protected void triggerDOMExit() {
 		inDOM = false;
 		for (Component c : components) c.triggerDOMExit();
+	}
+
+	/**
+	 * Update hook for when a child of this element has had it's dimensions updated.
+	 * Will propogate up the DOM tree.
+	 * Can be overridden to create custom actions for when a child is changed, for example FlexBox uses it
+	 * to resize itself to accomodate the updated child
+	 */
+	public void childUpdated() {
+		if (parent!=null) parent.childUpdated();
+	}
+
+	/**
+	 * Validates size is not smaller than min values
+	 */
+	public void checkSize() {
+		//Check min width
+		UnitValue size = GUI.getScreenUtils().translateToUnit(getWidth(), getMinWidth().u);
+		if (size.v<getMinWidth().v) r.width = getMinWidth().clone();
+		
+		//Check min height
+		size = GUI.getScreenUtils().translateToUnit(getHeight(), getMinHeight().u);
+		if (size.v<getMinHeight().v) r.height = getMinHeight().clone();
+
+		//Check max width
+		size = GUI.getScreenUtils().translateToUnit(getWidth(), getMaxWidth().u);
+		if (size.v>getMaxWidth().v) r.width = getMaxWidth().clone();
+		
+		//Check max height
+		size = GUI.getScreenUtils().translateToUnit(getHeight(), getMaxHeight().u);
+		if (size.v>getMaxHeight().v) r.height = getMaxHeight().clone();
 	}
 	
 	/**
@@ -441,6 +516,7 @@ public abstract class Element {
 	
 	@Override
 	public String toString() {
-		return "["+getClass().getSimpleName()+": pos: "+getPosition()+" dom: "+inDOM()+" r: "+getRec()+" rL: "+getRealRec()+"]";
+		if (inDOM()) return "["+getClass().getSimpleName()+": pos: "+getPosition()+" dom: "+inDOM()+" r: "+getRec()+" rL: "+getRealRec()+"]";
+		return "["+getClass().getSimpleName()+": pos: "+getPosition()+" dom: "+inDOM()+" r: "+getRec()+"]";
 	}
 }

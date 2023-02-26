@@ -32,14 +32,13 @@ public class CommandLineGUI extends Component {
         prefix.setYCentered(true);
         mainBox.addComponent(prefix);
         
-        command = new Label(new UnitRectangle(prefix.getWidth()+2, 50, 0, 0), "", new Font("Geneva", Font.PLAIN, 14), GUI.textMain);
+        command = new Label(new UnitRectangle(prefix.getWidth().v+2, 50, 0, 0), "", new Font("Geneva", Font.PLAIN, 14), GUI.textMain);
         command.setYCentered(true);
         mainBox.addComponent(command);
     }
 
     public void setPrefixString(String p) {
         prefix.setText("["+p+"]>");
-        command.setX(prefix.getX()+prefix.getWidth());
     }
 
     public void setCommandString(String c) {command.setText(c);} 

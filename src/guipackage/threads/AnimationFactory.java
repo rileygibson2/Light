@@ -14,6 +14,7 @@ import guipackage.general.Pair;
 import guipackage.general.Point;
 import guipackage.general.Rectangle;
 import guipackage.general.UnitRectangle;
+import guipackage.general.UnitValue;
 import guipackage.gui.components.Component;
 import guipackage.gui.components.basecomponents.TextBox;
 
@@ -105,8 +106,8 @@ public class AnimationFactory {
 
 				while (isRunning()) {
 					p += increment;
-					c.setX(sineCurve(start.x.v, to.x, p));
-					c.setY(sineCurve(start.y.v, to.y, p));
+					c.setX(new UnitValue(sineCurve(start.x.v, to.x, p), c.getX().u));
+					c.setY(new UnitValue(sineCurve(start.y.v, to.y, p), c.getY().u));
 
 					if (p>=100) end();
 					iterate();
@@ -131,10 +132,10 @@ public class AnimationFactory {
 
 				while (isRunning()) {
 					p += increment;
-					c.setX(sineCurve(start.x.v, to.x, p));
-					c.setY(sineCurve(start.y.v, to.y, p));
-					c.setWidth(sineCurve(start.width.v, to.width, p));
-					c.setHeight(sineCurve(start.height.v, to.height, p));;
+					c.setX(new UnitValue(sineCurve(start.x.v, to.x, p), c.getX().u));
+					c.setY(new UnitValue(sineCurve(start.y.v, to.y, p), c.getY().u));
+					c.setWidth(new UnitValue(sineCurve(start.width.v, to.width, p), c.getWidth().u));
+					c.setHeight(new UnitValue(sineCurve(start.height.v, to.height, p), c.getHeight().u));
 
 					if (p>=100) end();
 					iterate();

@@ -7,8 +7,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import guipackage.general.Rectangle;
 import guipackage.general.UnitRectangle;
+import guipackage.general.UnitValue;
 import guipackage.gui.GUI;
 import guipackage.gui.components.Component;
 
@@ -34,7 +34,7 @@ public class Dialog extends Component {
 		addComponent(mainBox);
 
 		//Top bar
-		SimpleBox tB = new SimpleBox(new UnitRectangle(getX(), getY(), getWidth(), 12.5), GUI.focus);
+		SimpleBox tB = new SimpleBox(new UnitRectangle(getX(), getY(), getWidth(), new UnitValue(12.5)), GUI.focus);
 		//tB.setAbsolute(true);
 		tB.setRounded(new int[]{1, 4});
 		mainBox.addComponent(tB);
@@ -72,10 +72,10 @@ public class Dialog extends Component {
 	public void addTab(String name, Runnable clickAction) {
 		//Tabs
 		Font f = new Font(GUI.baseFont, Font.BOLD, 14);
-		double w = GUI.getInstance().getScreenUtils().getStringWidthAsPerc(f, name)+10;
-		double h = GUI.getInstance().getScreenUtils().getStringHeightAsPerc(f, name)+5;
+		double w = GUI.getScreenUtils().getStringWidthAsPerc(f, name)+10;
+		double h = GUI.getScreenUtils().getStringHeightAsPerc(f, name)+5;
 		double x = 0;
-		if (!tabs.isEmpty()) x = tabs.get(tabs.size()-1).getX()+tabs.get(tabs.size()-1).getWidth();
+		if (!tabs.isEmpty()) x = tabs.get(tabs.size()-1).getX().v+tabs.get(tabs.size()-1).getWidth().v;
 		
 		SimpleBox tab = new SimpleBox(new UnitRectangle(x, 16-h, w, h), GUI.fg);
 		tab.setClickAction(() -> {

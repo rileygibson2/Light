@@ -2,9 +2,9 @@ package guipackage.gui.components.complexcomponents;
 
 import java.awt.Color;
 
-import guipackage.cli.CLI;
 import guipackage.general.Point;
 import guipackage.general.UnitRectangle;
+import guipackage.general.UnitValue;
 import guipackage.general.UnitValue.Unit;
 import guipackage.gui.GUI;
 import guipackage.gui.components.Component;
@@ -64,8 +64,9 @@ public class UDAGUI extends Component {
     public void openWindowPicker() {
         TempBox tB = new TempBox("Create Window");
         addComponent(tB);
-        CLI.debug("tB: "+tB.toString());
         GUI.getInstance().scanDOM(tB, "");
+        //tB.b.setX(new UnitValue(30, tB.b.getX().u));
+        //tB.b.setWidth(new UnitValue(50, tB.b.getWidth().u));
     }
     
 }

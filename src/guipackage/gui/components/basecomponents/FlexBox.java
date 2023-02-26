@@ -1,6 +1,7 @@
 package guipackage.gui.components.basecomponents;
 
 import guipackage.general.UnitRectangle;
+import guipackage.general.UnitValue;
 import guipackage.general.UnitValue.Unit;
 import guipackage.gui.GUI;
 import guipackage.gui.components.Component;
@@ -14,8 +15,13 @@ public class FlexBox extends Component {
     @Override
     public void addComponent(Component c) {
         super.addComponent(c);
-        //Trigger resize
-        resize();
+        resize(); //Trigger resize
+    }
+
+    @Override
+    public void childUpdated() {
+        resize(); //Trigger resize
+        super.childUpdated();
     }
 
     /**
@@ -37,7 +43,7 @@ public class FlexBox extends Component {
             if (uR.y.v+uR.height.v>newHeight) newHeight = uR.y.v+uR.height.v;
         }
 
-        setWidth(newWidth);
-        setHeight(newHeight);
-    }  
+        setWidth(new UnitValue(newWidth, Unit.vw));
+        setHeight(new UnitValue(newHeight, Unit.vh));
+    }
 }

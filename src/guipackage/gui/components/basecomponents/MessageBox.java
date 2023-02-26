@@ -6,8 +6,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import guipackage.general.Point;
-import guipackage.general.Rectangle;
 import guipackage.general.UnitRectangle;
+import guipackage.general.UnitValue;
 import guipackage.gui.GUI;
 import guipackage.gui.components.Component;
 import guipackage.threads.AnimationFactory;
@@ -47,15 +47,15 @@ public class MessageBox extends Component {
 		label.setCentered(true);
 		mainBox.addComponent(label);
 		
-		double w = label.getWidth()+5;
-		double h = label.getHeight()+5;
-		setX((100-w)/2);
-		setWidth(w);
-		setHeight(h);
+		double w = label.getWidth().v+5;
+		double h = label.getHeight().v+5;
+		setX(new UnitValue((100-w)/2, getWidth().u));
+		setWidth(new UnitValue(w, getWidth().u));
+		setHeight(new UnitValue(h, getHeight().u));
 		
 		fade = AnimationFactory.getAnimation(this, Animations.Fade, 100);
 		fade.start();
-		move = AnimationFactory.getAnimation(this, Animations.MoveTo, new Point(getX(), goalY));
+		move = AnimationFactory.getAnimation(this, Animations.MoveTo, new Point(getX().v, goalY));
 		move.setFinishAction(() -> {
 			move.sleep(hold);
 			GUI.getInstance().removeMessage(this);
@@ -70,11 +70,11 @@ public class MessageBox extends Component {
 	
 	public void updateGoal(double goalY) {
 		List<Object> extras = new ArrayList<>();
-		extras.add(new Point(getX(), goalY));
+		extras.add(new Point(getX().v, goalY));
 		
 		if (move!=null&&!move.isDoomed()) move.setExtras(extras);
 		else {
-			move = AnimationFactory.getAnimation(this, Animations.MoveTo, new Point(getX(), goalY));
+			move = AnimationFactory.getAnimation(this, Animations.MoveTo, new Point(getX().v, goalY));
 			move.start();
 		}
 	}

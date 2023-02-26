@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import guipackage.general.Point;
-import guipackage.general.Rectangle;
 import guipackage.general.UnitRectangle;
+import guipackage.general.UnitValue;
 import guipackage.gui.GUI;
 import guipackage.gui.components.Component;
 import guipackage.gui.components.basecomponents.SimpleBox;
@@ -26,10 +26,10 @@ public class PoolGUI extends Component {
         addComponent(mainBox);
 
         Point cellDims = GUI.getUDAPair().a.getCellDims();
-        setX(pool.cells.x*cellDims.x);
-        setY(pool.cells.y*cellDims.y);
-        setWidth(pool.cells.width*cellDims.x);
-        setHeight(pool.cells.height*cellDims.y);
+        setX(new UnitValue(pool.cells.x*cellDims.x));
+        setY(new UnitValue(pool.cells.y*cellDims.y));
+        setWidth(new UnitValue(pool.cells.width*cellDims.x));
+        setHeight(new UnitValue(pool.cells.height*cellDims.y));
         
         //Change cell dims to be realtive to this box
         cellDims = GUI.getUDAPair().a.translateToElement(GUI.getUDAPair().a.getCellDims(), this);
