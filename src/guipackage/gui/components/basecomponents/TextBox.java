@@ -3,14 +3,13 @@ package guipackage.gui.components.basecomponents;
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Font;
-import java.awt.Graphics2D;
 import java.awt.event.KeyEvent;
 
 import guipackage.general.Getter;
 import guipackage.general.GetterSubmitter;
 import guipackage.general.Point;
-import guipackage.general.Rectangle;
 import guipackage.general.Submitter;
+import guipackage.general.UnitRectangle;
 import guipackage.general.Utils;
 import guipackage.gui.GUI;
 import guipackage.gui.IO;
@@ -22,6 +21,7 @@ import guipackage.threads.ThreadController;
 public class TextBox extends Component {
 
 	private String text;
+	private SimpleBox mainBox;
 	public Label textLabel;
 	public Label descriptionLabel;
 	private GetterSubmitter<String, String> actions;
@@ -32,17 +32,21 @@ public class TextBox extends Component {
 	public String cursor;
 
 
-	public TextBox(Rectangle rectangle, String initialText) {
-		super(rectangle);
+	public TextBox(UnitRectangle r, String initialText) {
+		super(r);
 		text = initialText;
 		if (text==null) text = "";
 		cursor = "";
 		
-		textLabel = new Label(new Point(8, 55), text, new Font(GUI.baseFont, Font.ITALIC, 15), new Color(200, 200, 200));
-		addComponent(textLabel);
-		descriptionLabel = new Label(new Point(8, 55), text, new Font(GUI.baseFont, Font.ITALIC, 15), new Color(140, 140, 140));
+		mainBox = new SimpleBox(new UnitRectangle(0, 0, 100, 100), GUI.focus);
+		mainBox.setRounded(true);
+		addComponent(mainBox);
+
+		textLabel = new Label(new UnitRectangle(8, 55, 0, 0), text, new Font(GUI.baseFont, Font.ITALIC, 15), new Color(200, 200, 200));
+		mainBox.addComponent(textLabel);
+		descriptionLabel = new Label(new UnitRectangle(8, 55, 0, 0), text, new Font(GUI.baseFont, Font.ITALIC, 15), new Color(140, 140, 140));
 		descriptionLabel.setVisible(false);
-		addComponent(descriptionLabel);
+		mainBox.addComponent(descriptionLabel);
 	}
 	
 	public void setActions(GetterSubmitter<String, String> actions) {this.actions = actions;}
@@ -116,11 +120,5 @@ public class TextBox extends Component {
 		if (e.getExtendedKeyCode()==8&&!text.isEmpty()) text = text.substring(0, text.length()-1);
 		else text += e.getKeyChar();
 		textLabel.setText(text+cursor);
-	}
-
-	@Override
-	public void draw(Graphics2D g) {
-		GUI.getInstance().getScreenUtils().drawTextBox(g, this);
-		super.draw(g);
 	}
 }

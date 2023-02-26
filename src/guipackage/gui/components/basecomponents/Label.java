@@ -4,10 +4,8 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics2D;
 
-import guipackage.general.Point;
-import guipackage.general.Rectangle;
+import guipackage.general.UnitRectangle;
 import guipackage.gui.GUI;
-import guipackage.gui.ScreenUtils;
 import guipackage.gui.components.Component;
 
 public class Label extends Component {
@@ -22,20 +20,18 @@ public class Label extends Component {
 	private boolean xCentered;
 	private boolean yCentered; 
 	
-	public Label(Point point, String text, Font font, Color col) {
-		super(new Rectangle(point.x, point.y, 0, 0));
+	public Label(UnitRectangle r, String text, Font font, Color col) {
+		super(r);
 		this.text = text;
 		this.font = font;
 		this.col = col;
-		xCentered = false;
-		yCentered = false;
 	}
 
 	public String getText() {return text;}
 
 	public void setText(String t) {
 		text = t;
-		r.width = GUI.getScreenUtils().getStringWidthAsPerc(font, text);
+		r.width.v = GUI.getScreenUtils().getStringWidthAsPerc(font, text);
 	}
 	
 	public boolean isXCentered() {return xCentered;}
@@ -47,13 +43,23 @@ public class Label extends Component {
 		yCentered = c;
 	}
 
+	public void setColor(Color col) {this.col = col;}
+
 	public void setXCentered(boolean c) {xCentered = c;}
 
 	public void setYCentered(boolean c) {yCentered = c;}
 
+	/**
+	 * Will change the font size so that it fits to the label's height
+	 * MUST be called after component has been inserted into DOM
+	 */
+	public void fitFont() {
+		setDOMEntryAction(() -> font = GUI.getScreenUtils().getMaxFontForHeight(font, this));
+	}
+
 	@Override
 	public void draw(Graphics2D g) {
-		GUI.getInstance().getScreenUtils().drawLabel(g, this);
+		GUI.getScreenUtils().drawLabel(g, this);
 		super.draw(g);
 	}
 }

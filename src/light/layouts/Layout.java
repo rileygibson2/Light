@@ -1,4 +1,4 @@
-package light.Layout;
+package light.layouts;
 
 import java.util.HashSet;
 import java.util.Set;

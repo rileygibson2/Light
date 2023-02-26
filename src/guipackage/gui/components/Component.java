@@ -1,7 +1,7 @@
 package guipackage.gui.components;
 
 import guipackage.general.Point;
-import guipackage.general.Rectangle;
+import guipackage.general.UnitRectangle;
 import guipackage.gui.Element;
 
 public abstract class Component extends Element {
@@ -21,10 +21,10 @@ public abstract class Component extends Element {
 
 	private boolean hasShadow;
 	private boolean freezeShadow; //Stops shadow being updated with position changes
-	private Rectangle shadowR;
+	private UnitRectangle shadowR;
 	private String testName;
 
-	public Component(Rectangle r) {
+	public Component(UnitRectangle r) {
 		super (r);
 		selected = false;
 		hovered = false;
@@ -66,7 +66,7 @@ public abstract class Component extends Element {
 
 	public boolean hasShadow() {return hasShadow;}
 	public void hasShadow(boolean s) {hasShadow = s;} 
-	public Rectangle getShadowRec() {return shadowR;}
+	public UnitRectangle getShadowRec() {return shadowR;}
 	public void freezeShadow() {freezeShadow = true;}
 	public void unfreezeShadow() {freezeShadow = false;}
 
@@ -109,24 +109,24 @@ public abstract class Component extends Element {
 	@Override
 	public void setX(double x) {
 		super.setX(x);
-		if (!freezeShadow) shadowR.x = x;
+		if (!freezeShadow) shadowR.x.v = x;
 	}
 
 	@Override
 	public void setY(double y) {
 		super.setY(y);
-		if (!freezeShadow) shadowR.y = y;
+		if (!freezeShadow) shadowR.y.v = y;
 	}
 
 	@Override
 	public void setWidth(double width) {
 		super.setWidth(width);
-		if (!freezeShadow) shadowR.width = width;
+		if (!freezeShadow) shadowR.width.v = width;
 	}
 
 	@Override
 	public void setHeight(double height) {
 		super.setHeight(height);
-		if (!freezeShadow) shadowR.height = height;
+		if (!freezeShadow) shadowR.height.v = height;
 	}
 }

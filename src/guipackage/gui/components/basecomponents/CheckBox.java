@@ -3,6 +3,7 @@ package guipackage.gui.components.basecomponents;
 import guipackage.general.GetterSubmitter;
 import guipackage.general.Point;
 import guipackage.general.Rectangle;
+import guipackage.general.UnitRectangle;
 import guipackage.gui.GUI;
 import guipackage.gui.components.Component;
 import guipackage.threads.AnimationFactory;
@@ -17,23 +18,23 @@ public class CheckBox extends Component {
 	private ThreadController transform;
 	private boolean checked;
 
-	public CheckBox(Rectangle r) {
+	public CheckBox(UnitRectangle r) {
 		super(r);
 		checked = false;
 		
 		//Outer box
-		SimpleBox sB = new SimpleBox(new Rectangle(0, 0, 100, 100), GUI.focus);
+		SimpleBox sB = new SimpleBox(new UnitRectangle(0, 0, 100, 100), GUI.focus);
 		//sB.setFilled(false);
 		sB.setRounded(true);
 		addComponent(sB);
 
 		//Inner box
-		innerBox = new SimpleBox(new Rectangle(50, 50, 0, 0), GUI.focus2);
+		innerBox = new SimpleBox(new UnitRectangle(50, 50, 0, 0), GUI.focus2);
 		innerBox.setRounded(true);
 		addComponent(innerBox);
 		
 		//Tick
-		tick = new Image(new Rectangle(15, 10, 80, 80), "ok.png");
+		tick = new Image(new UnitRectangle(15, 10, 80, 80), "ok.png");
 		tick.setVisible(false);
 		addComponent(tick);
 	}
@@ -43,11 +44,11 @@ public class CheckBox extends Component {
 		checked = a.get();
 		if (checked) {
 			tick.setVisible(true);
-			innerBox.setRec(new Rectangle(0, 0, 100, 100));
+			innerBox.setRec(new UnitRectangle(0, 0, 100, 100));
 		}
 		else {
 			tick.setVisible(false);
-			innerBox.setRec(new Rectangle(50, 50, 0, 0));
+			innerBox.setRec(new UnitRectangle(50, 50, 0, 0));
 		}
 	}
 

@@ -2,6 +2,7 @@ package light.zones;
 
 import guipackage.general.Rectangle;
 import guipackage.gui.GUI;
+import light.general.ConsoleAddress;
 
 public class Pool extends Zone {
     
@@ -17,12 +18,14 @@ public class Pool extends Zone {
         Group
     };
 
-    PoolType type;
-    public Rectangle cellDims;
+    public PoolType type;
+    public ConsoleAddress address;
+    public Rectangle cells;
 
-    public Pool(PoolType type, Rectangle cellDims) {
+    public Pool(PoolType type, Rectangle cells) {
         this.type = type;
-        this.cellDims = cellDims;
+        this.cells = cells;
+        address = new ConsoleAddress(type.ordinal(), 0);
         GUI.getInstance().addZoneToView(this);
     }
 

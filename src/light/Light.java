@@ -4,8 +4,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 import guipackage.gui.GUI;
-import light.Layout.DefaultLayout;
-import light.Layout.Layout;
+import light.layouts.DefaultLayout;
+import light.layouts.Layout;
 
 public class Light {
 

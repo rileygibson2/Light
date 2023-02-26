@@ -25,7 +25,7 @@ public class CLIViewer extends JPanel implements KeyListener, MouseWheelListener
 	protected static JFrame frame;
 	private static Rectangle screen = new Rectangle(0, 0, 700, 400);
 
-	private ScreenUtils screenUtils;
+	private ScreenUtils sU;
 	private boolean isActive;
 	Deque<CLIMessage> stack;
 
@@ -35,7 +35,7 @@ public class CLIViewer extends JPanel implements KeyListener, MouseWheelListener
 	double maxWidth; //Width of longest message used for scroll
 
 	protected CLIViewer() {
-		screenUtils = new ScreenUtils(screen);
+		sU = new ScreenUtils(screen);
 		isActive = false;
 		stack = new ArrayDeque<CLIMessage>();
 		xAdj = 1;
@@ -74,11 +74,11 @@ public class CLIViewer extends JPanel implements KeyListener, MouseWheelListener
 	public void paintComponent(Graphics g) {
 		Graphics2D g2 = (Graphics2D) g;
 		Font f = new Font("Geneva", Font.ROMAN_BASELINE, 12);
-		screenUtils.fillRect(g2, new Color(0, 0, 0), screen); //Base
+		sU.fillRect(g2, new Color(0, 0, 0), new Rectangle(sU.cW(screen.x), sU.cH(screen.y), sU.cW(screen.width), sU.cH(screen.height))); //Base
 
 		//Account for messages overflowing screen
 		double y = 2;
-		double totalY = screenUtils.getStringHeightAsPerc(f, "Hello World")*stack.size();
+		double totalY = sU.getStringHeightAsPerc(f, "Hello World")*stack.size();
 		if (totalY>100) y -= (totalY-100);
 
 		//Verify start positions
@@ -99,24 +99,24 @@ public class CLIViewer extends JPanel implements KeyListener, MouseWheelListener
 		for (CLIMessage m : stack) {
 			if (y>=100) return;
 			String header = m.formatHeader();
-			double hP = screenUtils.getStringWidthAsPerc(f, header);
+			double hP = sU.getStringWidthAsPerc(f, header);
 
 			//Update maxWidth
-			double w = screenUtils.getStringWidthAsPerc(f, header+ " "+m.message);
+			double w = sU.getStringWidthAsPerc(f, header+ " "+m.message);
 			if (w>maxWidth) maxWidth = w;
 
-			screenUtils.drawStringFromPoint(g2, f, header, m.color, new Point(xAdj, y));
-			screenUtils.drawStringFromPoint(g2, f, "  "+m.message, Color.GREEN, new Point(hP+xAdj, y));
+			sU.drawStringFromPoint(g2, f, header, m.color, new Point(sU.cW(xAdj), sU.cH(y)));
+			sU.drawStringFromPoint(g2, f, "  "+m.message, Color.GREEN, new Point(sU.cW(hP+xAdj), sU.cH(y)));
 
-			y += screenUtils.getStringHeightAsPerc(f, header);
+			y += sU.getStringHeightAsPerc(f, header);
 		}
 
 		//Verbose symbol
 		if (CLI.isVerbose()) {
-			double w = screenUtils.getStringWidthAsPerc(f, "Verbose")+3;
-			double h = screenUtils.getStringHeightAsPerc(f, "Verbose")+3;
-			screenUtils.fillRoundRect(g2, new Color(255, 80, 80), new Rectangle(100-w-5, 2, w, h));
-			screenUtils.drawCenteredString(g2, f, "Verbose", Color.WHITE, new Rectangle(100-w-5, 2, w, h));
+			double w = sU.getStringWidthAsPerc(f, "Verbose")+3;
+			double h = sU.getStringHeightAsPerc(f, "Verbose")+3;
+			sU.fillRoundRect(g2, new Color(255, 80, 80), new Rectangle(sU.cW(100-w-5), sU.cH(2), sU.cW(w), sU.cH(h)), 10);
+			sU.drawCenteredString(g2, f, "Verbose", Color.WHITE, new Rectangle(sU.cW(100-w-5), sU.cH(2), sU.cW(w), sU.cH(h)));
 		}
 	}
 

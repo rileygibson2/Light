@@ -4,6 +4,7 @@ import java.awt.Color;
 
 import guipackage.general.Point;
 import guipackage.general.Rectangle;
+import guipackage.general.UnitRectangle;
 import guipackage.gui.components.Component;
 
 public class Slider extends Component {
@@ -16,25 +17,25 @@ public class Slider extends Component {
 	private SimpleBox groove;
 	private SimpleBox grooveFill;
 	
-	public Slider(Rectangle r) {
+	public Slider(UnitRectangle r) {
 		super(r);
 
 		//Main box
-		mainBox = new SimpleBox(new Rectangle(0, 0, 100, 100), new Color(70, 70, 70));
+		mainBox = new SimpleBox(new UnitRectangle(0, 0, 100, 100), new Color(70, 70, 70));
 		mainBox.setRounded(new int[]{4, 3});
 		mainBox.increasePriority();
 		addComponent(mainBox);
 
 		//Groove
-		groove = new SimpleBox(new Rectangle(10, 40, 80, 20), new Color(100, 100, 100));
+		groove = new SimpleBox(new UnitRectangle(10, 40, 80, 20), new Color(100, 100, 100));
 		mainBox.addComponent(groove);
 		
 		//Coloured Groove
-		grooveFill = new SimpleBox(new Rectangle(groove.getX(), groove.getY(), 0, groove.getHeight()), new Color(150, 100, 100));
+		grooveFill = new SimpleBox(new UnitRectangle(groove.getX(), groove.getY(), 0, groove.getHeight()), new Color(150, 100, 100));
 		mainBox.addComponent(grooveFill);
 
 		//Ball
-		ball = new SimpleBox(new Rectangle(groove.getX(), 20, 14, 60), new Color(255, 100, 100));
+		ball = new SimpleBox(new UnitRectangle(groove.getX(), 20, 14, 60), new Color(255, 100, 100));
 		ball.setOval(true);
 		mainBox.addComponent(ball);
 	}

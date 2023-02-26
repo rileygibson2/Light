@@ -80,14 +80,14 @@ public class IO implements MouseListener, MouseMotionListener, MouseWheelListene
 	
 	@Override
 	public void mouseMoved(MouseEvent e) {
-		GUI.getInstance().getView().doMove(new Point(e.getX(), e.getY()));
+		GUI.getInstance().getCurrentRoot().doMove(new Point(e.getX(), e.getY()));
 		finishEvent();
 	}
 	
 	@Override
 	public void mouseDragged(MouseEvent e) {
 		if (dragPoint==null) dragPoint = new Point(e.getX(), e.getY());
-		GUI.getInstance().getView().doDrag(dragPoint, new Point(e.getX(), e.getY()));
+		GUI.getInstance().getCurrentRoot().doDrag(dragPoint, new Point(e.getX(), e.getY()));
 		finishEvent();
 	}
 	
@@ -99,13 +99,13 @@ public class IO implements MouseListener, MouseMotionListener, MouseWheelListene
 
 	@Override
 	public void mouseClicked(MouseEvent e) {
-		GUI.getInstance().getView().doClick(new Point(e.getX(), e.getY()));
+		GUI.getInstance().getCurrentRoot().doClick(new Point(e.getX(), e.getY()));
 		finishEvent();
 	}
 	
 	@Override
 	public void mouseWheelMoved(MouseWheelEvent e) {
-		GUI.getInstance().getView().doScroll(new Point(e.getX(), e.getY()), e.getWheelRotation());
+		GUI.getInstance().getCurrentRoot().doScroll(new Point(e.getX(), e.getY()), e.getWheelRotation());
 		finishEvent();
 	}
 	
@@ -126,6 +126,7 @@ public class IO implements MouseListener, MouseMotionListener, MouseWheelListene
 			CLI.setVerbose(!CLI.isVerbose());
 			CLI.getViewer().repaint();
 		}
+		if (e.getExtendedKeyCode()==KeyEvent.VK_S) GUI.getInstance().scanDOM(GUI.getInstance().getCurrentRoot(), "");
 
 		for (Map.Entry<KeyEvent, Runnable> m : keyActions.entrySet()) {
 			if (e.getExtendedKeyCode()==m.getKey().getExtendedKeyCode()) m.getValue().run();

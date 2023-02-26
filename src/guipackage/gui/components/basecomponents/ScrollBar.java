@@ -10,6 +10,7 @@ import java.util.List;
 import guipackage.cli.CLI;
 import guipackage.general.Point;
 import guipackage.general.Rectangle;
+import guipackage.general.UnitRectangle;
 import guipackage.gui.GUI;
 import guipackage.gui.components.Component;
 
@@ -21,7 +22,7 @@ public class ScrollBar extends Component {
 	private boolean armed;
 
 	public ScrollBar() {
-		super(new Rectangle(95, 0, 5, 100));
+		super(new UnitRectangle(95, 0, 5, 100));
 		y = 0;
 		scrollable = new ArrayList<Component>();
 		armed = true;
@@ -89,13 +90,6 @@ public class ScrollBar extends Component {
 	private boolean withinBounds(Component c) {
 		if (c.getY()>bounds.x&&c.getY()<bounds.y) return true;
 		return false;
-	}
-
-	@Override
-	public void draw(Graphics2D g) {
-		Rectangle r = getRealRec();
-		GUI.getInstance().getScreenUtils().fillRect(g, new Color(255, 0, 0, 100), r);
-		super.draw(g);
 	}
 
 	public void sortScrollableComponents() {

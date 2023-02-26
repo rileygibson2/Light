@@ -13,6 +13,7 @@ import guipackage.general.GetterSubmitter;
 import guipackage.general.Pair;
 import guipackage.general.Point;
 import guipackage.general.Rectangle;
+import guipackage.general.UnitRectangle;
 import guipackage.gui.components.Component;
 import guipackage.gui.components.basecomponents.TextBox;
 
@@ -96,7 +97,7 @@ public class AnimationFactory {
 				doInitialDelay();
 				Component c = (Component) getTarget();
 				Point to = (Point) extras.get(0);
-				Rectangle start = c.getRec().clone();
+				UnitRectangle start = c.getRec().clone();
 				
 				double p = 0;
 				int increment = 2;
@@ -104,8 +105,8 @@ public class AnimationFactory {
 
 				while (isRunning()) {
 					p += increment;
-					c.setX(sineCurve(start.x, to.x, p));
-					c.setY(sineCurve(start.y, to.y, p));
+					c.setX(sineCurve(start.x.v, to.x, p));
+					c.setY(sineCurve(start.y.v, to.y, p));
 
 					if (p>=100) end();
 					iterate();
@@ -122,7 +123,7 @@ public class AnimationFactory {
 				doInitialDelay();
 				Component c = (Component) getTarget();
 				Rectangle to = (Rectangle) extras.get(0);
-				Rectangle start = c.getRec().clone();
+				UnitRectangle start = c.getRec().clone();
 				
 				double p = 0;
 				int increment = 2;
@@ -130,10 +131,10 @@ public class AnimationFactory {
 
 				while (isRunning()) {
 					p += increment;
-					c.setX(sineCurve(start.x, to.x, p));
-					c.setY(sineCurve(start.y, to.y, p));
-					c.setWidth(sineCurve(start.width, to.width, p));
-					c.setHeight(sineCurve(start.height, to.height, p));;
+					c.setX(sineCurve(start.x.v, to.x, p));
+					c.setY(sineCurve(start.y.v, to.y, p));
+					c.setWidth(sineCurve(start.width.v, to.width, p));
+					c.setHeight(sineCurve(start.height.v, to.height, p));;
 
 					if (p>=100) end();
 					iterate();

@@ -15,14 +15,19 @@ import java.util.Set;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.text.View;
 
+import guipackage.cli.CLI;
 import guipackage.dom.DOM;
+import guipackage.general.Pair;
 import guipackage.general.Rectangle;
+import guipackage.general.UnitRectangle;
 import guipackage.gui.components.Component;
 import guipackage.gui.components.basecomponents.MessageBox;
+import guipackage.gui.components.basecomponents.SimpleBox;
 import guipackage.gui.components.complexcomponents.CommandLineGUI;
+import guipackage.gui.components.complexcomponents.PoolGUI;
 import guipackage.gui.components.complexcomponents.UDAGUI;
-import guipackage.gui.components.complexcomponents.pools.PoolGUI;
 import light.zones.Pool;
 import light.zones.UDA;
 import light.zones.Zone;
@@ -40,9 +45,10 @@ public class GUI extends JPanel {
 	private static ScreenUtils screenUtils;
 	private IO io;
 
-	private Set<View> layouts;
-	private View currentLayout;
+	private Set<Element> roots; //Roots of all the views loaded
+	private RootElement currentRoot;
 	private Map<Zone, Component> zoneMappings;
+	private static Pair<UDAGUI, UDA> uda;
 
 	private List<MessageBox> messages;
 	
@@ -68,7 +74,7 @@ public class GUI extends JPanel {
 		screenUtils = new ScreenUtils(screen);
 		messages = new ArrayList<MessageBox>();
 		antiAlias = false;
-		currentLayout = new View(new Rectangle(0, 0, 100, 100));
+		currentRoot = new RootElement();
 		zoneMappings = new HashMap<Zone, Component>();
 		
 		setFocusable(true);
@@ -87,23 +93,24 @@ public class GUI extends JPanel {
 
 	public void setParent(Object parent) {this.parent = parent;}
 	
-	public void addZoneToView(Zone z, Object... extras) {
+	public Component addZoneToView(Zone z, Object... extras) {
 		Component c = null;
 		if (z instanceof CommandLine) {
-			c = new CommandLineGUI(new Rectangle(5, 93, 80, 5));
-			currentLayout.addComponent(c);
+			c = new CommandLineGUI(new UnitRectangle(5, 93, 80, 5));
+			currentRoot.addComponent(c);
 		}
 		else if (z instanceof UDA) {
-			c = new UDAGUI(new Rectangle(5, 0, 80, 93), (UDA) z);
-			currentLayout.addComponent(c);
+			c = new UDAGUI(new UnitRectangle(5, 0, 95, 93), (UDA) z);
+			currentRoot.addComponent(c);
+			uda = new Pair<UDAGUI, UDA>((UDAGUI) c, (UDA) z);
 		}
 		else if (z instanceof Pool) {
-			UDAGUI g = (UDAGUI) getGUIOfClass(UDA.class);
-			c = new PoolGUI((Pool) z, (UDA) getZoneOfClass(UDA.class), g);
-			g.addComponent(c);
+			c = new PoolGUI((Pool) z);
+			uda.a.addComponent(c);
 		}
 
 		if (c!=null) zoneMappings.put(z, c);
+		return c;
 	}
 
 	public Component getZoneGUIElement(Zone z) {return zoneMappings.get(z);}
@@ -122,6 +129,8 @@ public class GUI extends JPanel {
 		return null;
 	}
 
+	public static Pair<UDAGUI, UDA> getUDAPair() {return uda;}
+
 	public void addMessage(String message, Color col) {
 		//Find y position message should animate to
 		double goalY = messages.size()*12.5+5;
@@ -130,7 +139,7 @@ public class GUI extends JPanel {
 		
 		MessageBox m = new MessageBox(message, col, goalY, hold);
 		messages.add(m);
-		currentLayout.addComponent(m);
+		currentRoot.addComponent(m);
 	}
 	
 	public void removeMessage(MessageBox m) {
@@ -144,26 +153,29 @@ public class GUI extends JPanel {
 	
 	public static ScreenUtils getScreenUtils() {return screenUtils;}
 	
-	public View getView() {return currentLayout;}
+	public Element getCurrentRoot() {return currentRoot;}
 	
-	public void changeLayout(View v) { 
-		if (v==null) return;
-		
-		if (currentLayout!=null) currentLayout.destroy();
-		currentLayout = v;
-		repaint();
+	public void changeRoot(RootElement root) { 
+		if (root==null) return;
+		currentRoot = root;
 	}
 	
 	public void setAntiAliasing(boolean a) {antiAlias = a;}
 	
 	public boolean getAntiAliasing() {return antiAlias;}
+
+	public void scanDOM(Element e, String indent) {
+		if (e instanceof RootElement) CLI.debug("Scanning DOM:\nScreen Dims: "+screen.toString());
+		CLI.debug(indent+e.getClass().getSimpleName()+" r: "+e.getRec().toString()+" real: "+e.getRealRec().toString()+" pos: "+e.getPosition().toString());
+		for (Component c : e.getComponents()) scanDOM(c, indent+" - ");
+	}
 	
 	@Override
 	public void paintComponent(Graphics g) {
 		if (antiAlias) ((Graphics2D) g).setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 		screenUtils.drawBase((Graphics2D) g);
-		currentLayout.draw((Graphics2D) g);
-		if (dom.visualiserVisible()) dom.update(getView());
+		currentRoot.draw((Graphics2D) g);
+		if (dom.visualiserVisible()) dom.update(getCurrentRoot());
 	}
 
 	public static GUI initialise(Object controller, Rectangle screen) {

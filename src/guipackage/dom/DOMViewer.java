@@ -21,7 +21,7 @@ public class DOMViewer extends JPanel {
 	public static Rectangle screen = new Rectangle(0, 0, 1200, 500);
 
 	DOM dom;
-	ScreenUtils screenUtils;
+	ScreenUtils sU;
 	boolean isVisible;
 
 	int maxDepth;
@@ -29,7 +29,7 @@ public class DOMViewer extends JPanel {
 
 	public DOMViewer(DOM dom) {
 		this.dom = dom;
-		screenUtils = new ScreenUtils(screen);
+		sU = new ScreenUtils(screen);
 		isVisible = false;
 	}
 
@@ -37,7 +37,7 @@ public class DOMViewer extends JPanel {
 	public void paintComponent(Graphics g) {
 		Graphics2D g2 = (Graphics2D) g;
 		Font f = new Font("Geneva", Font.ROMAN_BASELINE, 10);
-		screenUtils.fillRect(g2, new Color(50, 50, 50), screen); //Base
+		sU.fillRect(g2, new Color(50, 50, 50), new Rectangle(sU.cW(screen.x), sU.cH(screen.y), sU.cW(screen.width), sU.cH(screen.height))); //Base
 
 		maxDepth = dom.maxDepth(dom.getRoot());
 		widths = new int[maxDepth];
@@ -47,8 +47,8 @@ public class DOMViewer extends JPanel {
 			widths[i] = width;
 		}
 		
-		screenUtils.drawStringFromPoint(g2, f, "Depth: "+maxDepth, new Color(220, 220, 220), new Point(2, 5));
-		screenUtils.drawStringFromPoint(g2, f, "Widths: "+Arrays.toString(widths), new Color(220, 220, 220), new Point(2, 8));
+		sU.drawStringFromPoint(g2, f, "Depth: "+maxDepth, new Color(220, 220, 220), new Point(sU.cW(2), sU.cH(5)));
+		sU.drawStringFromPoint(g2, f, "Widths: "+Arrays.toString(widths), new Color(220, 220, 220), new Point(sU.cW(2), sU.cH(8)));
 
 		if (maxDepth==0) return;
 		
@@ -81,8 +81,8 @@ public class DOMViewer extends JPanel {
 		Point yBound = new Point((100/maxDepth)*depth, (100/maxDepth)*(depth+1));
 		
 		
-		double w = screenUtils.getStringWidthAsPerc(f, node.getLabel())+2;
-		double h = screenUtils.getStringHeightAsPerc(f, node.getLabel())+2;;
+		double w = sU.getStringWidthAsPerc(f, node.getLabel())+2;
+		double h = sU.getStringHeightAsPerc(f, node.getLabel())+2;;
 		double x = xBound.x+((xBound.y-xBound.x)/2)-(w/2);
 		double y = yBound.x+((yBound.y-yBound.x)/2)-(h/2);
 		
@@ -95,11 +95,13 @@ public class DOMViewer extends JPanel {
 	public void drawNode(Graphics2D g, DOMNode node, Rectangle r, Point linePoint) {
 		Font f = new Font("Geneva", Font.ROMAN_BASELINE, 10);
 		
+		r = new Rectangle(sU.cW(r.x), sU.cH(r.y), sU.cW(r.width), sU.cH(r.height));
+		
 		//Draw node
-		screenUtils.fillRoundRect(g, new Color(100, 100, 100), r);
-		screenUtils.drawCenteredString(g, f, node.getLabel(), new Color(220, 220, 220), r);
+		sU.fillRoundRect(g, new Color(100, 100, 100), r, 10);
+		sU.drawCenteredString(g, f, node.getLabel(), new Color(220, 220, 220), r);
 		//Draw line
-		screenUtils.drawLine(g, new Color(200, 200, 200), linePoint, new Point(r.x+r.width/2, r.y));
+		sU.drawLine(g, new Color(200, 200, 200), new Point(sU.cW(linePoint.x), sU.cH(linePoint.y)), new Point(r.x+r.width/2, r.y));
 	}
 
 	public static DOMViewer initialise(DOM d) {

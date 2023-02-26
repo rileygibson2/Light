@@ -1,6 +1,7 @@
 package guipackage.gui;
 
 import java.awt.AlphaComposite;
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.FontMetrics;
@@ -9,31 +10,31 @@ import java.awt.Graphics2D;
 import java.awt.GraphicsEnvironment;
 import java.awt.MultipleGradientPaint.CycleMethod;
 import java.awt.RadialGradientPaint;
+import java.awt.RenderingHints;
 import java.awt.font.FontRenderContext;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
-import java.awt.RenderingHints;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.imageio.ImageIO;
+import javax.swing.JLabel;
 
 import guipackage.cli.CLI;
-import guipackage.general.Pair;
 import guipackage.general.Point;
 import guipackage.general.Rectangle;
+import guipackage.general.UnitRectangle;
+import guipackage.general.UnitValue;
+import guipackage.general.UnitValue.Unit;
 import guipackage.general.Utils;
 import guipackage.gui.components.Component;
-import guipackage.gui.components.basecomponents.GradientButton;
 import guipackage.gui.components.basecomponents.Image;
 import guipackage.gui.components.basecomponents.Label;
 import guipackage.gui.components.basecomponents.SimpleBox;
-import guipackage.gui.components.basecomponents.TextBox;
-import guipackage.threads.ThreadController;
 
 public class ScreenUtils {
 
@@ -72,7 +73,7 @@ public class ScreenUtils {
 	}
 
 	public void drawBase(Graphics2D g) {
-		fillRect(g, GUI.bg, new Rectangle(0, 0, 100, 100));
+		fillRect(g, GUI.bg, new Rectangle(0, 0, screen.width, screen.height));
 	}
 
 	public void drawLabel(Graphics2D g, Label l) {
@@ -84,13 +85,6 @@ public class ScreenUtils {
 		else if (l.isXCentered()) drawXCenteredString(g, l.font, l.getText(), col, new Rectangle(r.x, r.y, r.width, 1));
 		else if (l.isYCentered()) drawYCenteredString(g, l.font, l.getText(), col, new Rectangle(r.x, r.y, 1, r.height));
 		else drawStringFromPoint(g, l.font, l.getText(), col, new Point(r.x, r.y));
-	}
-
-	public void drawTextBox(Graphics2D g, TextBox t) {
-		Rectangle r = t.getRealRec();
-
-		fillRoundRect(g, GUI.focus, r); //Main box
-		if (t.isSelected()) drawRoundRect(g, GUI.focus2, r); //Highlight
 	}
 
 	public void drawImage(Graphics2D g, Image i) {
@@ -105,7 +99,7 @@ public class ScreenUtils {
 		if (i.getOpacity()<100) g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, (float) (i.getOpacity()/100)));
 
 		//Scale to rectangle
-		double scale = Math.min(cW(r.width)/(double) img.getWidth(), cH(r.height)/(double) img.getHeight());
+		double scale = Math.min(r.width/(double) img.getWidth(), r.height/(double) img.getHeight());
 		int scaledWidth = (int) (img.getWidth()*scale);
 		int scaledHeight = (int) (img.getHeight()*scale);
 
@@ -114,7 +108,7 @@ public class ScreenUtils {
 		AffineTransform affineTransform = AffineTransform.getScaleInstance(scale, scale);
 		AffineTransformOp affineTransformOp = new AffineTransformOp(affineTransform, AffineTransformOp.TYPE_BILINEAR);
 		affineTransformOp.filter(img, scaledImg);
-		g.drawImage(scaledImg, cW(r.x)+(cW(r.width)-scaledImg.getWidth())/2, cH(r.y), null);
+		g.drawImage(scaledImg, (int) (r.x+(r.width-scaledImg.getWidth())/2), (int) (r.y), null);
 
 		//Reset alpha
 		g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1f));
@@ -122,61 +116,25 @@ public class ScreenUtils {
 
 	public void drawSimpleBox(Graphics2D g, SimpleBox b) {
 		Rectangle r = b.getRealRec();
-		Color col = b.getColor();
-		col = new Color(col.getRed(), col.getGreen(), col.getBlue(), percToCol(b.getOpacity()));
-		if (b.getColor().getAlpha()==0) return; //Duck tape fix as this method does net respect the boxe's alpha channel
 
-		if (b.isOval()) {
-			if (b.isFilled()) fillOval(g, col, r);
-			else drawOval(g, col, r);
-		}
-		else if (b.isRounded()) {
-			if (b.getRoundedCorners()!=null) {
-				if (b.isFilled()) fillRoundRect(g, col, r, b.getRoundedCorners());
-				//TODO
+		if (b.isFilled()) {
+			Color col = b.getColor();
+			col = new Color(col.getRed(), col.getGreen(), col.getBlue(), percToCol(b.getOpacity()));
+			if (b.getColor().getAlpha()==0) return; //Duck tape fix as this method does net respect the boxe's alpha channel
+
+			if (b.isOval()) fillOval(g, col, r);
+			else if (b.isRounded()) {
+				if (b.getRoundedCorners()!=null) fillRoundRect(g, col, r, b.getRoundedCorners(), b.getArcSize());
+				else fillRoundRect(g, col, r, b.getArcSize());
 			}
-			else {
-				if (b.isFilled()) fillRoundRect(g, col, r);
-				else drawRoundRect(g, col, r);
-			}
+			else fillRect(g, col, r); 
 		}
-		else {
-			if (b.isFilled()) fillRect(g, col, r); 
-			else drawRect(g, col, r); 
-		}
-	}
-
-	public void drawPulse(Graphics2D g, ThreadController tC) {
-		if (!tC.hasElements()) return;
-		Element e = (Element) tC.getTarget();
-		Rectangle r;
-
-		for (Object o : tC.getElements()) {
-			@SuppressWarnings("unchecked")
-			Pair<Point, Color> pa = (Pair<Point, Color>) o;
-			Point p = pa.a;
-			Color c = pa.b;
-			r = e.getRealRec();
-
-			//Adjust rectangle to represent new bubble
-			r.x = (r.x+r.width/2)-(p.y*r.width)/2;
-			r.y = (r.y+r.height/2)-(p.y*r.height)/2;
-			r.width = p.y*r.width;
-			r.height = p.y*r.height;
-			fillOval(g, new Color(c.getRed(), c.getGreen(), c.getBlue(), percToCol(p.x)), r);
-		}
-	}
-
-	public void drawXBoxButton(Graphics2D g, GradientButton b) {
-		Rectangle r = b.getRealRec();
-		double rad = r.width;
-		Color start = new Color(b.start.getRed(), b.start.getGreen(), b.start.getBlue(), percToCol(b.getOpacity()));
-		Color end = new Color(b.end.getRed(), b.end.getGreen(), b.end.getBlue(), percToCol(b.getOpacity()));
-
-		//Button
-		for (double i=0; i<rad; i+= 0.1) {
-			Rectangle r1 = new Rectangle(r.x+i/2, r.y+i, rad-i, (rad-i)*2);
-			fillOval(g, getGrad(start, end, i, rad), r1);
+		
+		//Border
+		if (b.hasBorder()) {
+			if (b.isOval()) drawOval(g, b.getBorderColor(), r, b.getBorderWidth());
+			else if (b.isRounded()) drawRoundRect(g, b.getBorderColor(), r, b.getBorderWidth(), b.getArcSize());
+			else drawRect(g, b.getBorderColor(), r, b.getBorderWidth());
 		}
 	}
 
@@ -189,36 +147,37 @@ public class ScreenUtils {
 		Rectangle r1 = new Rectangle(r.x-(r.width*(size/2)), r.y-(r.height*(size/2)), r.width*(size+1), r.height*(size+1));
 		setGradientRadial(g, start, end, new float[]{0f, 1f}, r1);
 		fillRect(g, r1);
-
 	}
 
-	public void drawRect(Graphics2D g, Color c, Rectangle r) {
+	public void drawRect(Graphics2D g, Color c, Rectangle r, double strokeW) {
+		g.setStroke(new BasicStroke((float) strokeW));
 		g.setColor(c);
-		g.drawRect(cW(r.x), cH(r.y), cW(r.width), cH(r.height));
+		g.drawRect((int) r.x, (int) r.y, (int) r.width, (int) r.height);
 	}
 
 	public void fillRect(Graphics2D g, Color c, Rectangle r) {
 		g.setColor(c);
-		g.fillRect(cW(r.x), cH(r.y), cW(r.width), cH(r.height));
+		g.fillRect((int) r.x, (int) r.y, (int) r.width, (int) r.height);
 	}
 
 	public void fillRect(Graphics2D g, Rectangle r) {
-		g.fillRect(cW(r.x), cH(r.y), cW(r.width), cH(r.height));
+		g.fillRect((int) r.x, (int) r.y, (int) r.width, (int) r.height);
 	}
 
-	public void drawRoundRect(Graphics2D g, Color c, Rectangle r) {
+	public void drawRoundRect(Graphics2D g, Color c, Rectangle r, double strokeW, int arcSize) {
+		g.setStroke(new BasicStroke((float) strokeW));
 		g.setColor(c);
-		g.drawRoundRect(cW(r.x), cH(r.y), cW(r.width), cH(r.height), 10, 10);
+		g.drawRoundRect((int) r.x, (int) r.y, (int) r.width, (int) r.height, arcSize, arcSize);
 	}
 
-	public void fillRoundRect(Graphics2D g, Color c, Rectangle r) {
+	public void fillRoundRect(Graphics2D g, Color c, Rectangle r, int arcSize) {
 		g.setColor(c);
-		g.fillRoundRect(cW(r.x), cH(r.y), cW(r.width), cH(r.height), 10, 10);
+		g.fillRoundRect((int) r.x, (int) r.y, (int) r.width, (int) r.height, arcSize, arcSize);
 	}
 
-	public void fillRoundRect(Graphics2D g, Color c, Rectangle r, int[] corners) {
+	public void fillRoundRect(Graphics2D g, Color c, Rectangle r, int[] corners, int arcSize) {
 		g.setColor(c);
-		g.fillRoundRect(cW(r.x), cH(r.y), cW(r.width), cH(r.height), 10, 10);
+		g.fillRoundRect((int) r.x, (int) r.y, (int) r.width, (int) r.height, arcSize, arcSize);
 
 		if (corners.length==0) return;
 		List<Integer> cor = Arrays.stream(corners).boxed().collect(Collectors.toList());
@@ -227,31 +186,32 @@ public class ScreenUtils {
 		 * If a corner is not present then fill out the rounded edge. Corners
 		 * go in anti-clockwise order with 1 being top left and 4 being top right.
 		 */
-		if (!cor.contains(1)) g.fillRect(cW(r.x), cH(r.y), cW(r.width*0.2), cH(r.height*0.2));
-		if (!cor.contains(2)) g.fillRect(cW(r.x), cH(r.y+r.height*0.8), cW(r.width*0.2), cH(r.height*0.2));
-		if (!cor.contains(3)) g.fillRect(cW(r.x+r.width*0.8), cH(r.y+r.height*0.8), cW(r.width*0.2), cH(r.height*0.2));
-		if (!cor.contains(4)) g.fillRect(cW(r.x+r.width*0.8), cH(r.y), cW(r.width*0.2), cH(r.height*0.2));
+		if (!cor.contains(1)) g.fillRect((int) r.x, (int) r.y, (int) (r.width*0.2), (int) (r.height*0.2));
+		if (!cor.contains(2)) g.fillRect((int) r.x, (int) (r.y+r.height*0.8), (int) (r.width*0.2), (int) (r.height*0.2));
+		if (!cor.contains(3)) g.fillRect((int) (r.x+r.width*0.8), (int) (r.y+r.height*0.8), (int) (r.width*0.2), (int) (r.height*0.2));
+		if (!cor.contains(4)) g.fillRect((int) (r.x+r.width*0.8), (int) (r.y), (int) (r.width*0.2), (int) (r.height*0.2));
 	}
 
-	public void drawOval(Graphics2D g, Color c, Rectangle r) {
+	public void drawOval(Graphics2D g, Color c, Rectangle r, double strokeW) {
+		g.setStroke(new BasicStroke((float) strokeW));
 		g.setColor(c);
-		g.drawOval(cW(r.x), cH(r.y), cW(r.width), cH(r.height));
+		g.drawOval((int) r.x, (int) r.y, (int) r.width, (int) r.height);
 	}
 
 	public void fillOval(Graphics2D g, Color c, Rectangle r) {
 		g.setColor(c);
-		g.fillOval(cW(r.x), cH(r.y), cW(r.width), cH(r.height));
+		g.fillOval((int) r.x, (int) r.y, (int) r.width, (int) r.height);
 	}
 
 	public void drawLine(Graphics2D g, Color c, Point p1, Point p2) {
 		g.setColor(c);
-		g.drawLine(cW(p1.x), cH(p1.y), cW(p2.x), cH(p2.y));
+		g.drawLine((int) p1.x, (int) p1.y, (int) p2.x, (int) p2.y);
 	}
 
 	public void drawCenteredString(Graphics2D g, Font f, String s, Color c, Rectangle r) {
 		FontMetrics metrics = g.getFontMetrics(f);
-		int x = (int) (cW(r.x)+(cW(r.width)-metrics.stringWidth(s))/2);
-		int y = (int) (cH(r.y)+((cH(r.height)-metrics.getHeight())/2)+metrics.getAscent());
+		int x = (int) (r.x+(r.width-metrics.stringWidth(s))/2);
+		int y = (int) (r.y+((r.height-metrics.getHeight())/2)+metrics.getAscent());
 		g.setFont(f);
 		g.setColor(c);
 		g.drawString(s, x, y);
@@ -259,8 +219,8 @@ public class ScreenUtils {
 
 	public void drawXCenteredString(Graphics2D g, Font f, String s, Color c, Rectangle r) {
 		FontMetrics metrics = g.getFontMetrics(f);
-		int x = (int) (cW(r.x)+(cW(r.width)-metrics.stringWidth(s))/2);
-		int y = (int) (cH(r.y)+(-metrics.getHeight()/2))+metrics.getAscent();
+		int x = (int) (r.x+(r.width-metrics.stringWidth(s))/2);
+		int y = (int) (r.y+(-metrics.getHeight()/2))+metrics.getAscent();
 		g.setFont(f);
 		g.setColor(c);
 		g.drawString(s, x, y);
@@ -268,27 +228,58 @@ public class ScreenUtils {
 
 	public void drawYCenteredString(Graphics2D g, Font f, String s, Color c, Rectangle r) {
 		FontMetrics metrics = g.getFontMetrics(f);
-		int y = (int) (cH(r.y)+((cH(r.height)-metrics.getHeight())/2)+metrics.getAscent());
+		int y = (int) (r.y+((r.height-metrics.getHeight())/2)+metrics.getAscent());
 		g.setFont(f);
 		g.setColor(c);
-		g.drawString(s, cW(r.x), y);
+		g.drawString(s, (int) r.x, y);
 	}
 
 	public void drawStringFromPoint(Graphics2D g, Font f, String s, Color c, Point p) {
 		FontMetrics metrics = g.getFontMetrics(f);
-		int y = (int) (cH(p.y)+(-metrics.getHeight()/2))+metrics.getAscent();
+		int y = (int) (p.y+(-metrics.getHeight()/2))+metrics.getAscent();
 		g.setFont(f);
 		g.setColor(c);
-		g.drawString(s, cW(p.x), y);
+		g.drawString(s, (int) p.x, y);
+	}
+
+	/**
+	 * Finds the max height of a font that can fit in a specified height
+	 * @param f
+	 * @param height
+	 * @return
+	 */
+	public Font getMaxFontForHeight(Font f, Element e) {
+		int maxHeight = (int) e.getRealRec().height;
+		String text = "Lorem Ipsum"; // Dummy text
+		JLabel label = new JLabel(text);
+
+        // Binary search for maximum font size
+        int low = 1;
+        int hight = maxHeight;
+   		int maxFontSize = 0;
+
+        while (low <= hight) {
+            int mid = (low + hight) / 2;
+            Font newFont = new Font(f.getName(), f.getStyle(), mid);
+            label.setFont(newFont);
+            int height = label.getPreferredSize().height;
+            if (height > maxHeight) {
+                hight = mid - 1;
+            } else {
+                maxFontSize = mid;
+                low = mid + 1;
+            }
+        }
+		return new Font(f.getName(), f.getStyle(), maxFontSize);
 	}
 
 	public void setGradientLinear(Graphics2D g, Color start, Color end, Rectangle gR) {
-		GradientPaint gr = new GradientPaint(cW(gR.x), cH(gR.y), start, cW(gR.width), cH(gR.height), end);
+		GradientPaint gr = new GradientPaint((int) gR.x, (int) gR.y, start, (int) gR.width, (int) gR.height, end);
 		g.setPaint(gr);
 	}
 
 	public void setGradientRadial(Graphics2D g, Color start, Color end, float[] fracts, Rectangle gR) {
-		Rectangle2D r = new Rectangle2D.Double(cW(gR.x), cH(gR.y), cW(gR.width), cH(gR.height));
+		Rectangle2D r = new Rectangle2D.Double((int) gR.x, (int) gR.y, (int) gR.width, (int) gR.height);
 		Color[] cols = {start, end};
 		RadialGradientPaint gr = new RadialGradientPaint(r, fracts, cols, CycleMethod.NO_CYCLE);
 		g.setPaint(gr);
@@ -357,9 +348,122 @@ public class ScreenUtils {
 	 * @param c
 	 * @return realive height percentage
 	 */
-	public double rHP(Component c, double width) {
-		Rectangle r = c.getRealRec(new Rectangle(0, 0, width, 0));
-		int real = cW(r.width);
-		return cHR(real);
+	public double rHP(Component c, double width, Unit u) {
+		UnitRectangle o = new UnitRectangle();
+		o.width = new UnitValue(width, u);
+		Rectangle r = c.getRealRec(o);
+		return cHR(r.width);
 	}
+
+	/**
+	 * Takes a UnitValue pair and converts it and it's value to the new Unit specified.
+	 * Will not work for percentage unit values.
+	 * @param p
+	 * @param u
+	 * @return
+	 */
+	public UnitValue translateToUnit(UnitValue p, Unit u) {
+		if (u==Unit.pc) return null;
+		UnitValue newP = new UnitValue();
+		newP.u = u;
+
+		switch (u) {
+			case px:
+				switch (p.u) {
+					case px: newP.v = p.v; break;
+					case vh: newP.v = cH(p.v); break;
+					case vw: newP.v = cW(p.v); break;
+				}
+			case vh:
+				switch (p.u) {
+					case px: newP.v = cHR(p.v); break;
+					case vh: newP.v = p.v; break;
+					case vw: newP.v = cHR(cW(p.v)); break;
+				}
+				break;
+			case vw:
+				switch (p.u) {
+					case px: newP.v = cWR(p.v); break;
+					case vh: newP.v = cWR(cH(p.v)); break;
+					case vw: newP.v = p.v; break;
+				}
+				break;
+		}
+
+		return newP;
+	}
+
+	/**
+	 * Takes a rectangle of real values (not percentage values) and returns it as a viewport rectangle
+	 * where x values have vw units and y values have vh units
+	 * @param r
+	 * @return
+	 */
+	public UnitRectangle translateToVP(UnitRectangle r) {
+		UnitRectangle rNew = new UnitRectangle();
+
+		switch (r.x.u) {
+			case pc: rNew.x = new UnitValue(0, Unit.vw); break;
+			case px: rNew.x = new UnitValue(cW(r.x.v), Unit.vw); break;
+			case vh: rNew.x = new UnitValue(cWR(cH(r.x.v)), Unit.vw); break;
+			case vw: rNew.x = r.x; break;
+
+		}
+		
+		switch (r.y.u) {
+			case pc: rNew.y = new UnitValue(0, Unit.vw); break;
+			case px: rNew.y = new UnitValue(cH(r.y.v), Unit.vh); break;
+			case vh: rNew.y = r.y; break;
+			case vw: rNew.y = new UnitValue(cHR(cW(r.y.v)), Unit.vh); break;
+			
+		}
+		
+		switch (r.width.u) {
+			case pc: rNew.width = new UnitValue(0, Unit.vw); break;
+			case px: rNew.width = new UnitValue(cW(r.width.v), Unit.vw); break;
+			case vh: rNew.width = new UnitValue(cWR(cH(r.width.v)), Unit.vw); break;
+			case vw: rNew.width = r.width; break;
+
+		}
+		
+		switch (r.height.u) {
+			case pc: rNew.height = new UnitValue(0, Unit.vw); break;
+			case px: rNew.height = new UnitValue(cH(r.height.v), Unit.vh); break;
+			case vh: rNew.height = r.height; break;
+			case vw: rNew.height = new UnitValue(cHR(cW(r.height.v)), Unit.vh); break;
+			
+		}
+		
+		return rNew;	
+	}
+
+	/**
+	 * Takes a rectangle of real values (not percentage values) and returns it as a px rectangle
+	 * where all values have px unit
+	 * @param r
+	 * @return
+	 */
+	public UnitRectangle translateToPX(UnitRectangle r) {
+		UnitRectangle rNew = new UnitRectangle();
+
+		if (r.x.u==Unit.vw) rNew.x = new UnitValue(cW(r.x.v), Unit.px); 
+		if (r.x.u==Unit.vh) rNew.x = new UnitValue(cH(r.x.v), Unit.px);
+		if (r.x.u==Unit.px) rNew.x = r.x;
+		
+		if (r.y.u==Unit.vw) rNew.y = new UnitValue(cW(r.y.v), Unit.px);
+		if (r.y.u==Unit.vh) rNew.y = new UnitValue(cH(r.y.v), Unit.px);
+		if (r.y.u==Unit.px) rNew.y = r.y;
+		
+		if (r.width.u==Unit.vw) rNew.width = new UnitValue(cW(r.width.v), Unit.px);
+		if (r.width.u==Unit.vh) rNew.width = new UnitValue(cH(r.width.v), Unit.px);
+		if (r.width.u==Unit.px) rNew.width = r.width;
+		
+		if (r.height.u==Unit.vw) rNew.height = new UnitValue(cW(r.height.v), Unit.px);
+		if (r.height.u==Unit.vh) rNew.height = new UnitValue(cH(r.height.v), Unit.px);
+		if (r.height.u==Unit.px) rNew.height = r.height;
+
+		return rNew;	
+	}
+
+
 }

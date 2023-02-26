@@ -7,6 +7,7 @@ import java.util.List;
 
 import guipackage.general.Point;
 import guipackage.general.Rectangle;
+import guipackage.general.UnitRectangle;
 import guipackage.gui.GUI;
 import guipackage.gui.components.Component;
 import guipackage.threads.AnimationFactory;
@@ -28,7 +29,7 @@ public class MessageBox extends Component {
 	
 
 	public MessageBox(String text, Color col, double goalY, int hold) {
-		super(new Rectangle(50, -15, 10, 10));
+		super(new UnitRectangle(50, -15, 10, 10));
 
 		//Smother
 		/*SimpleBox smother = new SimpleBox(new Rectangle(0, 0, 100, 100), new Color(0, 0, 0));
@@ -37,12 +38,12 @@ public class MessageBox extends Component {
 		addComponent(smother);*/
 
 		//Main box
-		mainBox = new SimpleBox(new Rectangle(0, 0, 100, 100), col);
+		mainBox = new SimpleBox(new UnitRectangle(0, 0, 100, 100), col);
 		mainBox.setRounded(true);
 		mainBox.increasePriority();
 		addComponent(mainBox);
 		
-		label = new Label(new Point(49, 50), text, new Font(GUI.baseFont, Font.BOLD, 12), new Color(255, 255, 255));
+		label = new Label(new UnitRectangle(49, 50, 0, 0), text, new Font(GUI.baseFont, Font.BOLD, 12), new Color(255, 255, 255));
 		label.setCentered(true);
 		mainBox.addComponent(label);
 		
