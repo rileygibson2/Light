@@ -8,8 +8,8 @@ public class UnitPoint {
     public UnitValue y;
 
     public UnitPoint() {
-        x = new UnitValue(0, Unit.pc);
-        y = new UnitValue(0, Unit.pc);
+        x = new UnitValue(0, Unit.pcw);
+        y = new UnitValue(0, Unit.pch);
     }
 
     public UnitPoint(Unit u) {
@@ -18,8 +18,8 @@ public class UnitPoint {
     }
 
     public UnitPoint(double x, double y, double width, double height) {
-        this.x = new UnitValue(x, Unit.pc);
-        this.y = new UnitValue(y, Unit.pc);
+        this.x = new UnitValue(x, Unit.pcw);
+        this.y = new UnitValue(y, Unit.pch);
     }
 
     public UnitPoint(double x, double y, double width, double height, Unit u) {
@@ -50,6 +50,14 @@ public class UnitPoint {
     public boolean allUnitsSame(Unit u) {
         if (u==null) return false;
         return x.u==u&&y.u==u;
+    }
+
+    public boolean allUnitsReal() {
+        return x.u.isReal()&&y.u.isReal();
+    }
+
+    public boolean allUnitsRelative() {
+        return x.u.isRelative()&&y.u.isRelative();
     }
 
     public Point toPoint() {

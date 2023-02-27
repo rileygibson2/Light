@@ -212,7 +212,6 @@ public class ScreenUtils {
 		FontMetrics metrics = g.getFontMetrics(f);
 		int x = (int) (r.x+(r.width-metrics.stringWidth(s))/2);
 		int y = (int) (r.y+((r.height-metrics.getHeight())/2)+metrics.getAscent());
-		CLI.debug(x+", "+y);
 		g.setFont(f);
 		g.setColor(c);
 		g.drawString(s, x, y);
@@ -222,7 +221,6 @@ public class ScreenUtils {
 		FontMetrics metrics = g.getFontMetrics(f);
 		int x = (int) (r.x+(r.width-metrics.stringWidth(s))/2);
 		int y = (int) (r.y+(-metrics.getHeight()/2))+metrics.getAscent();
-		CLI.debug("x: "+x);
 		g.setFont(f);
 		g.setColor(c);
 		g.drawString(s, x, y);
@@ -358,14 +356,14 @@ public class ScreenUtils {
 	}
 
 	/**
-	 * Takes a UnitValue pair and converts it and it's value to the new Unit specified.
+	 * Takes a UnitValue pair of real units and converts it and it's value to the new real Unit specified.
 	 * Will not work for percentage unit values.
 	 * @param p
 	 * @param u
 	 * @return
 	 */
-	public UnitValue translateToUnit(UnitValue p, Unit u) {
-		if (u==Unit.pc) return null;
+	public UnitValue translateRealUnitToRealUnit(UnitValue p, Unit u) {
+		if (u.isRelative()) return null;
 		UnitValue newP = new UnitValue();
 		newP.u = u;
 
@@ -391,81 +389,6 @@ public class ScreenUtils {
 				}
 				break;
 		}
-
 		return newP;
 	}
-
-	/**
-	 * Takes a rectangle of real values (not percentage values) and returns it as a viewport rectangle
-	 * where x values have vw units and y values have vh units
-	 * @param r
-	 * @return
-	 */
-	public UnitRectangle translateToVP(UnitRectangle r) {
-		UnitRectangle rNew = new UnitRectangle();
-
-		switch (r.x.u) {
-			case pc: rNew.x = new UnitValue(0, Unit.vw); break;
-			case px: rNew.x = new UnitValue(cW(r.x.v), Unit.vw); break;
-			case vh: rNew.x = new UnitValue(cWR(cH(r.x.v)), Unit.vw); break;
-			case vw: rNew.x = r.x; break;
-
-		}
-		
-		switch (r.y.u) {
-			case pc: rNew.y = new UnitValue(0, Unit.vw); break;
-			case px: rNew.y = new UnitValue(cH(r.y.v), Unit.vh); break;
-			case vh: rNew.y = r.y; break;
-			case vw: rNew.y = new UnitValue(cHR(cW(r.y.v)), Unit.vh); break;
-			
-		}
-		
-		switch (r.width.u) {
-			case pc: rNew.width = new UnitValue(0, Unit.vw); break;
-			case px: rNew.width = new UnitValue(cW(r.width.v), Unit.vw); break;
-			case vh: rNew.width = new UnitValue(cWR(cH(r.width.v)), Unit.vw); break;
-			case vw: rNew.width = r.width; break;
-
-		}
-		
-		switch (r.height.u) {
-			case pc: rNew.height = new UnitValue(0, Unit.vw); break;
-			case px: rNew.height = new UnitValue(cH(r.height.v), Unit.vh); break;
-			case vh: rNew.height = r.height; break;
-			case vw: rNew.height = new UnitValue(cHR(cW(r.height.v)), Unit.vh); break;
-			
-		}
-		
-		return rNew;	
-	}
-
-	/**
-	 * Takes a rectangle of real values (not percentage values) and returns it as a px rectangle
-	 * where all values have px unit
-	 * @param r
-	 * @return
-	 */
-	public UnitRectangle translateToPX(UnitRectangle r) {
-		UnitRectangle rNew = new UnitRectangle();
-
-		if (r.x.u==Unit.vw) rNew.x = new UnitValue(cW(r.x.v), Unit.px); 
-		if (r.x.u==Unit.vh) rNew.x = new UnitValue(cH(r.x.v), Unit.px);
-		if (r.x.u==Unit.px) rNew.x = r.x;
-		
-		if (r.y.u==Unit.vw) rNew.y = new UnitValue(cW(r.y.v), Unit.px);
-		if (r.y.u==Unit.vh) rNew.y = new UnitValue(cH(r.y.v), Unit.px);
-		if (r.y.u==Unit.px) rNew.y = r.y;
-		
-		if (r.width.u==Unit.vw) rNew.width = new UnitValue(cW(r.width.v), Unit.px);
-		if (r.width.u==Unit.vh) rNew.width = new UnitValue(cH(r.width.v), Unit.px);
-		if (r.width.u==Unit.px) rNew.width = r.width;
-		
-		if (r.height.u==Unit.vw) rNew.height = new UnitValue(cW(r.height.v), Unit.px);
-		if (r.height.u==Unit.vh) rNew.height = new UnitValue(cH(r.height.v), Unit.px);
-		if (r.height.u==Unit.px) rNew.height = r.height;
-
-		return rNew;	
-	}
-
-
 }

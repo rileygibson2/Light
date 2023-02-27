@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import guipackage.cli.CLI;
 import guipackage.general.Point;
 import guipackage.general.Rectangle;
 import guipackage.general.UnitPoint;
@@ -21,8 +22,9 @@ import guipackage.gui.components.Component;
 public abstract class Element {
 	
 	private Element parent;
-	protected UnitRectangle r; //Current values
-	private UnitRectangle rO; //Original values
+	private UnitRectangle r; //Current values set by and visible to creator
+	private UnitRectangle rFunc; //Functional/actual values used by this class to implement positioning
+	
 	private UnitPoint minSize;
 	private UnitPoint maxSize;
 	private List<Component> components;
@@ -39,57 +41,95 @@ public abstract class Element {
 		Fixed //Dimensions taken from top left of screen
 	}
 	private Position position;
-
-	/*public enum Float {
+	
+	public enum Float {
 		Left, //Position is taken from top left of parent (if absolute) and from top right of sibling (if relative)
 		Right //Position is taken from top right of parent (if absolute) and from top left of sibling (if relative)
-	}*/
+	}
+	private Float floatType;
+	
+	public enum Fill {
+		Horizontal, //Element's width fills space between it and the next element beside it (or between it and the edge of the element)
+		Vertical, //Element's height fills space between it and the next element below it (or between it and the bottom of the element)
+		None
+	}
+	public Fill fill;
 	
 	public Element(UnitRectangle r) {
 		this.r = r;
-		this.rO = r.clone();
+		this.rFunc = r.clone();
 		this.minSize = new UnitPoint(0, Unit.px, 0, Unit.px);
 		this.maxSize = new UnitPoint(GUI.screen.width, Unit.px, GUI.screen.height, Unit.px);
 		this.components = new ArrayList<Component>();
 		componentsLock = new ReentrantLock();
 		position = Position.Absolute;
+		floatType = Float.Left;
+		fill = Fill.None;
 	}
 	
 	public void setX(UnitValue p) {
 		r.x = p;
-		checkSize();
-		if (parent!=null) parent.childUpdated();
+		doPositioning();
+		if (parent!=null) {
+			parent.childUpdated();
+			parent.updateSiblings();
+		}
 	}
 	public void setY(UnitValue p) {
 		r.y = p;
-		checkSize();
-		if (parent!=null) parent.childUpdated();
+		doPositioning();
+		if (parent!=null) {
+			parent.childUpdated();
+			parent.updateSiblings();
+		}
 	}
 	public void setWidth(UnitValue p) {
 		r.width = p;
-		checkSize();
-		if (parent!=null) parent.childUpdated();
+		doPositioning();
+		if (parent!=null) {
+			parent.childUpdated();
+			parent.updateSiblings();
+		}
 	}
 	public void setHeight(UnitValue p) {
 		r.height = p;
-		checkSize();
-		if (parent!=null) parent.childUpdated();
+		doPositioning();
+		if (parent!=null) {
+			parent.childUpdated();
+			parent.updateSiblings();
+		}
 	}
 	public void setMinWidth(UnitValue p) {
 		minSize.x = p;
-		if (parent!=null) parent.childUpdated();
+		doPositioning();
+		if (parent!=null) {
+			parent.childUpdated();
+			parent.updateSiblings();
+		}
 	}
 	public void setMinHeight(UnitValue p) {
 		minSize.y = p;
-		if (parent!=null) parent.childUpdated();
+		doPositioning();
+		if (parent!=null) {
+			parent.childUpdated();
+			parent.updateSiblings();
+		}
 	}
 	public void setMaxWidth(UnitValue p) {
 		maxSize.x = p;
-		if (parent!=null) parent.childUpdated();
+		doPositioning();
+		if (parent!=null) {
+			parent.childUpdated();
+			parent.updateSiblings();
+		}
 	}
 	public void setMaxHeight(UnitValue p) {
 		maxSize.y = p;
-		if (parent!=null) parent.childUpdated();
+		doPositioning();
+		if (parent!=null) {
+			parent.childUpdated();
+			parent.updateSiblings();
+		}
 	}
 	
 	public UnitValue getX() {return r.x;}
@@ -101,21 +141,31 @@ public abstract class Element {
 	public UnitValue getMaxWidth() {return maxSize.x;}
 	public UnitValue getMaxHeight() {return maxSize.y;}
 	
-	public void setRec(UnitRectangle r) {this.r = r;}
-	public void setRecToOriginal() {r = rO.clone();}
+	public void setRec(UnitRectangle r) {
+		this.r = r;
+		doPositioning();
+		if (parent!=null) {
+			parent.childUpdated();
+			parent.updateSiblings();
+		}
+	}
 	public UnitRectangle getRec() {return r;}
-	public UnitRectangle getOriginalRec() {return rO;}
-	public void changeOriginalRec(UnitRectangle r) {rO = r;}
-	public void updateOriginalRec() {rO = r.clone();}
-
+	public UnitRectangle getFunctionalRec() {return rFunc;}
+	
 	public void setMinSize(UnitPoint p) {this.minSize = p;}
 	public void setMaxSize(UnitPoint p) {this.maxSize = p;}
 	
-	public Element getParent() {return parent;}
-	public void setParent(Element e) {parent = e;}
-	
 	public Position getPosition() {return position;}
 	public void setPosition(Position p) {position = p;}
+	
+	public void setFloat(Float f) {this.floatType = f;}
+	public Float getFloat() {return floatType;}
+	
+	public void setFill(Fill f) {this.fill = f;}
+	public Fill getFill() {return fill;}
+	
+	public Element getParent() {return parent;}
+	public void setParent(Element e) {parent = e;}
 	
 	public void setDOMEntryAction(Runnable r) {domEntryAction = r;}
 	public boolean inDOM() {return inDOM;}
@@ -151,42 +201,12 @@ public abstract class Element {
 		components.add(c);
 		componentsLock.unlock();
 		
-		if (c.getPosition()==Position.Relative) positionRelatively(c);
+		c.doPositioning();
+		updateSiblings();
 		
 		//DOM entry
 		if (isRoot()) c.triggerDOMEntry(); //Trigger DOM entry action if this is the root node adding a component
 		if (inDOM) c.triggerDOMEntry(); //Also trigger if this is another element already already in dom
-	}
-	
-	/**
-	* Relativly position this component from the top right of the last component
-	*/
-	public void positionRelatively(Component c) {
-		componentsLock.lock();
-		
-		if (!components.isEmpty()) {
-			//Get last added relative component
-			Component lastRelativeSibling = null;
-			for (int i=components.size()-1; i>-1; i--) {
-				Component sibling = components.get(i);
-				if (sibling!=c&&sibling.getPosition()==Position.Relative&&!sibling.getRec().hasUnit(Unit.pc)) {
-					lastRelativeSibling = sibling;
-					break;
-				}
-			}
-			componentsLock.unlock();
-			
-			if (lastRelativeSibling!=null) {
-				//Adjust this elements position values to base off siblings
-				
-				UnitValue pos = GUI.getScreenUtils().translateToUnit(lastRelativeSibling.getX(), c.getX().u);
-				UnitValue size = GUI.getScreenUtils().translateToUnit(lastRelativeSibling.getWidth(), c.getX().u);
-				c.setX(new UnitValue(c.getX().v+pos.v+size.v, c.getX().u));
-
-				pos = GUI.getScreenUtils().translateToUnit(lastRelativeSibling.getY(), c.getY().u);
-				c.setY(new UnitValue(c.getY().v+pos.v, c.getY().u));
-			}
-		}
 	}
 	
 	public void removeComponent(Component c) {
@@ -236,36 +256,169 @@ public abstract class Element {
 		inDOM = false;
 		for (Component c : components) c.triggerDOMExit();
 	}
-
+	
 	/**
-	 * Update hook for when a child of this element has had it's dimensions updated.
-	 * Will propogate up the DOM tree.
-	 * Can be overridden to create custom actions for when a child is changed, for example FlexBox uses it
-	 * to resize itself to accomodate the updated child
-	 */
-	public void childUpdated() {
+	* Update hook for when a child of this element has had it's dimensions updated.
+	* Will propogate up the DOM tree.
+	* Can be overridden to create custom actions for when a child is changed, for example FlexBox uses it
+	* to resize itself to accomodate the updated child
+	*/
+	protected void childUpdated() {
 		if (parent!=null) parent.childUpdated();
 	}
-
+	
 	/**
-	 * Validates size is not smaller than min values
-	 */
-	public void checkSize() {
+	* Trigger sibling updated hook in all children
+	*/
+	private void updateSiblings() {
+		for (Component c : getComponents()) c.siblingUpdated();
+	}
+	
+	/**
+	* Update hook for when a sibling of this element is updated. Allows relative positioning to be
+	* adjusted and to stay true when changes happen to siblings
+	*/
+	protected void siblingUpdated() {
+		doPositioning();
+	}
+	
+	/**
+	* Positions this element where it should be on the screen.
+	* Implements relative, absolute and static positioning, float and fill.
+	* Translates the user visible r into rFunc which is used to draw and interact with this element.
+	
+	* Rules:
+	* Elements with position relative are only relative to other relative elements
+	* Elements with position relative are only relative to other elements with the same float as them
+	* Min max width overrides the fill width
+	* Position relative does not work for centered elements
+	*/
+	protected void doPositioning() {
+		rFunc = r.clone(); //This is all needed for absolute and fixed positioning
+		checkMinMaxSize();
+		
+		if (parent==null) return; //Nothing below this will work without a parent
+		
+		/*
+		* Float should be done from right end of box if position is not relative OR
+		* if position is relative but there are no eligable elements added before this element.
+		* This is done so that relative chaining can still work. Position relative uses values
+		* of last added eligable element as a reference, and so needs the first relative element to still
+		* be normally floated right for this to work.
+		*/
+		
+		//Do float
+		if (getFloat()==Float.Right&&getPosition()!=Position.Relative) floatRight();
+		
+		//Do relative positioning
+		if (position==Position.Relative) positionRelatively();
+		
+		//Do fill
+		if (fill!=Fill.None) fillToNextElement();
+		checkMinMaxSize();
+	}
+	
+	/**
+	* Validates size is not smaller than min values
+	*/
+	protected void checkMinMaxSize() {
 		//Check min width
-		UnitValue size = GUI.getScreenUtils().translateToUnit(getWidth(), getMinWidth().u);
-		if (size.v<getMinWidth().v) r.width = getMinWidth().clone();
+		UnitValue size = translateToUnit(getWidth(), this, getMinWidth().u);
+		if (size.v<getMinWidth().v) rFunc.width = getMinWidth().clone();
 		
 		//Check min height
-		size = GUI.getScreenUtils().translateToUnit(getHeight(), getMinHeight().u);
-		if (size.v<getMinHeight().v) r.height = getMinHeight().clone();
-
+		size = translateToUnit(getHeight(), this, getMinHeight().u);
+		if (size.v<getMinHeight().v) rFunc.height = getMinHeight().clone();
+		
 		//Check max width
-		size = GUI.getScreenUtils().translateToUnit(getWidth(), getMaxWidth().u);
-		if (size.v>getMaxWidth().v) r.width = getMaxWidth().clone();
+		size = translateToUnit(getWidth(), this, getMaxWidth().u);
+		if (size.v>getMaxWidth().v) rFunc.width = getMaxWidth().clone();
 		
 		//Check max height
-		size = GUI.getScreenUtils().translateToUnit(getHeight(), getMaxHeight().u);
-		if (size.v>getMaxHeight().v) r.height = getMaxHeight().clone();
+		size = translateToUnit(getHeight(), this, getMaxHeight().u);
+		if (size.v>getMaxHeight().v) rFunc.height = getMaxHeight().clone();
+	}
+	
+	private void positionRelatively() {
+		List<Component> siblings = parent.getComponents();
+		if (siblings==null||siblings.isEmpty()) return;
+		
+		//Find location of this element in siblings
+		int loc = 0;
+		for (; loc<siblings.size(); loc++) if (siblings.get(loc)==this) break;
+		
+		//Get last added eligable relative component
+		Component lastRelativeSibling = null;
+		for (int i=loc; i>=0; i--) { //Search back from this component
+			Component sibling = siblings.get(i);
+			if (sibling!=this&&sibling.getPosition()==Position.Relative&&sibling.getFloat()==this.getFloat()) {
+				lastRelativeSibling = sibling;
+				break;
+			}
+		}
+		
+		if (lastRelativeSibling!=null) {
+			UnitValue sibX = translateToUnit(lastRelativeSibling.getFunctionalRec().x, lastRelativeSibling, getX().u);
+			UnitValue sibY = translateToUnit(lastRelativeSibling.getFunctionalRec().y, lastRelativeSibling, getY().u);
+			
+			//Adjust this elements position values to base off siblings
+			if (getFloat()==Float.Left) { //X from top right of sibling
+				UnitValue width = translateToUnit(lastRelativeSibling.getFunctionalRec().width, lastRelativeSibling, getX().u);
+				//CLI.debug(lastRelativeSibling.getFunctionalRec().width+", "+width+", "+", "+sibX.v+", "+getX().v);
+				rFunc.x = new UnitValue(sibX.v+width.v+getX().v, getX().u);
+			}
+			if (getFloat()==Float.Right) { //X backwards from top left of sibling
+				UnitValue width = translateToUnit(getWidth(), this, getX().u);
+				rFunc.x = new UnitValue(sibX.v-width.v-getX().v, getX().u);
+			}
+			rFunc.y = new UnitValue(getY().v+sibY.v, getY().u);
+		}
+		//No eligable relative sibling, still need to handle float as described aboves
+		else if (getFloat()==Float.Right) floatRight();
+	}
+	
+	private void floatRight() {
+		if (parent==null) return;
+		UnitValue parentW = translateToUnit(new UnitValue(parent.getRealRec().width, Unit.px), parent, getX().u);
+		UnitValue width = translateToUnit(getWidth(), this, getX().u);
+		rFunc.x = new UnitValue(parentW.v-width.v-getX().v, getX().u);
+	}
+	
+	private void fillToNextElement() {
+		List<Component> siblings = parent.getComponents();
+		if (siblings==null||siblings.isEmpty()||siblings.size()==1) return;
+		
+		//Find location of this element in siblings
+		int loc = 0;
+		for (; loc<siblings.size(); loc++) if (siblings.get(loc)==this) break;
+		
+		if (loc==siblings.size()-1) {
+			//Element is either has no siblings or was last added element so fill to edge of parent
+			if (getFill()==Fill.Horizontal) {
+				UnitValue parentW = translateToUnit(new UnitValue(parent.getRealRec().width, Unit.px), parent, getWidth().u);
+				UnitValue posX = translateToUnit(getX(), this, getWidth().u);
+				rFunc.width = new UnitValue(parentW.v-posX.v, getWidth().u);
+			}
+			if (getFill()==Fill.Vertical) {
+				UnitValue parentH = translateToUnit(new UnitValue(parent.getRealRec().height, Unit.px), parent, getHeight().u);
+				UnitValue posY = translateToUnit(getY(), this, getHeight().u);
+				rFunc.height = new UnitValue(parentH.v-posY.v, getHeight().u);
+			}
+			return;
+		}
+		
+		//Fill to next element
+		Component next = siblings.get(loc+1);
+		if (getFill()==Fill.Horizontal) {
+			UnitValue nextX = translateToUnit(new UnitValue(getRealRec().x, Unit.px), next, getWidth().u);
+			UnitValue posX = translateToUnit(getX(), this, getWidth().u);
+			rFunc.width = new UnitValue(nextX.v-posX.v, getWidth().u);
+		}
+		if (getFill()==Fill.Vertical) {
+			UnitValue nextY = translateToUnit(new UnitValue(next.getRealRec().y, Unit.px), next, getHeight().u);
+			UnitValue posY = translateToUnit(getX(), this, getHeight().u);
+			rFunc.height = new UnitValue(nextY.v-posY.v, getHeight().u);
+		}
 	}
 	
 	/**
@@ -276,7 +429,7 @@ public abstract class Element {
 	* 
 	* @return
 	*/
-	public Rectangle getRealRec() {return getRealRec(r);}
+	public Rectangle getRealRec() {return getRealRec(rFunc);}
 	
 	/**
 	* Allows you to translate any rectangle into real pixel values as if it were being processed
@@ -291,26 +444,30 @@ public abstract class Element {
 		//Fixed positioning
 		if (position==Position.Fixed||isRoot()) { //Root element should be treated as position fixed
 			switch (r.x.u) {
-				case pc:
+				case pcw:
 				case vw: rNew.x = GUI.getScreenUtils().cW(r.x.v); break;
+				case pch:
 				case vh: rNew.x = GUI.getScreenUtils().cH(r.x.v); break;
 				case px: rNew.x = r.x.v; break;
 			}
 			switch (r.y.u) {
-				case pc:
+				case pch:
 				case vh: rNew.y = GUI.getScreenUtils().cH(r.y.v); break;
+				case pcw:
 				case vw: rNew.y = GUI.getScreenUtils().cW(r.y.v); break;
 				case px: rNew.y = r.y.v; break;
 			}
 			switch (r.width.u) {
-				case pc:
+				case pcw:
 				case vw: rNew.width = GUI.getScreenUtils().cW(r.width.v); break;
+				case pch:
 				case vh: rNew.width = GUI.getScreenUtils().cH(r.width.v); break;
 				case px: rNew.width = r.width.v; break;
 			}
 			switch (r.height.u) {
-				case pc:
+				case pch:
 				case vh: rNew.height = GUI.getScreenUtils().cH(r.height.v); break;
+				case pcw:
 				case vw: rNew.height = GUI.getScreenUtils().cW(r.height.v); break;
 				case px: rNew.height = r.height.v; break;
 			}
@@ -319,33 +476,100 @@ public abstract class Element {
 			if (parent==null) return r.toRect();
 			Rectangle pR = parent.getRealRec();
 			switch (r.x.u) {
-				case pc: rNew.x = pR.x+(r.x.v/100d)*pR.width; break;
+				case pcw: rNew.x = pR.x+(r.x.v/100d)*pR.width; break;
+				case pch: rNew.x = pR.x+(r.x.v/100d)*pR.height; break;
 				case vw: rNew.x = pR.x+GUI.getScreenUtils().cW(r.x.v); break;
 				case vh: rNew.x = pR.x+GUI.getScreenUtils().cH(r.x.v); break;
 				case px: rNew.x = pR.x+r.x.v; break;
 			}
 			switch (r.y.u) {
-				case pc: rNew.y = pR.y+(r.y.v/100d)*pR.height; break;
+				case pcw: rNew.y = pR.y+(r.y.v/100d)*pR.width; break;
+				case pch: rNew.y = pR.y+(r.y.v/100d)*pR.height; break;
 				case vw: rNew.y = pR.y+GUI.getScreenUtils().cW(r.y.v); break;
 				case vh: rNew.y = pR.y+GUI.getScreenUtils().cH(r.y.v); break;
 				case px: rNew.y = pR.y+r.y.v; break;
 			}
 			switch (r.width.u) {
-				case pc: rNew.width = (r.width.v/100d)*pR.width; break;
+				case pcw: rNew.width = (r.width.v/100d)*pR.width; break;
+				case pch: rNew.width = (r.width.v/100d)*pR.height; break;
 				case vw: rNew.width = GUI.getScreenUtils().cW(r.width.v); break;
 				case vh: rNew.width = GUI.getScreenUtils().cH(r.width.v); break;
 				case px: rNew.width = r.width.v; break;
 			}
 			switch (r.height.u) {
-				case pc: rNew.height = (r.height.v/100d)*pR.height; break;
+				case pcw: rNew.height = (r.height.v/100d)*pR.width; break;
+				case pch: rNew.height = (r.height.v/100d)*pR.height; break;
 				case vw: rNew.height = GUI.getScreenUtils().cW(r.height.v); break;
 				case vh: rNew.height = GUI.getScreenUtils().cH(r.height.v); break;
 				case px: rNew.height = r.height.v; break;
 			}
 		}
 		
-		//CLI.debug("El: "+getClass().getSimpleName()+" r: "+r.toString()+" rNew: "+rNew.toString()+" pos: "+position.toString()+" par: "+parent.getClass().getSimpleName());
-		//if (isRoot()) CLI.debug("ISROOT");
+		return rNew;
+	}
+
+	public UnitValue translateToUnit(UnitValue oldUV, Element oldScope, Unit newUnit) {
+		if (oldUV.u.isRelative()&&newUnit.isReal()) {
+			//Need to translate old uv in old scope to real value before real to real conversion
+			Rectangle oldScopeR = oldScope.getParent().getRealRec();
+			if (oldUV.u==Unit.pcw) oldUV = new UnitValue((oldUV.v/100d)*oldScopeR.width, Unit.px);
+			if (oldUV.u==Unit.pch) oldUV = new UnitValue((oldUV.v/100d)*oldScopeR.height, Unit.px);
+			return GUI.getScreenUtils().translateRealUnitToRealUnit(oldUV, newUnit);
+		}
+
+		if (oldUV.u.isRelative()&&newUnit.isRelative()) {
+			//Need to translate olduv relative value into this scope relative value
+			Rectangle oldScopeR = oldScope.getParent().getRealRec();
+			Rectangle r = parent.getRealRec();
+			if (oldUV.u==Unit.pcw) {
+				if (newUnit==Unit.pcw) return new UnitValue((((oldUV.v/100d)*oldScopeR.width)/r.width)*100, newUnit);
+				if (newUnit==Unit.pch) return new UnitValue((((oldUV.v/100d)*oldScopeR.width)/r.height)*100, newUnit);
+			}
+			if (oldUV.u==Unit.pch) {
+				if (newUnit==Unit.pcw) return new UnitValue((((oldUV.v/100d)*oldScopeR.height)/r.width)*100, newUnit);
+				if (newUnit==Unit.pch) return new UnitValue((((oldUV.v/100d)*oldScopeR.height)/r.height)*100, newUnit);
+			}
+		}
+
+		if (oldUV.u.isReal()&&newUnit.isRelative()) {
+			//Need to translate real unit to be a relative value for this element
+			Rectangle r = parent.getRealRec();
+			if (newUnit==Unit.pcw) {
+				if (oldUV.u==Unit.px) return new UnitValue((oldUV.v/r.width)*100, newUnit);
+				if (oldUV.u==Unit.vw) return new UnitValue((GUI.getScreenUtils().cW(oldUV.v)/r.width)*100, newUnit);
+				if (oldUV.u==Unit.vh) return new UnitValue((GUI.getScreenUtils().cH(oldUV.v)/r.width)*100, newUnit);
+				
+			}
+			if (newUnit==Unit.pch) {
+				if (oldUV.u==Unit.px) return new UnitValue((oldUV.v/r.height)*100, newUnit);
+				if (oldUV.u==Unit.vw) return new UnitValue((GUI.getScreenUtils().cW(oldUV.v)/r.height)*100, newUnit);
+				if (oldUV.u==Unit.vh) return new UnitValue((GUI.getScreenUtils().cH(oldUV.v)/r.height)*100, newUnit);
+				
+			}
+		}
+
+		//Can just convert real unit to another real unit using the screen utils otherwise
+		if (oldUV.u.isReal()&&newUnit.isReal()) {
+			return GUI.getScreenUtils().translateRealUnitToRealUnit(oldUV, newUnit);
+		}
+		return null;
+	}
+
+	public UnitRectangle translateToVP(UnitRectangle oldR, Element oldScope) {
+		UnitRectangle rNew = new UnitRectangle();
+		rNew.x = translateToUnit(oldR.x, oldScope, Unit.vw);
+		rNew.y = translateToUnit(oldR.y, oldScope, Unit.vh);
+		rNew.width = translateToUnit(oldR.width, oldScope, Unit.vw);
+		rNew.height = translateToUnit(oldR.height, oldScope, Unit.vh);
+		return rNew;
+	}
+
+	public UnitRectangle translateToPX(UnitRectangle oldR, Element oldScope) {
+		UnitRectangle rNew = new UnitRectangle();
+		rNew.x = translateToUnit(oldR.x, oldScope, Unit.px);
+		rNew.y = translateToUnit(oldR.y, oldScope, Unit.px);
+		rNew.width = translateToUnit(oldR.width, oldScope, Unit.px);
+		rNew.height = translateToUnit(oldR.height, oldScope, Unit.px);
 		return rNew;
 	}
 	
@@ -358,7 +582,7 @@ public abstract class Element {
 	*/
 	public Point translateToElement(Point p, Element e) {
 		if (position==Position.Absolute||parent==null) return p;
-		Rectangle pR = getRealRec(new UnitRectangle(0, 0, p.x, p.y, Unit.pc));
+		Rectangle pR = getRealRec(new UnitRectangle(0, 0, p.x, p.y, Unit.pcw, Unit.pch));
 		Rectangle eR = e.getRealRec();
 		Point pNew = new Point();
 		
@@ -391,8 +615,7 @@ public abstract class Element {
 	}
 	
 	/**
-	* Scales a point real point on the screen and turns it into a percentage
-	* position in this element. This method respects nested components.
+	* Scales a point real point on the screen and turns it into a percentage position in this element.
 	* @param p
 	* @return
 	*/
@@ -441,7 +664,7 @@ public abstract class Element {
 		componentsLock.unlock();
 	}
 	
-	public void doClick(Point p) {
+	protected void doClick(Point p) {
 		componentsLock.lock();
 		/*
 		* Components with higher priority may have overrided their isOver method,
@@ -470,7 +693,7 @@ public abstract class Element {
 		componentsLock.unlock();
 	}
 	
-	public void doMove(Point p) {
+	protected void doMove(Point p) {
 		componentsLock.lock();
 		sortComponents();
 		
@@ -485,7 +708,7 @@ public abstract class Element {
 		componentsLock.unlock();
 	}
 	
-	public void doDrag(Point entry, Point current) {
+	protected void doDrag(Point entry, Point current) {
 		componentsLock.lock();
 		sortComponents();
 		
@@ -499,7 +722,7 @@ public abstract class Element {
 		componentsLock.unlock();
 	}
 	
-	public void doScroll(Point p, int amount) {
+	protected void doScroll(Point p, int amount) {
 		componentsLock.lock();
 		sortComponents();
 		
@@ -512,11 +735,12 @@ public abstract class Element {
 		componentsLock.unlock();
 	}
 	
-	public void doKeyPress(KeyEvent k) {}; //Doesn't need to recur due to key listener registration in IO
+	protected void doKeyPress(KeyEvent k) {}; //Doesn't need to recur due to key listener registration in IO
 	
 	@Override
 	public String toString() {
-		if (inDOM()) return "["+getClass().getSimpleName()+": pos: "+getPosition()+" dom: "+inDOM()+" r: "+getRec()+" rL: "+getRealRec()+"]";
-		return "["+getClass().getSimpleName()+": pos: "+getPosition()+" dom: "+inDOM()+" r: "+getRec()+"]";
+		//if (inDOM()) 
+		return "["+CLI.orange+getClass().getSimpleName()+CLI.reset+": "+CLI.blue+"pos"+CLI.reset+": "+getPosition()+" "+CLI.blue+"float"+CLI.reset+": "+getFloat()+" "+CLI.blue+"dom"+CLI.reset+": "+inDOM()+" "+CLI.blue+"r"+CLI.reset+": "+getRec()+" "+CLI.blue+"rFunc"+CLI.reset+": "+rFunc+" "+CLI.blue+"rL"+CLI.reset+": "+getRealRec()+"]";
+		//return "["+CLI.orange+getClass().getSimpleName()+CLI.reset+": "+CLI.blue+"pos"+CLI.reset+": "+getPosition()+" "+CLI.blue+"float"+CLI.reset+": "+getFloat()+" "+CLI.blue+"dom"+CLI.reset+": "+inDOM()+" "+CLI.blue+"r"+CLI.reset+": "+getRec()+" "+CLI.blue+"rFunc"+CLI.reset+": "+rFunc+"]";
 	}
 }

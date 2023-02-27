@@ -5,6 +5,7 @@ import java.awt.Color;
 import guipackage.general.Point;
 import guipackage.general.UnitRectangle;
 import guipackage.general.UnitValue;
+import guipackage.general.UnitValue.Unit;
 import guipackage.gui.components.Component;
 
 public class Slider extends Component {
@@ -31,7 +32,7 @@ public class Slider extends Component {
 		mainBox.addComponent(groove);
 		
 		//Coloured Groove
-		grooveFill = new SimpleBox(new UnitRectangle(groove.getX(), groove.getY(), new UnitValue(0), groove.getHeight()), new Color(150, 100, 100));
+		grooveFill = new SimpleBox(new UnitRectangle(groove.getX(), groove.getY(), new UnitValue(0, Unit.pcw), groove.getHeight()), new Color(150, 100, 100));
 		mainBox.addComponent(grooveFill);
 
 		//Ball
@@ -43,8 +44,8 @@ public class Slider extends Component {
 	public void setValue(double v) {
 		value = v;
 		v /= 100;
-		ball.setX(new UnitValue(groove.getX().v+(v*groove.getWidth().v)-ball.getWidth().v/2));
-		grooveFill.setWidth(new UnitValue(v*groove.getWidth().v));
+		ball.setX(new UnitValue(groove.getX().v+(v*groove.getWidth().v)-ball.getWidth().v/2, Unit.pcw));
+		grooveFill.setWidth(new UnitValue(v*groove.getWidth().v, Unit.pcw));
 	}
 	
 	public double getValue() {return value;}
@@ -57,8 +58,8 @@ public class Slider extends Component {
 		
 		if (x>=groove.getX().v&&x<=groove.getX().v+groove.getWidth().v) { //Check within bounds of groove
 			value = ((x-groove.getX().v)/groove.getWidth().v)*100;
-			ball.setX(new UnitValue(x-ball.getWidth().v/2));
-			grooveFill.setWidth(new UnitValue(x-grooveFill.getX().v));
+			ball.setX(new UnitValue(x-ball.getWidth().v/2, Unit.pcw));
+			grooveFill.setWidth(new UnitValue(x-grooveFill.getX().v, Unit.pcw));
 		}
 		
 		if (onUpdate!=null) onUpdate.run();
@@ -71,8 +72,8 @@ public class Slider extends Component {
 		
 		if (x>=groove.getX().v&&x<=groove.getX().v+groove.getWidth().v) { //Check within bounds of groove
 			value = ((x-groove.getX().v)/groove.getWidth().v)*100;
-			ball.setX(new UnitValue(x-ball.getWidth().v/2));
-			grooveFill.setWidth(new UnitValue(x-grooveFill.getX().v));
+			ball.setX(new UnitValue(x-ball.getWidth().v/2, Unit.pcw));
+			grooveFill.setWidth(new UnitValue(x-grooveFill.getX().v, Unit.pcw));
 		}
 		
 		if (onUpdate!=null) onUpdate.run();

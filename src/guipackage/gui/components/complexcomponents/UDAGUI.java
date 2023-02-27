@@ -9,7 +9,7 @@ import guipackage.general.UnitValue.Unit;
 import guipackage.gui.GUI;
 import guipackage.gui.components.Component;
 import guipackage.gui.components.basecomponents.SimpleBox;
-import guipackage.gui.components.basecomponents.TempBox;
+import guipackage.gui.components.basecomponents.TempWindow;
 import light.zones.UDA;
 
 public class UDAGUI extends Component {
@@ -28,7 +28,7 @@ public class UDAGUI extends Component {
 
         setDOMEntryAction(() -> {
             //Cell dimensions
-            cellDims = new Point(100/uda.size.x, GUI.getScreenUtils().rHP(mainBox, 100/uda.size.x, Unit.pc));
+            cellDims = new Point(100/uda.size.x, GUI.getScreenUtils().rHP(mainBox, 100/uda.size.x, Unit.pcw));
         
             //Dots
             int colCount = 0;
@@ -62,7 +62,7 @@ public class UDAGUI extends Component {
     }
 
     public void openWindowPicker() {
-        TempBox tB = new TempBox("Create Window");
+        TempWindow tB = new TempWindow("Create Window");
         addComponent(tB);
         GUI.getInstance().scanDOM(tB, "");
         //tB.b.setX(new UnitValue(30, tB.b.getX().u));

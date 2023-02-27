@@ -13,7 +13,7 @@ import guipackage.general.UnitValue.Unit;
 import guipackage.gui.GUI;
 import guipackage.gui.components.Component;
 
-public class TempBox extends FlexBox {
+public class TempWindow extends FlexBox {
 
 	private Runnable onClose;
 	Set<Component> addedComponents; //Components that are not part of the core box
@@ -21,7 +21,7 @@ public class TempBox extends FlexBox {
 
 	public SimpleBox b;
 	
-	public TempBox(String label) {
+	public TempWindow(String label) {
 		super(new UnitRectangle(10, Unit.vw, 10, Unit.vh, 0, Unit.vw, 0, Unit.vh));
 		addedComponents = new HashSet<Component>();
 		tabs = new ArrayList<SimpleBox>();
@@ -42,11 +42,17 @@ public class TempBox extends FlexBox {
 		addComponent(tB);*/
 
 		FlexBox topBar = new FlexBox(new UnitRectangle(0, 0, 0, 0, Unit.px));
-		topBar.setMinWidth(new UnitValue(50, Unit.vw));
+		topBar.setMinWidth(new UnitValue(40, Unit.vw));
 		topBar.setMinHeight(new UnitValue(5, Unit.vh));
 		addComponent(topBar);
 
-		Label title = new Label(new UnitRectangle(0, 0, 80, 100, Unit.pc), label, new Font(GUI.baseFont, Font.BOLD, 18), new Color(230, 230, 230));
+		b = new SimpleBox(new UnitRectangle(0, 0, 100, 100), Color.PINK);
+		b.setOval(true);
+		topBar.addComponent(b);
+
+		Label title = new Label(new UnitRectangle(0, Unit.px, 0, Unit.px, 30, Unit.vw, 100, Unit.pch), label, new Font(GUI.baseFont, Font.BOLD, 18), new Color(230, 230, 230));
+		title.setPosition(Position.Relative);
+		//title.setFloat(Float.Right);
 		title.setColor(new Color(0, 0, 180));
 		title.setBorder(1, new Color(10, 100, 255));
 		title.setRounded(10);
@@ -54,15 +60,21 @@ public class TempBox extends FlexBox {
 		title.setYCentered(true);
 		topBar.addComponent(title);
 
-		Image exit = new Image(new UnitRectangle(80, 0, 20, 100, Unit.pc), "exit.png");
+		Image exit = new Image(new UnitRectangle(0, Unit.vw, 0, Unit.vh, 20, Unit.vw, 100, Unit.pch), "exit.png");
+		exit.setPosition(Position.Relative);
+		//exit.setFloat(Float.Right);
 		exit.setColor(GUI.bg);
 		exit.setBorder(1, new Color(80, 80, 80));
 		exit.setRounded(10);
 		topBar.addComponent(exit);
 
-		SimpleBox content = new SimpleBox(new UnitRectangle(0, Unit.pc, 5, Unit.vh, 100, Unit.pc, 20, Unit.vh), GUI.fg);
+		/*b = new SimpleBox(new UnitRectangle(0, 0, 5, 5, Unit.vw, Unit.vh), Color.yellow);
+		//b.setFloat(Float.Right);
+		b.setPosition(Position.Relative);
+		topBar.addComponent(b);*/
+		/*SimpleBox content = new SimpleBox(new UnitRectangle(0, Unit.pc, 5, Unit.vh, 100, Unit.pc, 20, Unit.vh), GUI.fg);
 		content.setRounded(10);
-		addComponent(content);
+		addComponent(content);*/
 	}
 
 	public void addSmother(double opacity) {

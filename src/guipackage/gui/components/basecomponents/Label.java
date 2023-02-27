@@ -30,7 +30,6 @@ public class Label extends SimpleBox {
 
 	public void setText(String t) {
 		text = t;
-		r.width.v = GUI.getScreenUtils().getStringWidthAsPerc(font, text);
 	}
 
 	public void setLabelColor(Color col) {this.col = col;}

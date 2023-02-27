@@ -58,7 +58,7 @@ public class ScrollBar extends Component {
 		y = 0;
 		if (isArmed()) {
 			for (Component c : scrollable) {
-				c.setRecToOriginal();
+				//c.setRecToOriginal();
 				c.setVisible(true);
 			}
 		}

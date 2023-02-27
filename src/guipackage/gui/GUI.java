@@ -165,8 +165,11 @@ public class GUI extends JPanel {
 	public boolean getAntiAliasing() {return antiAlias;}
 
 	public void scanDOM(Element e, String indent) {
-		if (indent.equals("")) CLI.debug("Scanning DOM:\nScreen Dims: "+screen.toString());
-		CLI.debug(indent+e.getClass().getSimpleName()+" r: "+e.getRec().toString()+" real: "+e.getRealRec().toString()+" pos: "+e.getPosition().toString());
+		if (indent.equals("")) {
+			CLI.debug("Scanning DOM:");
+			CLI.debug("Screen Dims: "+screen.toString());
+		}
+		CLI.debug(indent+e.toString());
 		for (Component c : e.getComponents()) scanDOM(c, indent+" - ");
 	}
 	

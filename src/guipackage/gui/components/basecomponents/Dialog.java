@@ -9,6 +9,7 @@ import java.util.Set;
 
 import guipackage.general.UnitRectangle;
 import guipackage.general.UnitValue;
+import guipackage.general.UnitValue.Unit;
 import guipackage.gui.GUI;
 import guipackage.gui.components.Component;
 
@@ -34,7 +35,7 @@ public class Dialog extends Component {
 		addComponent(mainBox);
 
 		//Top bar
-		SimpleBox tB = new SimpleBox(new UnitRectangle(getX(), getY(), getWidth(), new UnitValue(12.5)), GUI.focus);
+		SimpleBox tB = new SimpleBox(new UnitRectangle(getX(), getY(), getWidth(), new UnitValue(12.5, Unit.pch)), GUI.focus);
 		//tB.setAbsolute(true);
 		tB.setRounded(new int[]{1, 4});
 		mainBox.addComponent(tB);

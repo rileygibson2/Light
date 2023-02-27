@@ -3,10 +3,14 @@ package guipackage.general;
 public class UnitValue {
 
     public enum Unit {
-        pc,
-        vw,
-        vh,
-        px
+        pcw, //Percentage width (Relative unit)
+        pch, //Percentage height (Relative unit)
+        vw, //Viewport width (Real unit)
+        vh, //Viewport height (Real unit)
+        px; //Pixels (Real Unit)
+
+        public boolean isRelative() {return this==Unit.pcw||this==Unit.pch;}
+        public boolean isReal() {return this!=Unit.pcw&&this!=Unit.pch;}
     };
 
     public double v;
@@ -16,7 +20,7 @@ public class UnitValue {
 
     public UnitValue(double v) {
         this.v = v;
-        this.u = Unit.pc;
+        this.u = Unit.px;
     }
 
     public UnitValue(double v, Unit u) {

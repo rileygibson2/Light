@@ -3,7 +3,6 @@ package guipackage.gui.components.basecomponents;
 import guipackage.general.UnitRectangle;
 import guipackage.general.UnitValue;
 import guipackage.general.UnitValue.Unit;
-import guipackage.gui.GUI;
 import guipackage.gui.components.Component;
 
 public class FlexBox extends Component {
@@ -28,18 +27,26 @@ public class FlexBox extends Component {
      * Resize box to encapsulate all components.
      * Do this by finding the component which has a real value which has the furtherst away
      * bottom right corner and set the bottom right corner of this component to the same.
-     * Will not consider components that have any percentage values in their dimensions
      */
     public void resize() {
         double newWidth = 0;
         double newHeight = 0;
 
         for (Component c : getComponents()) {
-            UnitRectangle uR = c.getRec();
-            if (uR.hasUnit(Unit.pc)) continue;
-            uR = GUI.getScreenUtils().translateToVP(uR);
+            UnitRectangle uR = c.getFunctionalRec();
+            
+            if (!uR.allUnitsReal()) {
+                /*
+                * Only consider elements with a relative size in the resizing if this box has a
+                * min width or min height set as that is the only way they should actually affect
+                * the space
+                */
+                if (getMinWidth().v==0&&getMinHeight().v==0) continue;
+            }
 
-            if (uR.x.v+uR.width.v>newWidth) newWidth = uR.x.v+uR.width.v;
+
+            uR = translateToVP(uR, c);
+            if (uR.x.v+uR.width.v>newWidth)  newWidth = uR.x.v+uR.width.v;
             if (uR.y.v+uR.height.v>newHeight) newHeight = uR.y.v+uR.height.v;
         }
 

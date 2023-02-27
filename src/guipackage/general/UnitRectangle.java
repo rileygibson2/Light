@@ -10,10 +10,10 @@ public class UnitRectangle {
     public UnitValue height;
 
     public UnitRectangle() {
-        x = new UnitValue(0, Unit.pc);
-        y = new UnitValue(0, Unit.pc);
-        width = new UnitValue(0, Unit.pc);
-        height = new UnitValue(0, Unit.pc);
+        x = new UnitValue(0, Unit.pcw);
+        y = new UnitValue(0, Unit.pch);
+        width = new UnitValue(0, Unit.pcw);
+        height = new UnitValue(0, Unit.pch);
     }
 
     public UnitRectangle(Unit u) {
@@ -24,10 +24,10 @@ public class UnitRectangle {
     }
 
     public UnitRectangle(double x, double y, double width, double height) {
-        this.x = new UnitValue(x, Unit.pc);
-        this.y = new UnitValue(y, Unit.pc);
-        this.width = new UnitValue(width, Unit.pc);
-        this.height = new UnitValue(height, Unit.pc);
+        this.x = new UnitValue(x, Unit.pcw);
+        this.y = new UnitValue(y, Unit.pch);
+        this.width = new UnitValue(width, Unit.pcw);
+        this.height = new UnitValue(height, Unit.pch);
     }
 
     public UnitRectangle(double x, double y, double width, double height, Unit u) {
@@ -73,6 +73,14 @@ public class UnitRectangle {
     public boolean allUnitsSame(Unit u) {
         if (u==null) return false;
         return x.u==u&&y.u==u&&width.u==u&&height.u==u;
+    }
+
+    public boolean allUnitsReal() {
+        return x.u.isReal()&&y.u.isReal()&&width.u.isReal()&&height.u.isReal();
+    }
+
+    public boolean allUnitsRelative() {
+        return x.u.isRelative()&&y.u.isRelative()&&width.u.isRelative()&&height.u.isRelative();
     }
 
     public Rectangle toRect() {
