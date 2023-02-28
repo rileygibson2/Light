@@ -44,8 +44,8 @@ public class FlexBox extends Component {
                 if (getMinWidth().v==0&&getMinHeight().v==0) continue;
             }
 
-
-            uR = translateToVP(uR, c);
+            //Translate childs values into viewport values
+            uR = translateToVP(uR, c, this);
             if (uR.x.v+uR.width.v>newWidth)  newWidth = uR.x.v+uR.width.v;
             if (uR.y.v+uR.height.v>newHeight) newHeight = uR.y.v+uR.height.v;
         }

@@ -42,7 +42,7 @@ public class Dialog extends Component {
 
 		//Top label
 		Label l = new Label(new UnitRectangle(50, 50, 0 , 0), label, new Font(GUI.baseFont, Font.BOLD, 16), new Color(230, 230, 230));
-		l.setCentered(true);
+		l.setTextCentered(true);
 		tB.addComponent(l);
 
 		//Exit button
@@ -86,7 +86,7 @@ public class Dialog extends Component {
 		});
 		tab.setRounded(new int[] {1, 4});
 		Label l = new Label(new UnitRectangle(50, 50, 0, 0), name, f, new Color(220, 220, 220));
-		l.setCentered(true);
+		l.setTextCentered(true);
 		tab.addComponent(l);
 		tab.increasePriority();
 		mainBox.addComponent(tab);

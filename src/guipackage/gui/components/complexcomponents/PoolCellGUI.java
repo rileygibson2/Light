@@ -38,7 +38,7 @@ public class PoolCellGUI extends Component {
         addComponent(mainBox);
 
         idLabel = new Label(new UnitRectangle(10, 5, 0, 15), id+"", new Font("Geneva", Font.PLAIN, 20), GUI.textDull);
-        idLabel.setYCentered(true);
+        idLabel.setTextYCentered(true);
         idLabel.fitFont();
         mainBox.addComponent(idLabel);
 
@@ -50,11 +50,11 @@ public class PoolCellGUI extends Component {
                 //Image address and title
                 mainBox.addComponent(new Image(new UnitRectangle(20, 5, 60, 40), "icon.png"));
                 Label l = new Label(new UnitRectangle(0, 62, 100, 22), poolGUI.pool.address.prefix+"", new Font("Geneva", Font.BOLD, 20), GUI.textMain);
-                l.setXCentered(true);
+                l.setTextXCentered(true);
                 l.fitFont();
                 mainBox.addComponent(l);
                 l = new Label(new UnitRectangle(0, 80, 100, 22), poolGUI.pool.type.toString(), new Font("Geneva", Font.BOLD, 20), GUI.textMain);
-                l.setXCentered(true);
+                l.setTextXCentered(true);
                 l.fitFont();
                 mainBox.addComponent(l);
 

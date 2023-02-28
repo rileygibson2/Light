@@ -44,7 +44,7 @@ public class MessageBox extends Component {
 		addComponent(mainBox);
 		
 		label = new Label(new UnitRectangle(49, 50, 0, 0), text, new Font(GUI.baseFont, Font.BOLD, 12), new Color(255, 255, 255));
-		label.setCentered(true);
+		label.setTextCentered(true);
 		mainBox.addComponent(label);
 		
 		double w = label.getWidth().v+5;

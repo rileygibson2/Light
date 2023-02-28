@@ -53,7 +53,9 @@ public abstract class Element {
 		Vertical, //Element's height fills space between it and the next element below it (or between it and the bottom of the element)
 		None
 	}
-	public Fill fill;
+	private Fill fill;
+
+	private boolean centered; //Sets element to be centered in parent element. This requires position absolute
 	
 	public Element(UnitRectangle r) {
 		this.r = r;
@@ -136,6 +138,10 @@ public abstract class Element {
 	public UnitValue getY() {return r.y;}
 	public UnitValue getWidth() {return r.width;}
 	public UnitValue getHeight() {return r.height;}
+	public UnitValue getFuncX() {return rFunc.x;}
+	public UnitValue getFuncY() {return rFunc.y;}
+	public UnitValue getFuncWidth() {return rFunc.width;}
+	public UnitValue getFuncHeight() {return rFunc.height;}
 	public UnitValue getMinWidth() {return minSize.x;}
 	public UnitValue getMinHeight() {return minSize.y;}
 	public UnitValue getMaxWidth() {return maxSize.x;}
@@ -163,6 +169,12 @@ public abstract class Element {
 	
 	public void setFill(Fill f) {this.fill = f;}
 	public Fill getFill() {return fill;}
+
+	public void setCentered(boolean c) {
+		this.centered = c;
+		if (centered) setPosition(Position.Absolute);
+	}
+	public boolean isCentered() {return centered;}
 	
 	public Element getParent() {return parent;}
 	public void setParent(Element e) {parent = e;}
@@ -203,6 +215,7 @@ public abstract class Element {
 		
 		c.doPositioning();
 		updateSiblings();
+		if (parent!=null) parent.childUpdated();
 		
 		//DOM entry
 		if (isRoot()) c.triggerDOMEntry(); //Trigger DOM entry action if this is the root node adding a component
@@ -299,6 +312,16 @@ public abstract class Element {
 		
 		if (parent==null) return; //Nothing below this will work without a parent
 		
+		//Do centered
+		if (isCentered()) {
+			centerElementInParent();
+			/*
+			 * An element with centered set should never be relative and should not respect it's
+			 * float or fill property as center overrides both of these so safe to return here
+			 */
+			return;
+		}
+
 		/*
 		* Float should be done from right end of box if position is not relative OR
 		* if position is relative but there are no eligable elements added before this element.
@@ -311,10 +334,10 @@ public abstract class Element {
 		if (getFloat()==Float.Right&&getPosition()!=Position.Relative) floatRight();
 		
 		//Do relative positioning
-		if (position==Position.Relative) positionRelatively();
+		if (getPosition()==Position.Relative) positionRelatively();
 		
 		//Do fill
-		if (fill!=Fill.None) fillToNextElement();
+		if (getFill()!=Fill.None) fillToNextElement();
 		checkMinMaxSize();
 	}
 	
@@ -323,19 +346,19 @@ public abstract class Element {
 	*/
 	protected void checkMinMaxSize() {
 		//Check min width
-		UnitValue size = translateToUnit(getWidth(), this, getMinWidth().u);
+		UnitValue size = translateToUnit(getWidth(), this, getMinWidth().u, this);
 		if (size.v<getMinWidth().v) rFunc.width = getMinWidth().clone();
 		
 		//Check min height
-		size = translateToUnit(getHeight(), this, getMinHeight().u);
+		size = translateToUnit(getHeight(), this, getMinHeight().u, this);
 		if (size.v<getMinHeight().v) rFunc.height = getMinHeight().clone();
 		
 		//Check max width
-		size = translateToUnit(getWidth(), this, getMaxWidth().u);
+		size = translateToUnit(getWidth(), this, getMaxWidth().u, this);
 		if (size.v>getMaxWidth().v) rFunc.width = getMaxWidth().clone();
 		
 		//Check max height
-		size = translateToUnit(getHeight(), this, getMaxHeight().u);
+		size = translateToUnit(getHeight(), this, getMaxHeight().u, this);
 		if (size.v>getMaxHeight().v) rFunc.height = getMaxHeight().clone();
 	}
 	
@@ -358,17 +381,17 @@ public abstract class Element {
 		}
 		
 		if (lastRelativeSibling!=null) {
-			UnitValue sibX = translateToUnit(lastRelativeSibling.getFunctionalRec().x, lastRelativeSibling, getX().u);
-			UnitValue sibY = translateToUnit(lastRelativeSibling.getFunctionalRec().y, lastRelativeSibling, getY().u);
+			UnitValue sibX = translateToUnit(lastRelativeSibling.getFuncX(), lastRelativeSibling, getX().u, this);
+			UnitValue sibY = translateToUnit(lastRelativeSibling.getFuncY(), lastRelativeSibling, getY().u, this);
 			
 			//Adjust this elements position values to base off siblings
 			if (getFloat()==Float.Left) { //X from top right of sibling
-				UnitValue width = translateToUnit(lastRelativeSibling.getFunctionalRec().width, lastRelativeSibling, getX().u);
+				UnitValue width = translateToUnit(lastRelativeSibling.getFuncWidth(), lastRelativeSibling, getX().u, this);
 				//CLI.debug(lastRelativeSibling.getFunctionalRec().width+", "+width+", "+", "+sibX.v+", "+getX().v);
 				rFunc.x = new UnitValue(sibX.v+width.v+getX().v, getX().u);
 			}
 			if (getFloat()==Float.Right) { //X backwards from top left of sibling
-				UnitValue width = translateToUnit(getWidth(), this, getX().u);
+				UnitValue width = translateToUnit(getWidth(), this, getX().u, this);
 				rFunc.x = new UnitValue(sibX.v-width.v-getX().v, getX().u);
 			}
 			rFunc.y = new UnitValue(getY().v+sibY.v, getY().u);
@@ -379,8 +402,8 @@ public abstract class Element {
 	
 	private void floatRight() {
 		if (parent==null) return;
-		UnitValue parentW = translateToUnit(new UnitValue(parent.getRealRec().width, Unit.px), parent, getX().u);
-		UnitValue width = translateToUnit(getWidth(), this, getX().u);
+		UnitValue parentW = translateToUnit(parent.getFuncWidth(), parent, getX().u, this);
+		UnitValue width = translateToUnit(getWidth(), this, getX().u, this);
 		rFunc.x = new UnitValue(parentW.v-width.v-getX().v, getX().u);
 	}
 	
@@ -395,13 +418,13 @@ public abstract class Element {
 		if (loc==siblings.size()-1) {
 			//Element is either has no siblings or was last added element so fill to edge of parent
 			if (getFill()==Fill.Horizontal) {
-				UnitValue parentW = translateToUnit(new UnitValue(parent.getRealRec().width, Unit.px), parent, getWidth().u);
-				UnitValue posX = translateToUnit(getX(), this, getWidth().u);
+				UnitValue parentW = translateToUnit(parent.getFuncWidth(), parent, getWidth().u, this);
+				UnitValue posX = translateToUnit(getX(), this, getWidth().u, this);
 				rFunc.width = new UnitValue(parentW.v-posX.v, getWidth().u);
 			}
 			if (getFill()==Fill.Vertical) {
-				UnitValue parentH = translateToUnit(new UnitValue(parent.getRealRec().height, Unit.px), parent, getHeight().u);
-				UnitValue posY = translateToUnit(getY(), this, getHeight().u);
+				UnitValue parentH = translateToUnit(parent.getFuncHeight(), parent, getHeight().u, this);
+				UnitValue posY = translateToUnit(getY(), this, getHeight().u, this);
 				rFunc.height = new UnitValue(parentH.v-posY.v, getHeight().u);
 			}
 			return;
@@ -410,15 +433,29 @@ public abstract class Element {
 		//Fill to next element
 		Component next = siblings.get(loc+1);
 		if (getFill()==Fill.Horizontal) {
-			UnitValue nextX = translateToUnit(new UnitValue(getRealRec().x, Unit.px), next, getWidth().u);
-			UnitValue posX = translateToUnit(getX(), this, getWidth().u);
+			UnitValue nextX = translateToUnit(next.getFuncX(), next, getWidth().u, this);
+			UnitValue posX = translateToUnit(getX(), this, getWidth().u, this);
 			rFunc.width = new UnitValue(nextX.v-posX.v, getWidth().u);
 		}
 		if (getFill()==Fill.Vertical) {
-			UnitValue nextY = translateToUnit(new UnitValue(next.getRealRec().y, Unit.px), next, getHeight().u);
-			UnitValue posY = translateToUnit(getX(), this, getHeight().u);
+			UnitValue nextY = translateToUnit(next.getFuncY(), next, getHeight().u, this);
+			UnitValue posY = translateToUnit(getX(), this, getHeight().u, this);
 			rFunc.height = new UnitValue(nextY.v-posY.v, getHeight().u);
 		}
+	}
+
+	public void centerElementInParent() {
+		UnitValue parentW = translateToUnit(parent.getWidth(), parent, getX().u, this);
+		UnitValue parentH = translateToUnit(parent.getHeight(), parent, getY().u, this);
+		UnitValue width = translateToUnit(getWidth(), this, getX().u, this);
+		UnitValue height = translateToUnit(getHeight(), this, getY().u, this);
+		CLI.debug("\n"+parent+"\n"+this);
+		CLI.debug(parent.getWidth()+", "+getX());
+		CLI.debug(parent.getWidth().u.isReal()+", "+getX().u.isReal());
+		CLI.debug(parentW+", "+parentH+", "+width+", "+height);
+		
+		rFunc.x = new UnitValue((parentW.v-width.v)/2, getX().u);
+		rFunc.y = new UnitValue((parentH.v-height.v)/2, getY().u);
 	}
 	
 	/**
@@ -508,7 +545,7 @@ public abstract class Element {
 		return rNew;
 	}
 
-	public UnitValue translateToUnit(UnitValue oldUV, Element oldScope, Unit newUnit) {
+	public UnitValue translateToUnit(UnitValue oldUV, Element oldScope, Unit newUnit, Element newScope) {
 		if (oldUV.u.isRelative()&&newUnit.isReal()) {
 			//Need to translate old uv in old scope to real value before real to real conversion
 			Rectangle oldScopeR = oldScope.getParent().getRealRec();
@@ -520,30 +557,30 @@ public abstract class Element {
 		if (oldUV.u.isRelative()&&newUnit.isRelative()) {
 			//Need to translate olduv relative value into this scope relative value
 			Rectangle oldScopeR = oldScope.getParent().getRealRec();
-			Rectangle r = parent.getRealRec();
+			Rectangle newScopeR = newScope.getParent().getRealRec();
 			if (oldUV.u==Unit.pcw) {
-				if (newUnit==Unit.pcw) return new UnitValue((((oldUV.v/100d)*oldScopeR.width)/r.width)*100, newUnit);
-				if (newUnit==Unit.pch) return new UnitValue((((oldUV.v/100d)*oldScopeR.width)/r.height)*100, newUnit);
+				if (newUnit==Unit.pcw) return new UnitValue((((oldUV.v/100d)*oldScopeR.width)/newScopeR.width)*100, newUnit);
+				if (newUnit==Unit.pch) return new UnitValue((((oldUV.v/100d)*oldScopeR.width)/newScopeR.height)*100, newUnit);
 			}
 			if (oldUV.u==Unit.pch) {
-				if (newUnit==Unit.pcw) return new UnitValue((((oldUV.v/100d)*oldScopeR.height)/r.width)*100, newUnit);
-				if (newUnit==Unit.pch) return new UnitValue((((oldUV.v/100d)*oldScopeR.height)/r.height)*100, newUnit);
+				if (newUnit==Unit.pcw) return new UnitValue((((oldUV.v/100d)*oldScopeR.height)/newScopeR.width)*100, newUnit);
+				if (newUnit==Unit.pch) return new UnitValue((((oldUV.v/100d)*oldScopeR.height)/newScopeR.height)*100, newUnit);
 			}
 		}
 
 		if (oldUV.u.isReal()&&newUnit.isRelative()) {
 			//Need to translate real unit to be a relative value for this element
-			Rectangle r = parent.getRealRec();
+			Rectangle newScopeR = newScope.getParent().getRealRec();
 			if (newUnit==Unit.pcw) {
-				if (oldUV.u==Unit.px) return new UnitValue((oldUV.v/r.width)*100, newUnit);
-				if (oldUV.u==Unit.vw) return new UnitValue((GUI.getScreenUtils().cW(oldUV.v)/r.width)*100, newUnit);
-				if (oldUV.u==Unit.vh) return new UnitValue((GUI.getScreenUtils().cH(oldUV.v)/r.width)*100, newUnit);
+				if (oldUV.u==Unit.px) return new UnitValue((oldUV.v/newScopeR.width)*100, newUnit);
+				if (oldUV.u==Unit.vw) return new UnitValue((GUI.getScreenUtils().cW(oldUV.v)/newScopeR.width)*100, newUnit);
+				if (oldUV.u==Unit.vh) return new UnitValue((GUI.getScreenUtils().cH(oldUV.v)/newScopeR.width)*100, newUnit);
 				
 			}
 			if (newUnit==Unit.pch) {
-				if (oldUV.u==Unit.px) return new UnitValue((oldUV.v/r.height)*100, newUnit);
-				if (oldUV.u==Unit.vw) return new UnitValue((GUI.getScreenUtils().cW(oldUV.v)/r.height)*100, newUnit);
-				if (oldUV.u==Unit.vh) return new UnitValue((GUI.getScreenUtils().cH(oldUV.v)/r.height)*100, newUnit);
+				if (oldUV.u==Unit.px) return new UnitValue((oldUV.v/newScopeR.height)*100, newUnit);
+				if (oldUV.u==Unit.vw) return new UnitValue((GUI.getScreenUtils().cW(oldUV.v)/newScopeR.height)*100, newUnit);
+				if (oldUV.u==Unit.vh) return new UnitValue((GUI.getScreenUtils().cH(oldUV.v)/newScopeR.height)*100, newUnit);
 				
 			}
 		}
@@ -555,21 +592,21 @@ public abstract class Element {
 		return null;
 	}
 
-	public UnitRectangle translateToVP(UnitRectangle oldR, Element oldScope) {
+	public UnitRectangle translateToVP(UnitRectangle oldR, Element oldScope, Element newScope) {
 		UnitRectangle rNew = new UnitRectangle();
-		rNew.x = translateToUnit(oldR.x, oldScope, Unit.vw);
-		rNew.y = translateToUnit(oldR.y, oldScope, Unit.vh);
-		rNew.width = translateToUnit(oldR.width, oldScope, Unit.vw);
-		rNew.height = translateToUnit(oldR.height, oldScope, Unit.vh);
+		rNew.x = translateToUnit(oldR.x, oldScope, Unit.vw, newScope);
+		rNew.y = translateToUnit(oldR.y, oldScope, Unit.vh, newScope);
+		rNew.width = translateToUnit(oldR.width, oldScope, Unit.vw, newScope);
+		rNew.height = translateToUnit(oldR.height, oldScope, Unit.vh, newScope);
 		return rNew;
 	}
 
-	public UnitRectangle translateToPX(UnitRectangle oldR, Element oldScope) {
+	public UnitRectangle translateToPX(UnitRectangle oldR, Element oldScope, Element newScope) {
 		UnitRectangle rNew = new UnitRectangle();
-		rNew.x = translateToUnit(oldR.x, oldScope, Unit.px);
-		rNew.y = translateToUnit(oldR.y, oldScope, Unit.px);
-		rNew.width = translateToUnit(oldR.width, oldScope, Unit.px);
-		rNew.height = translateToUnit(oldR.height, oldScope, Unit.px);
+		rNew.x = translateToUnit(oldR.x, oldScope, Unit.px, newScope);
+		rNew.y = translateToUnit(oldR.y, oldScope, Unit.px, newScope);
+		rNew.width = translateToUnit(oldR.width, oldScope, Unit.px, newScope);
+		rNew.height = translateToUnit(oldR.height, oldScope, Unit.px, newScope);
 		return rNew;
 	}
 	

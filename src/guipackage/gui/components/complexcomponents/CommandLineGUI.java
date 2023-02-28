@@ -29,11 +29,11 @@ public class CommandLineGUI extends Component {
         mainBox.addComponent(new Image(new UnitRectangle(0.5, 20, 4, 60), "icon.png"));
 
         prefix = new Label(new UnitRectangle(5, 50, 0, 0), "[Command]>", new Font("Geneva", Font.PLAIN, 14), GUI.textDull);
-        prefix.setYCentered(true);
+        prefix.setTextYCentered(true);
         mainBox.addComponent(prefix);
         
         command = new Label(new UnitRectangle(prefix.getWidth().v+2, 50, 0, 0), "", new Font("Geneva", Font.PLAIN, 14), GUI.textMain);
-        command.setYCentered(true);
+        command.setTextYCentered(true);
         mainBox.addComponent(command);
     }
 

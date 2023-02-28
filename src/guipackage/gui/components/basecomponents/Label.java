@@ -34,18 +34,18 @@ public class Label extends SimpleBox {
 
 	public void setLabelColor(Color col) {this.col = col;}
 	
-	public boolean isXCentered() {return xCentered;}
+	public boolean isTextXCentered() {return xCentered;}
 
-	public boolean isYCentered() {return yCentered;}
+	public boolean isTextYCentered() {return yCentered;}
 
-	public void setCentered(boolean c) {
+	public void setTextCentered(boolean c) {
 		xCentered = c;
 		yCentered = c;
 	}
 
-	public void setXCentered(boolean c) {xCentered = c;}
+	public void setTextXCentered(boolean c) {xCentered = c;}
 
-	public void setYCentered(boolean c) {yCentered = c;}
+	public void setTextYCentered(boolean c) {yCentered = c;}
 
 	/**
 	 * Will change the font size so that it fits to the label's height

@@ -81,9 +81,9 @@ public class ScreenUtils {
 		Color col = new Color(l.col.getRed(), l.col.getGreen(), l.col.getBlue(), percToCol(l.getOpacity()));
 		g.setFont(l.font);
 
-		if (l.isXCentered()&&l.isYCentered()) drawCenteredString(g, l.font, l.getText(), col, r);
-		else if (l.isXCentered()) drawXCenteredString(g, l.font, l.getText(), col, r);
-		else if (l.isYCentered()) drawYCenteredString(g, l.font, l.getText(), col, r);
+		if (l.isTextXCentered()&&l.isTextYCentered()) drawCenteredString(g, l.font, l.getText(), col, r);
+		else if (l.isTextXCentered()) drawXCenteredString(g, l.font, l.getText(), col, r);
+		else if (l.isTextYCentered()) drawYCenteredString(g, l.font, l.getText(), col, r);
 		else drawStringFromPoint(g, l.font, l.getText(), col, new Point(r.x, r.y));
 	}
 
@@ -374,6 +374,7 @@ public class ScreenUtils {
 					case vh: newP.v = cH(p.v); break;
 					case vw: newP.v = cW(p.v); break;
 				}
+				break;
 			case vh:
 				switch (p.u) {
 					case px: newP.v = cHR(p.v); break;

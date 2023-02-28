@@ -26,20 +26,8 @@ public class TempWindow extends FlexBox {
 		addedComponents = new HashSet<Component>();
 		tabs = new ArrayList<SimpleBox>();
 
-		//Main box
-		/*mainBox = new SimpleBox(new Rectangle(0, 0, 100, 100), Color.RED);
-		mainBox.setRounded(true);
-		mainBox.increasePriority();
-		addComponent(mainBox);*/
-
 		SimpleBox b = new SimpleBox(new UnitRectangle(0, 0, 100, 100), Color.RED);
 		addComponent(b);
-
-		//Top bar
-		/*SimpleBox tB = new SimpleBox(new Rectangle(0, 0, 0, 0), Color.RED);
-		tB.setRounded(new int[]{1, 4});
-		tB.setPosition(Position.Relative);
-		addComponent(tB);*/
 
 		FlexBox topBar = new FlexBox(new UnitRectangle(0, 0, 0, 0, Unit.px));
 		topBar.setMinWidth(new UnitValue(40, Unit.vw));
@@ -50,23 +38,30 @@ public class TempWindow extends FlexBox {
 		b.setOval(true);
 		topBar.addComponent(b);
 
-		Label title = new Label(new UnitRectangle(0, Unit.px, 0, Unit.px, 30, Unit.vw, 100, Unit.pch), label, new Font(GUI.baseFont, Font.BOLD, 18), new Color(230, 230, 230));
-		title.setPosition(Position.Relative);
-		//title.setFloat(Float.Right);
+		Label title = new Label(new UnitRectangle(0, Unit.px, 0, Unit.px, 20, Unit.vw, 100, Unit.pch), label, new Font(GUI.baseFont, Font.BOLD, 18), new Color(230, 230, 230));
+		title.setFill(Fill.Horizontal);
 		title.setColor(new Color(0, 0, 180));
 		title.setBorder(1, new Color(10, 100, 255));
 		title.setRounded(10);
-		title.setXCentered(true);
-		title.setYCentered(true);
+		title.setTextXCentered(true);
+		title.setTextYCentered(true);
 		topBar.addComponent(title);
 
-		Image exit = new Image(new UnitRectangle(0, Unit.vw, 0, Unit.vh, 20, Unit.vw, 100, Unit.pch), "exit.png");
+		Image exit = new Image(new UnitRectangle(0, Unit.vw, 0, Unit.vh, 5, Unit.vw, 100, Unit.pch), "exit.png");
 		exit.setPosition(Position.Relative);
-		//exit.setFloat(Float.Right);
+		exit.setFloat(Float.Right);
 		exit.setColor(GUI.bg);
 		exit.setBorder(1, new Color(80, 80, 80));
 		exit.setRounded(10);
 		topBar.addComponent(exit);
+
+
+		FlexBox contentBox = new FlexBox(new UnitRectangle(0, Unit.vw, 5, Unit.vh, 100, Unit.pcw, 0, Unit.vh));
+		contentBox.setMinWidth(new UnitValue(40, Unit.vw));
+		addComponent(contentBox);
+
+		b = new SimpleBox(new UnitRectangle(0, 0, 100, 100), Color.YELLOW);
+		contentBox.addComponent(b);
 
 		/*b = new SimpleBox(new UnitRectangle(0, 0, 5, 5, Unit.vw, Unit.vh), Color.yellow);
 		//b.setFloat(Float.Right);
