@@ -3,13 +3,12 @@ package guipackage.gui.components.complexcomponents;
 import java.awt.Color;
 import java.awt.Font;
 
-import guipackage.general.Rectangle;
 import guipackage.general.UnitRectangle;
 import guipackage.gui.GUI;
 import guipackage.gui.components.Component;
 import guipackage.gui.components.basecomponents.Image;
 import guipackage.gui.components.basecomponents.Label;
-import guipackage.gui.components.basecomponents.SimpleBox;
+import guipackage.gui.components.boxes.SimpleBox;
 
 public class PoolCellGUI extends Component {
 

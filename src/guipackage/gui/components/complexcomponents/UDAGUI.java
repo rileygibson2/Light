@@ -4,12 +4,11 @@ import java.awt.Color;
 
 import guipackage.general.Point;
 import guipackage.general.UnitRectangle;
-import guipackage.general.UnitValue;
 import guipackage.general.UnitValue.Unit;
 import guipackage.gui.GUI;
 import guipackage.gui.components.Component;
-import guipackage.gui.components.basecomponents.SimpleBox;
 import guipackage.gui.components.basecomponents.TempWindow;
+import guipackage.gui.components.boxes.SimpleBox;
 import light.zones.UDA;
 
 public class UDAGUI extends Component {

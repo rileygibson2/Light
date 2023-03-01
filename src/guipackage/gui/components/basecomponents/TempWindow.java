@@ -7,11 +7,15 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import guipackage.general.UnitPoint;
 import guipackage.general.UnitRectangle;
 import guipackage.general.UnitValue;
 import guipackage.general.UnitValue.Unit;
 import guipackage.gui.GUI;
 import guipackage.gui.components.Component;
+import guipackage.gui.components.boxes.CollumnBox;
+import guipackage.gui.components.boxes.FlexBox;
+import guipackage.gui.components.boxes.SimpleBox;
 
 public class TempWindow extends FlexBox {
 
@@ -19,24 +23,15 @@ public class TempWindow extends FlexBox {
 	Set<Component> addedComponents; //Components that are not part of the core box
 	List<SimpleBox> tabs; //Tabs added to this popup;
 
-	public SimpleBox b;
 	
 	public TempWindow(String label) {
-		super(new UnitRectangle(10, Unit.vw, 10, Unit.vh, 0, Unit.vw, 0, Unit.vh));
+		super(new UnitPoint(10, Unit.vw, 10, Unit.vh));
 		addedComponents = new HashSet<Component>();
 		tabs = new ArrayList<SimpleBox>();
 
-		SimpleBox b = new SimpleBox(new UnitRectangle(0, 0, 100, 100), Color.RED);
-		addComponent(b);
-
-		FlexBox topBar = new FlexBox(new UnitRectangle(0, 0, 0, 0, Unit.px));
+		SimpleBox topBar = new SimpleBox(new UnitRectangle(0, Unit.px, 0, Unit.px, 100, Unit.pcw, 5, Unit.vh));
 		topBar.setMinWidth(new UnitValue(40, Unit.vw));
-		topBar.setMinHeight(new UnitValue(5, Unit.vh));
 		addComponent(topBar);
-
-		b = new SimpleBox(new UnitRectangle(0, 0, 100, 100), Color.PINK);
-		b.setOval(true);
-		topBar.addComponent(b);
 
 		Label title = new Label(new UnitRectangle(0, Unit.px, 0, Unit.px, 20, Unit.vw, 100, Unit.pch), label, new Font(GUI.baseFont, Font.BOLD, 18), new Color(230, 230, 230));
 		title.setFill(Fill.Horizontal);
@@ -55,21 +50,17 @@ public class TempWindow extends FlexBox {
 		exit.setRounded(10);
 		topBar.addComponent(exit);
 
-
-		FlexBox contentBox = new FlexBox(new UnitRectangle(0, Unit.vw, 5, Unit.vh, 100, Unit.pcw, 0, Unit.vh));
+		FlexBox contentBox = new FlexBox(new UnitPoint(0, Unit.vw, 5, Unit.vh));
 		contentBox.setMinWidth(new UnitValue(40, Unit.vw));
+		contentBox.setColor(Color.yellow);
 		addComponent(contentBox);
 
-		b = new SimpleBox(new UnitRectangle(0, 0, 100, 100), Color.YELLOW);
-		contentBox.addComponent(b);
-
-		/*b = new SimpleBox(new UnitRectangle(0, 0, 5, 5, Unit.vw, Unit.vh), Color.yellow);
-		//b.setFloat(Float.Right);
-		b.setPosition(Position.Relative);
-		topBar.addComponent(b);*/
-		/*SimpleBox content = new SimpleBox(new UnitRectangle(0, Unit.pc, 5, Unit.vh, 100, Unit.pc, 20, Unit.vh), GUI.fg);
-		content.setRounded(10);
-		addComponent(content);*/
+		Table table = new Table(new UnitPoint());
+		table.addCollumn(Label.class, "Attrib", new UnitValue(50, Unit.px));
+		table.addCollumn(Label.class, "Inter", new UnitValue(150, Unit.px));
+		table.addCollumn(Label.class, "Mode", new UnitValue(50, Unit.px));
+		table.addRow();
+		contentBox.addComponent(table);
 	}
 
 	public void addSmother(double opacity) {

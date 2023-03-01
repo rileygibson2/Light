@@ -10,6 +10,7 @@ import guipackage.general.UnitRectangle;
 import guipackage.general.UnitValue;
 import guipackage.gui.GUI;
 import guipackage.gui.components.Component;
+import guipackage.gui.components.boxes.SimpleBox;
 import guipackage.threads.AnimationFactory;
 import guipackage.threads.AnimationFactory.Animations;
 import guipackage.threads.ThreadController;

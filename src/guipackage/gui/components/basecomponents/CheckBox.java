@@ -5,14 +5,14 @@ import guipackage.general.Point;
 import guipackage.general.Rectangle;
 import guipackage.general.UnitRectangle;
 import guipackage.gui.GUI;
-import guipackage.gui.components.Component;
+import guipackage.gui.components.InputComponent;
+import guipackage.gui.components.boxes.SimpleBox;
 import guipackage.threads.AnimationFactory;
 import guipackage.threads.AnimationFactory.Animations;
 import guipackage.threads.ThreadController;
 
-public class CheckBox extends Component {
+public class CheckBox extends InputComponent<Boolean> {
 
-	private GetterSubmitter<Boolean, Boolean> actions;
 	private SimpleBox innerBox;
 	private Image tick;
 	private ThreadController transform;
@@ -24,7 +24,6 @@ public class CheckBox extends Component {
 		
 		//Outer box
 		SimpleBox sB = new SimpleBox(new UnitRectangle(0, 0, 100, 100), GUI.focus);
-		//sB.setFilled(false);
 		sB.setRounded(true);
 		addComponent(sB);
 
@@ -39,9 +38,9 @@ public class CheckBox extends Component {
 		addComponent(tick);
 	}
 
-	public void setActions(GetterSubmitter<Boolean, Boolean> a) {
-		actions = a;
-		checked = a.get();
+	@Override
+	public void actionsUpdated() {
+		checked = getActions().get();
 		if (checked) {
 			tick.setVisible(true);
 			innerBox.setRec(new UnitRectangle(0, 0, 100, 100));
@@ -54,9 +53,9 @@ public class CheckBox extends Component {
 
 	@Override
 	public void doClick(Point p) {
-		if (actions!=null) {
-			actions.submit(!checked);
-			checked = actions.get();
+		if (hasActions()) {
+			getActions().submit(!checked);
+			checked = getActions().get();
 		}
 		else checked = !checked;
 		

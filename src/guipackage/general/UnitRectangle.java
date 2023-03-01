@@ -58,6 +58,27 @@ public class UnitRectangle {
         this.height = height;
     }
 
+    public UnitRectangle(UnitPoint pos, UnitPoint dims) {
+        this.x = pos.x;
+        this.y = pos.y;
+        this.width = dims.x;
+        this.height = dims.y;
+    }
+
+    public UnitRectangle(UnitPoint pos, UnitValue width, UnitValue height) {
+        this.x = pos.x;
+        this.y = pos.y;
+        this.width = width;
+        this.height = height;
+    }
+
+    public UnitRectangle(UnitValue x, UnitValue y, UnitPoint dims) {
+        this.x = x;
+        this.y = y;
+        this.width = dims.x;
+        this.height = dims.y;
+    }
+
     public void setAllUnits(Unit u) {
         x.u = u;
         y.u = u;

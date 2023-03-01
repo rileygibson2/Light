@@ -8,8 +8,8 @@ public class UnitPoint {
     public UnitValue y;
 
     public UnitPoint() {
-        x = new UnitValue(0, Unit.pcw);
-        y = new UnitValue(0, Unit.pch);
+        x = new UnitValue(0, Unit.px);
+        y = new UnitValue(0, Unit.px);
     }
 
     public UnitPoint(Unit u) {

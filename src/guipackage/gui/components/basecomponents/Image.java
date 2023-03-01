@@ -4,6 +4,7 @@ import java.awt.Graphics2D;
 
 import guipackage.general.UnitRectangle;
 import guipackage.gui.GUI;
+import guipackage.gui.components.boxes.SimpleBox;
 
 public class Image extends SimpleBox {
 

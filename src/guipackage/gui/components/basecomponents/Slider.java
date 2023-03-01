@@ -6,11 +6,11 @@ import guipackage.general.Point;
 import guipackage.general.UnitRectangle;
 import guipackage.general.UnitValue;
 import guipackage.general.UnitValue.Unit;
-import guipackage.gui.components.Component;
+import guipackage.gui.components.InputComponent;
+import guipackage.gui.components.boxes.SimpleBox;
 
-public class Slider extends Component {
+public class Slider extends InputComponent<Double> {
 
-	private Runnable onUpdate;
 	private SimpleBox mainBox;
 	private SimpleBox ball;
 
@@ -50,8 +50,6 @@ public class Slider extends Component {
 	
 	public double getValue() {return value;}
 	
-	public void setUpdateAction(Runnable r) {onUpdate = r;}
-	
 	@Override
 	public void doClick(Point p) {
 		double x = scalePoint(p).x*100;
@@ -61,8 +59,8 @@ public class Slider extends Component {
 			ball.setX(new UnitValue(x-ball.getWidth().v/2, Unit.pcw));
 			grooveFill.setWidth(new UnitValue(x-grooveFill.getX().v, Unit.pcw));
 		}
-		
-		if (onUpdate!=null) onUpdate.run();
+		if (hasActions()) getActions().submit(value);
+
 		super.doClick(p);
 	}
 	
@@ -75,8 +73,8 @@ public class Slider extends Component {
 			ball.setX(new UnitValue(x-ball.getWidth().v/2, Unit.pcw));
 			grooveFill.setWidth(new UnitValue(x-grooveFill.getX().v, Unit.pcw));
 		}
+		if (hasActions()) getActions().submit(value);
 		
-		if (onUpdate!=null) onUpdate.run();
 		super.doDrag(entry, current);
 	}
 }

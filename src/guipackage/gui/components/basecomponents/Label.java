@@ -6,6 +6,7 @@ import java.awt.Graphics2D;
 
 import guipackage.general.UnitRectangle;
 import guipackage.gui.GUI;
+import guipackage.gui.components.boxes.SimpleBox;
 
 public class Label extends SimpleBox {
 
@@ -52,7 +53,7 @@ public class Label extends SimpleBox {
 	 * MUST be called after component has been inserted into DOM
 	 */
 	public void fitFont() {
-		setDOMEntryAction(() -> font = GUI.getScreenUtils().getMaxFontForHeight(font, this));
+		setDOMEntryAction(() -> font = GUI.getScreenUtils().getMaxFontForRect(font, getRealRec(), text));
 	}
 
 	@Override

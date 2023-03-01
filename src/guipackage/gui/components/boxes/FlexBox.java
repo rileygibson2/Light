@@ -1,14 +1,15 @@
-package guipackage.gui.components.basecomponents;
+package guipackage.gui.components.boxes;
 
+import guipackage.general.UnitPoint;
 import guipackage.general.UnitRectangle;
 import guipackage.general.UnitValue;
 import guipackage.general.UnitValue.Unit;
 import guipackage.gui.components.Component;
 
-public class FlexBox extends Component {
+public class FlexBox extends SimpleBox {
     
-    public FlexBox(UnitRectangle r) {
-        super(new UnitRectangle(r.x.v, r.x.u, r.y.v, r.y.u, 0, Unit.vw, 0, Unit.vh));
+    public FlexBox(UnitPoint pos) {
+        super(new UnitRectangle(pos, new UnitValue(0, pos.x.u), new UnitValue(0, pos.y.u)));
     }
     
     @Override
@@ -35,14 +36,10 @@ public class FlexBox extends Component {
         for (Component c : getComponents()) {
             UnitRectangle uR = c.getFunctionalRec();
             
-            if (!uR.allUnitsReal()) {
-                /*
-                * Only consider elements with a relative size in the resizing if this box has a
-                * min width or min height set as that is the only way they should actually affect
-                * the space
-                */
-                if (getMinWidth().v==0&&getMinHeight().v==0) continue;
-            }
+            /* Should only consider elements with a relative size in the resizing if this box has a
+            * min width or min height set as that is the only way they should actually affect
+             * the space */
+            if (!uR.allUnitsReal()&&getMinWidth().v==0&&getMinHeight().v==0) continue;
 
             //Translate childs values into viewport values
             uR = translateToVP(uR, c, this);
@@ -50,7 +47,9 @@ public class FlexBox extends Component {
             if (uR.y.v+uR.height.v>newHeight) newHeight = uR.y.v+uR.height.v;
         }
 
-        setWidth(new UnitValue(newWidth, Unit.vw));
-        setHeight(new UnitValue(newHeight, Unit.vh));
+        UnitValue width = translateToUnit(new UnitValue(newWidth, Unit.vw), this, getWidth().u, this);
+        UnitValue height = translateToUnit(new UnitValue(newHeight, Unit.vh), this, getHeight().u, this);
+        setWidth(width);
+        setHeight(height);
     }
 }

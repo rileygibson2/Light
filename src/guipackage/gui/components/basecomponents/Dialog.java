@@ -12,6 +12,7 @@ import guipackage.general.UnitValue;
 import guipackage.general.UnitValue.Unit;
 import guipackage.gui.GUI;
 import guipackage.gui.components.Component;
+import guipackage.gui.components.boxes.SimpleBox;
 
 public class Dialog extends Component {
 
