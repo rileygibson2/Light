@@ -18,6 +18,7 @@ import guipackage.general.UnitRectangle;
 import guipackage.general.UnitValue;
 import guipackage.general.UnitValue.Unit;
 import guipackage.gui.components.Component;
+import guipackage.gui.components.boxes.FlexBox;
 
 public abstract class Element {
 	
@@ -216,6 +217,21 @@ public abstract class Element {
 		if (!results.isEmpty()) return results;
 		return null;
 	}
+
+	public Component getNthComponent(int n) {
+		if (n<0||n>=components.size()) return null;
+		componentsLock.lock();
+		Component c =  components.get(n);
+		componentsLock.unlock();
+		return c;
+	}
+
+	public int getNumComponents() {
+		componentsLock.lock();
+		int num = components.size();
+		componentsLock.unlock();
+		return num;
+	}
 	
 	public void addComponent(Component c) {
 		c.setParent(this);
@@ -406,15 +422,42 @@ public abstract class Element {
 			
 			//Adjust this elements position values to base off siblings
 			if (getFloat()==Float.Left) { //X from top right of sibling
-				UnitValue width = translateToUnit(lastRelativeSibling.getFuncWidth(), lastRelativeSibling, getX().u, this);
-				//CLI.debug(lastRelativeSibling.getFunctionalRec().width+", "+width+", "+", "+sibX.v+", "+getX().v);
-				rFunc.x = new UnitValue(sibX.v+width.v+getX().v, getX().u);
+				UnitValue sibWidth = translateToUnit(lastRelativeSibling.getFuncWidth(), lastRelativeSibling, getX().u, this);
+				double x = sibX.v+sibWidth.v+getX().v;
+
+				//Check if new position will overflow parent
+				UnitValue parentW = translateToUnit(getParent().getFuncWidth(), getParent(), getX().u, this);
+				//Special case for flex box - should consider max width not actual width as should still be allowed to resize
+				if (getParent() instanceof FlexBox) parentW = translateToUnit(getParent().getMaxWidth(), getParent(), getX().u, this);
+				
+				UnitValue width = translateToUnit(getFuncWidth(), this, getX().u, this);
+				if (x+width.v>parentW.v+2) {
+					//Position at left of element but down a 'row'
+					UnitValue sibHeight = translateToUnit(lastRelativeSibling.getFuncHeight(), lastRelativeSibling, getY().u, this);
+					rFunc.x = getX().clone();
+					rFunc.y = new UnitValue(sibY.v+sibHeight.v+getY().v, getY().u);
+				}
+				else { //Position from sibling
+					rFunc.x = new UnitValue(x, getX().u);
+					rFunc.y = new UnitValue(getY().v+sibY.v, getY().u);
+				}
 			}
 			if (getFloat()==Float.Right) { //X backwards from top left of sibling
-				UnitValue width = translateToUnit(getWidth(), this, getX().u, this);
-				rFunc.x = new UnitValue(sibX.v-width.v-getX().v, getX().u);
+				UnitValue width = translateToUnit(getFuncWidth(), this, getX().u, this);
+				double x = sibX.v-width.v-getX().v;
+
+				//Check if new position will overflow parent
+				if (x-width.v<0) {
+					//Position at right of element but down a 'row'
+					UnitValue sibHeight = translateToUnit(lastRelativeSibling.getFuncHeight(), lastRelativeSibling, getY().u, this);
+					floatRight();
+					rFunc.y = new UnitValue(sibY.v+sibHeight.v+getY().v, getY().u);
+				}
+				else { //Position from sibling
+					rFunc.x = new UnitValue(x, getX().u);
+					rFunc.y = new UnitValue(getY().v+sibY.v, getY().u);
+				}
 			}
-			rFunc.y = new UnitValue(getY().v+sibY.v, getY().u);
 		}
 		//No eligable relative sibling, still need to handle float as described aboves
 		else if (getFloat()==Float.Right) floatRight();
@@ -563,7 +606,6 @@ public abstract class Element {
 				case px: rNew.height = r.height.v; break;
 			}
 		}
-		
 		return rNew;
 	}
 	
@@ -623,6 +665,13 @@ public abstract class Element {
 			return GUI.getScreenUtils().translateRealUnitToRealUnit(oldUV, newUnit);
 		}
 		return null;
+	}
+
+	public UnitPoint translateToUnit(UnitPoint oldP, Element oldScope, Unit newUnit, Element newScope) {
+		UnitPoint pNew = new UnitPoint();
+		pNew.x = translateToUnit(oldP.x, oldScope, newUnit, newScope);
+		pNew.y = translateToUnit(oldP.y, oldScope, newUnit, newScope);
+		return pNew;
 	}
 	
 	public UnitRectangle translateToVP(UnitRectangle oldR, Element oldScope, Element newScope) {
@@ -690,16 +739,10 @@ public abstract class Element {
 	* @return
 	*/
 	public Point scalePoint(Point p) {
-		//Scale real point to percentage point
-		Point pNew = p.clone();
-		pNew.x = GUI.getScreenUtils().cWR(pNew.x);
-		pNew.y = GUI.getScreenUtils().cHR(pNew.y);
-		
 		Rectangle r = getRealRec();
-		r = new Rectangle(GUI.getScreenUtils().cWR(r.x), GUI.getScreenUtils().cHR(r.y), GUI.getScreenUtils().cWR(r.width), GUI.getScreenUtils().cHR(r.height));
-		//Scale to percentage of this element
-		pNew.x = (pNew.x-r.x)/r.width;
-		pNew.y = (pNew.y-r.y)/r.height;
+		Point pNew = new Point();
+		pNew.x = (p.x-r.x)/r.width;
+		pNew.y = (p.y-r.y)/r.height;
 		return pNew;
 	}
 	

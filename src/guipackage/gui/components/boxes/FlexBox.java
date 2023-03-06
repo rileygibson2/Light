@@ -40,7 +40,7 @@ public class FlexBox extends SimpleBox {
             * min width or min height set as that is the only way they should actually affect
              * the space */
             if (!uR.allUnitsReal()&&getMinWidth().v==0&&getMinHeight().v==0) continue;
-
+            
             //Translate childs values into viewport values
             uR = translateToVP(uR, c, this);
             if (uR.x.v+uR.width.v>newWidth)  newWidth = uR.x.v+uR.width.v;

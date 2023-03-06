@@ -1,4 +1,4 @@
-package light.zones.commandline;
+package light.uda.commandline;
 
 import light.commands.Command;
 

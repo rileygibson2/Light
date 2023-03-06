@@ -36,7 +36,7 @@ public class PoolCellGUI extends Component {
         mainBox.setBorder(1, GUI.fg);
         addComponent(mainBox);
 
-        idLabel = new Label(new UnitRectangle(10, 5, 0, 15), id+"", new Font("Geneva", Font.PLAIN, 20), GUI.textDull);
+        idLabel = new Label(new UnitRectangle(10, 5, 10, 15), id+"", new Font("Geneva", Font.PLAIN, 20), GUI.textDull);
         idLabel.setTextYCentered(true);
         idLabel.fitFont();
         mainBox.addComponent(idLabel);

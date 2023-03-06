@@ -4,15 +4,18 @@ import java.util.HashSet;
 import java.util.Set;
 
 import guipackage.gui.GUI;
-import light.layouts.DefaultLayout;
-import light.layouts.Layout;
+import light.uda.UDA;
+import light.uda.commandline.CommandLine;
 
 public class Light {
 
     static Light singleton;
 
-    private Set<Layout> layouts;
-    private Layout currentLayout;
+    private Set<UDA> udas;
+    private UDA currentUDA;
+
+    //Elements not tied to UDA
+    CommandLine cL;
 
     private Light() {
         setup();
@@ -25,13 +28,14 @@ public class Light {
 
     private void setup() {
         GUI.initialise(this, null);
-        layouts = new HashSet<Layout>();
+        cL = new CommandLine();
 
-        currentLayout = new DefaultLayout();
-        layouts.add(currentLayout);
+        udas = new HashSet<UDA>();
+        currentUDA = new UDA();
+        udas.add(currentUDA);
     }
 
-    public Layout getCurrentLayout() {return currentLayout;}
+    public UDA getCurrentUDA() {return currentUDA;}
 
     public static void main(String args[]) {
         Light.getInstance();

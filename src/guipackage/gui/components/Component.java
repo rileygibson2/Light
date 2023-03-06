@@ -1,6 +1,7 @@
 package guipackage.gui.components;
 
 import guipackage.general.Point;
+import guipackage.general.Tag;
 import guipackage.general.UnitRectangle;
 import guipackage.general.UnitValue;
 import guipackage.gui.Element;
@@ -24,6 +25,8 @@ public abstract class Component extends Element {
 	private boolean freezeShadow; //Stops shadow being updated with position changes
 	private UnitRectangle shadowR;
 	private String testName;
+
+	private Tag tag;
 
 	public Component(UnitRectangle r) {
 		super (r);
@@ -56,6 +59,10 @@ public abstract class Component extends Element {
 		for (Component c : getComponents()) c.setOpacity(d); //Recur down
 		return this; //To allow for chaining
 	}
+
+	public void setTag(Tag t) {tag = t;}
+	public boolean hasTag() {return tag!=null;}
+	public Tag getTag() {return tag;}
 
 	public boolean isSelected() {return selected;}
 	public void setSelected(boolean s) {selected = s;}

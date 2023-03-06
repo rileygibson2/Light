@@ -3,69 +3,74 @@ package guipackage.gui.components.complexcomponents;
 import java.awt.Color;
 
 import guipackage.general.Point;
+import guipackage.general.UnitPoint;
 import guipackage.general.UnitRectangle;
+import guipackage.general.UnitValue;
 import guipackage.general.UnitValue.Unit;
 import guipackage.gui.GUI;
 import guipackage.gui.components.Component;
 import guipackage.gui.components.basecomponents.TempWindow;
 import guipackage.gui.components.boxes.SimpleBox;
-import light.zones.UDA;
+import light.uda.UDA;
+import light.uda.guiinterfaces.UDAInterface;
 
-public class UDAGUI extends Component {
-
+public class UDAGUI extends Component implements UDAInterface {
+    
     UDA uda;
-    SimpleBox mainBox;
-    private Point cellDims; //Dimensions of a cell relative to the mainBox
-    private Point size; //Size of area in cells
-
+    private UnitPoint cellDims; //Dimensions of a cell relative to the mainBox
+    
     public UDAGUI(UnitRectangle r, UDA uda) {
         super(r);
         this.uda = uda;
-
-        mainBox = new SimpleBox(new UnitRectangle(0, 0, 100, 100));
-        addComponent(mainBox);
-
-        setDOMEntryAction(() -> {
-            //Cell dimensions
-            cellDims = new Point(100/uda.size.x, GUI.getScreenUtils().rHP(mainBox, 100/uda.size.x, Unit.pcw));
+        cellDims = new UnitPoint(8, Unit.vw, 8, Unit.vw); //Cell dimensions
         
-            //Dots
-            int colCount = 0;
-                for (double y=0; y<r.height.v; y+=cellDims.y) {
-                    if (y+cellDims.y>r.height.v) break;
-                    for (int i=0; i<uda.size.x; i++) {
-                        SimpleBox sB = new SimpleBox(new UnitRectangle(i*cellDims.x, y, cellDims.x, cellDims.y));
-                        mainBox.addComponent(sB);
-                        SimpleBox oval = new SimpleBox(new UnitRectangle(48, 48, 4, 4), new Color(100, 100, 100));
-                        oval.setOval(true);
-                        sB.addComponent(oval);
-                    }
-                    colCount++;
+        setDOMEntryAction(() -> {
+            
+            //Add dots
+            for (int i=0; i<300; i++) {
+                SimpleBox sB = new SimpleBox(new UnitRectangle(new UnitValue(), new UnitValue(), cellDims));
+                //sB.setBorder(Color.WHITE);
+                sB.setPosition(Position.Relative);
+                addComponent(sB);
+                SimpleBox oval = new SimpleBox(new UnitRectangle(48, 48, 4, 4), new Color(100, 100, 100));
+                oval.setOval(true);
+                sB.addComponent(oval);
+
+                //Check not overflowing edge
+                UnitValue x = translateToUnit(sB.getFuncX(), sB, getWidth().u, this);
+                UnitValue y = translateToUnit(sB.getFuncY(), sB, getHeight().u, this);
+                if (x.v>getWidth().v||y.v>getHeight().v) {
+                    removeComponent(sB);
+                    break;
                 }
-
-                size = new Point(uda.size.x, colCount);
-            });
+            }
+        });
     }
-
-    public Point getSize() {return size;}
-
-    public Point getCellDims() {return cellDims;}
-
+    
+    public Point getSize() {
+        UnitValue width = translateToUnit(getWidth(), this, cellDims.x.u, this);
+        UnitValue height = translateToUnit(getHeight(), this, cellDims.y.u, this);
+        return new Point((int) (width.v/cellDims.x.v), (int) (height.v/cellDims.y.v));
+    }
+    
+    public UnitPoint getCellDims() {return cellDims;}
+    
     @Override
     public void doClick(Point p) {
         Point p1 = scalePoint(p);
-        int x = (int) Math.abs((p1.x*100)/cellDims.x);
-        int y = (int) Math.abs((p1.y*100)/cellDims.y);
+
+        int x = (int) Math.abs((p1.x*100)/translateToUnit(cellDims.x, this, Unit.pcw, this).v);
+        int y = (int) Math.abs((p1.y*100)/translateToUnit(cellDims.y, this, Unit.pch, this).v);
         uda.cellClicked(x, y);
         super.doClick(p);
     }
-
+    
     public void openWindowPicker() {
         TempWindow tB = new TempWindow("Create Window");
         addComponent(tB);
+        tB.addTab("aa");
+        tB.addTab("bb");
         GUI.getInstance().scanDOM(tB, "");
-        //tB.b.setX(new UnitValue(30, tB.b.getX().u));
-        //tB.b.setWidth(new UnitValue(50, tB.b.getWidth().u));
     }
     
 }

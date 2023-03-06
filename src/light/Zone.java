@@ -1,4 +1,4 @@
-package light.zones;
+package light;
 
 public class Zone {
     

@@ -8,9 +8,10 @@ import guipackage.gui.components.Component;
 import guipackage.gui.components.basecomponents.Image;
 import guipackage.gui.components.basecomponents.Label;
 import guipackage.gui.components.boxes.SimpleBox;
+import light.uda.guiinterfaces.CommandLineInterface;
 
 
-public class CommandLineGUI extends Component {
+public class CommandLineGUI extends Component implements CommandLineInterface{
 
     private SimpleBox mainBox;
     private Label prefix;

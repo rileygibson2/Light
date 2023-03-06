@@ -16,7 +16,10 @@ public class UnitValue {
     public double v;
     public Unit u;
 
-    public UnitValue() {}
+    public UnitValue() {
+        this.v = 0;
+        this.u = Unit.px;
+    }
 
     public UnitValue(double v) {
         this.v = v;

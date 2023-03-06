@@ -134,7 +134,14 @@ public class ScreenUtils {
 		//Border
 		if (b.hasBorder()) {
 			if (b.isOval()) drawOval(g, b.getBorderColor(), r, b.getBorderWidth());
-			else if (b.isRounded()) drawRoundRect(g, b.getBorderColor(), r, b.getBorderWidth(), b.getArcSize());
+			else if (b.isRounded()) {
+				if (b.getRoundedCorners()!=null) {
+					Color koCol = b.getColor();
+					koCol = new Color(koCol.getRed(), koCol.getGreen(), koCol.getBlue(), percToCol(b.getOpacity()));
+					drawRoundRect(g, b.getBorderColor(), koCol, r, b.getBorderWidth(),  b.getRoundedCorners(), b.getArcSize());
+				}
+				else drawRoundRect(g, b.getBorderColor(), r, b.getBorderWidth(), b.getArcSize());
+			}
 			else drawRect(g, b.getBorderColor(), r, b.getBorderWidth());
 		}
 	}
@@ -169,6 +176,48 @@ public class ScreenUtils {
 		g.setStroke(new BasicStroke((float) strokeW));
 		g.setColor(c);
 		g.drawRoundRect((int) r.x, (int) r.y, (int) r.width, (int) r.height, arcSize, arcSize);
+	}
+
+	public void drawRoundRect(Graphics2D g, Color c, Color knockoutCol, Rectangle r, double strokeW, int[] corners, int arcSize) {
+		g.setStroke(new BasicStroke((float) strokeW));
+		g.setColor(c);
+		g.drawRoundRect((int) r.x, (int) r.y, (int) r.width, (int) r.height, arcSize, arcSize);
+		
+		if (corners.length==0) return;
+		List<Integer> cor = Arrays.stream(corners).boxed().collect(Collectors.toList());
+		
+		/*
+		* If a corner is not present then fill out the rounded edge. Corners
+		* go in anti-clockwise order with 1 being top left and 4 being top right.
+		*/
+		if (!cor.contains(1)) {
+			g.setColor(knockoutCol);
+			g.fillRect((int) (r.x-strokeW), (int) (r.y-strokeW), (int) (r.width*0.2), (int) (r.height*0.2));
+			g.setColor(c);
+			g.drawLine((int) r.x, (int) r.y, (int) r.x, (int) (r.y+r.height/2));
+			g.drawLine((int) r.x, (int) r.y, (int) (r.x+r.width/2), (int) r.y);
+		}
+		if (!cor.contains(2)) {
+			g.setColor(knockoutCol);
+			g.fillRect((int) (r.x-strokeW), (int) (r.y+r.height*0.8+strokeW), (int) (r.width*0.2), (int) (r.height*0.2));
+			g.setColor(c);
+			g.drawLine((int) r.x, (int) (r.y+r.height/2), (int) r.x, (int) (r.y+r.height));
+			g.drawLine((int) r.x, (int) (r.y+r.height), (int) (r.x+r.width/2), (int) (r.y+r.height));
+		}
+		if (!cor.contains(3)) {
+			g.setColor(knockoutCol);
+			g.fillRect((int) (r.x+r.width*0.8+strokeW), (int) (r.y+r.height*0.8+strokeW), (int) (r.width*0.2), (int) (r.height*0.2));
+			g.setColor(c);
+			g.drawLine((int) (r.x+r.width/2), (int) (r.y+r.height), (int) (r.x+r.width), (int) (r.y+r.height));
+			g.drawLine((int) (r.x+r.width), (int) (r.y+r.height), (int) (r.x+r.width), (int) (r.y+r.height/2));
+		}
+		if (!cor.contains(4)) {
+			g.setColor(knockoutCol);
+			g.fillRect((int) (r.x+r.width*0.8+strokeW), (int) (r.y), (int) (r.width*0.2-strokeW), (int) (r.height*0.2));
+			g.setColor(c);
+			g.drawLine((int) (r.x+r.width/2), (int) r.y, (int) (r.x+r.width), (int) r.y);
+			g.drawLine((int) (r.x+r.width), (int) r.y, (int) (r.x+r.width), (int) (r.y+r.height/2));
+		}
 	}
 	
 	public void fillRoundRect(Graphics2D g, Color c, Rectangle r, int arcSize) {
@@ -288,7 +337,6 @@ public class ScreenUtils {
 		int high = maxWidth;
 		if (maxHeight>maxWidth) high = maxHeight;
 		int maxFontSize = 0;
-		CLI.debug("init: "+maxHeight+", "+maxWidth);
 		
 		while (low <= high) {
 			int mid = (low + high) / 2;
@@ -300,9 +348,7 @@ public class ScreenUtils {
 				maxFontSize = mid;
 				low = mid + 1;
 			}
-			CLI.debug(low+", "+mid+", "+high);
 		}
-		CLI.debug(maxFontSize+"\n\n");
 		return new Font(f.getName(), f.getStyle(), maxFontSize);
 	}
 	

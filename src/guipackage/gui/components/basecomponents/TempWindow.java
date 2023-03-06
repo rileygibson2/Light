@@ -2,10 +2,6 @@ package guipackage.gui.components.basecomponents;
 
 import java.awt.Color;
 import java.awt.Font;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 import guipackage.general.UnitPoint;
 import guipackage.general.UnitRectangle;
@@ -17,22 +13,25 @@ import guipackage.gui.components.boxes.CollumnBox;
 import guipackage.gui.components.boxes.FlexBox;
 import guipackage.gui.components.boxes.SimpleBox;
 
-public class TempWindow extends FlexBox {
-
+public class TempWindow extends CollumnBox {
+	
 	private Runnable onClose;
-	Set<Component> addedComponents; //Components that are not part of the core box
-	List<SimpleBox> tabs; //Tabs added to this popup;
-
+	SimpleBox topBar;
+	FlexBox tabBar;
+	FlexBox contentBox;
+	
+	int activeTab;
 	
 	public TempWindow(String label) {
-		super(new UnitPoint(10, Unit.vw, 10, Unit.vh));
-		addedComponents = new HashSet<Component>();
-		tabs = new ArrayList<SimpleBox>();
-
-		SimpleBox topBar = new SimpleBox(new UnitRectangle(0, Unit.px, 0, Unit.px, 100, Unit.pcw, 5, Unit.vh));
-		topBar.setMinWidth(new UnitValue(40, Unit.vw));
+		super(new UnitPoint(0, Unit.vw, 0, Unit.vh));
+		activeTab = -1;
+		setCentered(true);
+		setMinWidth(new UnitValue(40, Unit.vw));
+		
+		//Top bar
+		topBar = new SimpleBox(new UnitRectangle(0, Unit.px, 0, Unit.px, 100, Unit.pcw, 5, Unit.vh));
 		addComponent(topBar);
-
+		
 		Label title = new Label(new UnitRectangle(0, Unit.px, 0, Unit.px, 20, Unit.vw, 100, Unit.pch), label, new Font(GUI.baseFont, Font.BOLD, 18), new Color(230, 230, 230));
 		title.setFill(Fill.Horizontal);
 		title.setColor(new Color(0, 0, 180));
@@ -41,7 +40,7 @@ public class TempWindow extends FlexBox {
 		title.setTextXCentered(true);
 		title.setTextYCentered(true);
 		topBar.addComponent(title);
-
+		
 		Image exit = new Image(new UnitRectangle(0, Unit.vw, 0, Unit.vh, 5, Unit.vw, 100, Unit.pch), "exit.png");
 		exit.setPosition(Position.Relative);
 		exit.setFloat(Float.Right);
@@ -50,12 +49,21 @@ public class TempWindow extends FlexBox {
 		exit.setRounded(10);
 		topBar.addComponent(exit);
 
-		FlexBox contentBox = new FlexBox(new UnitPoint(0, Unit.vw, 5, Unit.vh));
-		contentBox.setMinWidth(new UnitValue(40, Unit.vw));
-		contentBox.setColor(Color.yellow);
+		//Tab bar
+		tabBar = new FlexBox(new UnitPoint());
+		tabBar.setMinWidth(new UnitValue(100, Unit.pcw));
+		tabBar.setColor(GUI.fg);
+		SimpleBox tBB = new SimpleBox(new UnitRectangle(0, 96.7, 100, 5, Unit.pcw, Unit.pch), new Color(245, 0, 66));
+		tabBar.addComponent(tBB);
+		addComponent(tabBar);
+		
+		//Content box
+		contentBox = new FlexBox(new UnitPoint());
+		contentBox.setMinWidth(new UnitValue(100, Unit.pcw));
+		contentBox.setColor(GUI.fg);
 		addComponent(contentBox);
-
-		Table table = new Table(new UnitPoint());
+		
+		Table table = new Table(new UnitPoint(0, Unit.px, 5, Unit.vh));
 		table.addCollumn(Label.class, "Attrib", new UnitValue(50, Unit.px));
 		table.addCollumn(Label.class, "Inter", new UnitValue(150, Unit.px));
 		table.addCollumn(Label.class, "Mode", new UnitValue(50, Unit.px));
@@ -63,6 +71,18 @@ public class TempWindow extends FlexBox {
 		contentBox.addComponent(table);
 	}
 
+	public void addTab(String name) {
+		SimpleBox tab = new SimpleBox(new UnitRectangle(0, 0, 80, 30, Unit.px), GUI.focus);
+		tab.setPosition(Position.Relative);
+		tab.setRounded(new int[]{1, 4});
+		tab.setBorder(new Color(245, 185, 66));
+		Label tabName = new Label(new UnitRectangle(0, 0, 100, 100, Unit.pcw, Unit.pch), name, new Font(GUI.baseFont, Font.BOLD, 18), new Color(230, 230, 230));
+		tabName.setTextCentered(true);
+		tab.addComponent(tabName);
+		tabBar.addComponent(tab);
+		if (activeTab==-1) activeTab = 1;
+	}
+	
 	public void addSmother(double opacity) {
 		//Smother
 		SimpleBox smother = new SimpleBox(new UnitRectangle(0, 0, 100, 100), new Color(0, 0, 0));
@@ -70,45 +90,14 @@ public class TempWindow extends FlexBox {
 		smother.setPosition(Position.Absolute);
 		addComponent(smother);
 	}
+
+	public void addContent(Component c) {
+
+	}
 	
 	public void setCloseAction(Runnable r) {this.onClose = r;}
 	
-	/*public void addTab(String name, Runnable clickAction) {
-		//Tabs
-		Font f = new Font(GUI.baseFont, Font.BOLD, 14);
-		double w = GUI.getScreenUtils().getStringWidthAsPerc(f, name)+10;
-		double h = GUI.getScreenUtils().getStringHeightAsPerc(f, name)+5;
-		double x = 0;
-		if (!tabs.isEmpty()) x = tabs.get(tabs.size()-1).getX().v+tabs.get(tabs.size()-1).getWidth().v;
-		
-		SimpleBox tab = new SimpleBox(new UnitRectangle(x, 16-h, w, h), GUI.fg);
-		tab.setClickAction(() -> {
-			for (SimpleBox t : tabs) t.setColor(GUI.focus2);
-			tab.setColor(GUI.fg);
-			clickAction.run();
-		});
-		tab.setRounded(new int[] {1, 4});
-		Label l = new Label(new UnitRectangle(50, 50, 0, 0), name, f, new Color(220, 220, 220));
-		l.setCentered(true);
-		tab.addComponent(l);
-		tab.increasePriority();
-		mainBox.addComponent(tab);
-		
-		tabs.add(tab);
-	}
-
-	//So components get added to the main box not to the popup which is essentially a wrapper
-	public void addPopUpComponent(Component c) {
-		addedComponents.add(c);
-		mainBox.addComponent(c);
-	}
-	
-	public void cleanPopupComponents() {
-		mainBox.removeComponents(addedComponents);
-		addedComponents.clear();
-	}*/
-
-	private void close(boolean cancelled) {
+	public void close(boolean cancelled) {
 		if (onClose!=null) onClose.run();
 		removeFromParent();
 		destroy();

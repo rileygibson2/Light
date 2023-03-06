@@ -16,7 +16,7 @@ import guipackage.general.Rectangle;
 import guipackage.general.UnitRectangle;
 import guipackage.general.UnitValue;
 import guipackage.gui.components.Component;
-import guipackage.gui.components.basecomponents.TextBox;
+import guipackage.gui.components.basecomponents.TextInput;
 
 public class AnimationFactory {
 
@@ -232,19 +232,19 @@ public class AnimationFactory {
 			@Override
 			public void run() {
 				doInitialDelay();
-				TextBox t = (TextBox) getTarget();
+				TextInput t = (TextInput) getTarget();
 
 				while (isRunning()) {
 					if (t.cursor.isEmpty()) t.cursor = "_";
 					else t.cursor = "";
-					t.textLabel.setText(t.getText()+t.cursor);
+					t.textLabel.setText(t.getValue()+t.cursor);
 
 					iterate();
 				}
 
 				//Reset
 				t.cursor = "";
-				t.textLabel.setText(t.getText());
+				t.textLabel.setText(t.getValue());
 				finish();
 			}
 		};

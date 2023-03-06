@@ -18,10 +18,8 @@ import guipackage.threads.AnimationFactory;
 import guipackage.threads.AnimationFactory.Animations;
 import guipackage.threads.ThreadController;
 
-public class TextBox extends InputComponent<String> {
+public class TextInput extends InputComponent<String> {
 	
-	private String text;
-	private SimpleBox mainBox;
 	public Label textLabel;
 	public Label descriptionLabel;
 	private Getter<String> description;
@@ -30,39 +28,35 @@ public class TextBox extends InputComponent<String> {
 	private ThreadController cursorAni;
 	public String cursor;
 	
-	public TextBox(UnitRectangle r, String initialText) {
+	public TextInput(UnitRectangle r) {
 		super(r);
-		text = initialText;
-		if (text==null) text = "";
+		if (getValue()==null) setValue("");
 		cursor = "";
 		
-		mainBox = new SimpleBox(new UnitRectangle(0, 0, 100, 100), GUI.focus);
-		mainBox.setRounded(true);
-		addComponent(mainBox);
+		setColor(GUI.focus);
+		setRounded(true);
 		
-		textLabel = new Label(new UnitRectangle(8, 55, 0, 0), text, new Font(GUI.baseFont, Font.ITALIC, 15), new Color(200, 200, 200));
-		mainBox.addComponent(textLabel);
-		descriptionLabel = new Label(new UnitRectangle(8, 55, 0, 0), text, new Font(GUI.baseFont, Font.ITALIC, 15), new Color(140, 140, 140));
+		textLabel = new Label(new UnitRectangle(8, 55, 0, 0), getValue(), new Font(GUI.baseFont, Font.ITALIC, 15), new Color(200, 200, 200));
+		addComponent(textLabel);
+		descriptionLabel = new Label(new UnitRectangle(8, 55, 0, 0), getValue(), new Font(GUI.baseFont, Font.ITALIC, 15), new Color(140, 140, 140));
 		descriptionLabel.setVisible(false);
-		mainBox.addComponent(descriptionLabel);
+		addComponent(descriptionLabel);
 	}
 	
 	@Override
 	public void actionsUpdated() {
-		text = getActions().get();
-		textLabel.setText(text+cursor);
+		textLabel.setText(getValue());
 	}
 	
-	public void setText(String t) {
-		text = t;
-		textLabel.setText(text+cursor);
+	@Override
+	public void setValue(String v) {
+		super.setValue(v);
+		textLabel.setText(getValue()+cursor);
 	}
-	
-	public String getText() {return text;}
 	
 	public void setDescriptionAction(Getter<String> d) {
 		description = d;
-		if (text.isEmpty()) {
+		if (getValue().isEmpty()) {
 			descriptionLabel.setText(description.get());
 			descriptionLabel.setVisible(true);
 		}
@@ -72,7 +66,7 @@ public class TextBox extends InputComponent<String> {
 	@Override
 	public void doClick(Point p) {
 		setSelected(true);
-		TextBox t = this;
+		TextInput t = this;
 		IO.getInstance().registerKeyListener(this, new Submitter<KeyEvent>() {
 			@Override
 			public void submit(KeyEvent e) {
@@ -94,11 +88,11 @@ public class TextBox extends InputComponent<String> {
 		
 		//Submit input
 		if (hasActions()) {
-			getActions().submit(text); //Submit input
-			text = getActions().get(); //Update text
-			textLabel.setText(text);
+			getActions().submit(getValue()); //Submit input
+			setValue(getActions().get()); //Update text
+			textLabel.setText(getValue());
 		}
-		if (text.isEmpty()&&description!=null) {
+		if (getValue().isEmpty()&&description!=null) {
 			descriptionLabel.setText(description.get());
 			descriptionLabel.setVisible(true);
 		}
@@ -124,8 +118,8 @@ public class TextBox extends InputComponent<String> {
 	
 	@Override
 	public void doKeyPress(KeyEvent e) {
-		if (e.getExtendedKeyCode()==8&&!text.isEmpty()) text = text.substring(0, text.length()-1);
-		else text += e.getKeyChar();
-		textLabel.setText(text+cursor);
+		if (e.getExtendedKeyCode()==8&&!getValue().isEmpty()) setValue(getValue().substring(0, getValue().length()-1));
+		else setValue(getValue()+e.getKeyChar());
+		textLabel.setText(getValue()+cursor);
 	}
 }

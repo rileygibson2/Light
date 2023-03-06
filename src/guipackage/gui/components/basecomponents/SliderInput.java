@@ -9,16 +9,15 @@ import guipackage.general.UnitValue.Unit;
 import guipackage.gui.components.InputComponent;
 import guipackage.gui.components.boxes.SimpleBox;
 
-public class Slider extends InputComponent<Double> {
+public class SliderInput extends InputComponent<Double> {
 
 	private SimpleBox mainBox;
 	private SimpleBox ball;
 
-	private double value;
 	private SimpleBox groove;
 	private SimpleBox grooveFill;
 	
-	public Slider(UnitRectangle r) {
+	public SliderInput(UnitRectangle r) {
 		super(r);
 
 		//Main box
@@ -41,25 +40,23 @@ public class Slider extends InputComponent<Double> {
 		mainBox.addComponent(ball);
 	}
 
-	public void setValue(double v) {
-		value = v;
-		v /= 100;
-		ball.setX(new UnitValue(groove.getX().v+(v*groove.getWidth().v)-ball.getWidth().v/2, Unit.pcw));
-		grooveFill.setWidth(new UnitValue(v*groove.getWidth().v, Unit.pcw));
+	@Override
+	public void setValue(Double v) {
+		super.setValue(v/=100);
+		ball.setX(new UnitValue(groove.getX().v+(getValue()*groove.getWidth().v)-ball.getWidth().v/2, Unit.pcw));
+		grooveFill.setWidth(new UnitValue(getValue()*groove.getWidth().v, Unit.pcw));
 	}
-	
-	public double getValue() {return value;}
 	
 	@Override
 	public void doClick(Point p) {
 		double x = scalePoint(p).x*100;
 		
 		if (x>=groove.getX().v&&x<=groove.getX().v+groove.getWidth().v) { //Check within bounds of groove
-			value = ((x-groove.getX().v)/groove.getWidth().v)*100;
+			setValue(((x-groove.getX().v)/groove.getWidth().v)*100);
 			ball.setX(new UnitValue(x-ball.getWidth().v/2, Unit.pcw));
 			grooveFill.setWidth(new UnitValue(x-grooveFill.getX().v, Unit.pcw));
 		}
-		if (hasActions()) getActions().submit(value);
+		if (hasActions()) getActions().submit(getValue());
 
 		super.doClick(p);
 	}
@@ -69,11 +66,11 @@ public class Slider extends InputComponent<Double> {
 		double x = scalePoint(current).x*100;
 		
 		if (x>=groove.getX().v&&x<=groove.getX().v+groove.getWidth().v) { //Check within bounds of groove
-			value = ((x-groove.getX().v)/groove.getWidth().v)*100;
+			setValue(((x-groove.getX().v)/groove.getWidth().v)*100);
 			ball.setX(new UnitValue(x-ball.getWidth().v/2, Unit.pcw));
 			grooveFill.setWidth(new UnitValue(x-grooveFill.getX().v, Unit.pcw));
 		}
-		if (hasActions()) getActions().submit(value);
+		if (hasActions()) getActions().submit(getValue());
 		
 		super.doDrag(entry, current);
 	}

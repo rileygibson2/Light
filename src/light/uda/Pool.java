@@ -1,11 +1,15 @@
-package light.zones;
+package light.uda;
 
 import guipackage.general.Rectangle;
 import guipackage.gui.GUI;
+import light.Zone;
 import light.general.ConsoleAddress;
+import light.uda.guiinterfaces.PoolInterface;
 
 public class Pool extends Zone {
     
+    PoolInterface gui;
+
     public enum PoolType {
         Dimmer,
         Color,
@@ -26,7 +30,7 @@ public class Pool extends Zone {
         this.type = type;
         this.cells = cells;
         address = new ConsoleAddress(type.ordinal(), 0);
-        GUI.getInstance().addZoneToView(this);
+        gui = (PoolInterface) GUI.getInstance().addToGUI(this);
     }
 
     @Override

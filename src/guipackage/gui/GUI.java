@@ -8,14 +8,11 @@ import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
 import java.awt.RenderingHints;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
-import javax.swing.text.View;
 
 import guipackage.cli.CLI;
 import guipackage.dom.DOM;
@@ -24,14 +21,14 @@ import guipackage.general.Rectangle;
 import guipackage.general.UnitRectangle;
 import guipackage.gui.components.Component;
 import guipackage.gui.components.basecomponents.MessageBox;
-import guipackage.gui.components.basecomponents.SimpleBox;
 import guipackage.gui.components.complexcomponents.CommandLineGUI;
 import guipackage.gui.components.complexcomponents.PoolGUI;
 import guipackage.gui.components.complexcomponents.UDAGUI;
-import light.zones.Pool;
-import light.zones.UDA;
-import light.zones.Zone;
-import light.zones.commandline.CommandLine;
+import light.Zone;
+import light.uda.Pool;
+import light.uda.UDA;
+import light.uda.commandline.CommandLine;
+import light.uda.guiinterfaces.GUIInterface;
 
 
 public class GUI extends JPanel {
@@ -47,7 +44,6 @@ public class GUI extends JPanel {
 
 	private Set<Element> roots; //Roots of all the views loaded
 	private RootElement currentRoot;
-	private Map<Zone, Component> zoneMappings;
 	private static Pair<UDAGUI, UDA> uda;
 
 	private List<MessageBox> messages;
@@ -75,7 +71,6 @@ public class GUI extends JPanel {
 		messages = new ArrayList<MessageBox>();
 		antiAlias = false;
 		currentRoot = new RootElement();
-		zoneMappings = new HashMap<Zone, Component>();
 		
 		setFocusable(true);
 		setFocusTraversalKeysEnabled(false);
@@ -93,40 +88,23 @@ public class GUI extends JPanel {
 
 	public void setParent(Object parent) {this.parent = parent;}
 	
-	public Component addZoneToView(Zone z, Object... extras) {
-		Component c = null;
+	public GUIInterface addToGUI(Zone z, Object... extras) {
+		GUIInterface c = null;
 		if (z instanceof CommandLine) {
 			c = new CommandLineGUI(new UnitRectangle(5, 93, 80, 5));
-			currentRoot.addComponent(c);
+			currentRoot.addComponent((Component) c);
 		}
 		else if (z instanceof UDA) {
 			c = new UDAGUI(new UnitRectangle(5, 0, 95, 93), (UDA) z);
-			currentRoot.addComponent(c);
+			currentRoot.addComponent((Component) c);
 			uda = new Pair<UDAGUI, UDA>((UDAGUI) c, (UDA) z);
 		}
 		else if (z instanceof Pool) {
 			c = new PoolGUI((Pool) z);
-			uda.a.addComponent(c);
+			uda.a.addComponent((Component) c);
 		}
 
-		if (c!=null) zoneMappings.put(z, c);
 		return c;
-	}
-
-	public Component getZoneGUIElement(Zone z) {return zoneMappings.get(z);}
-
-	public Zone getZoneOfClass(Class c) {
-		for (Zone z : zoneMappings.keySet()) {
-			if (z.getClass().equals(c)) return z;
-		}
-		return null;
-	}
-
-	public Component getGUIOfClass(Class c) {
-		for (Zone z : zoneMappings.keySet()) {
-			if (z.getClass().equals(c)) return zoneMappings.get(z);
-		}
-		return null;
 	}
 
 	public static Pair<UDAGUI, UDA> getUDAPair() {return uda;}
