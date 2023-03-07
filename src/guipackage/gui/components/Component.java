@@ -1,5 +1,6 @@
 package guipackage.gui.components;
 
+import guipackage.cli.CLI;
 import guipackage.general.Point;
 import guipackage.general.Tag;
 import guipackage.general.UnitRectangle;
@@ -27,6 +28,7 @@ public abstract class Component extends Element {
 	private String testName;
 
 	private Tag tag;
+	public String tagString;
 
 	public Component(UnitRectangle r) {
 		super (r);

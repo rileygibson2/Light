@@ -29,11 +29,9 @@ public class Label extends SimpleBox {
 
 	public String getText() {return text;}
 
-	public void setText(String t) {
-		text = t;
-	}
+	public void setText(String t) {text = t;}
 
-	public void setLabelColor(Color col) {this.col = col;}
+	public void setTextColor(Color col) {this.col = col;}
 	
 	public boolean isTextXCentered() {return xCentered;}
 

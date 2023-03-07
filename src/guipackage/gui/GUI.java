@@ -56,6 +56,8 @@ public class GUI extends JPanel {
 	public final static Color focus = new Color(70, 70, 70);
 	public final static Color focus2 = new Color(90, 90, 90);
 
+	public final static Color focusOrange = new Color(245, 185, 66);
+
 	public final static Color textMain = new Color(220, 220, 220);
 	public final static Color textDull = new Color(100, 100, 100);
 

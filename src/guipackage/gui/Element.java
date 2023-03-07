@@ -59,6 +59,8 @@ public abstract class Element {
 	private boolean xCentered; //Sets element to be x centered in parent element. This requires position absolute
 	private boolean yCentered; //Sets element to be x centered in parent element. This requires position absolute
 	
+	private boolean collumnRelative;
+
 	public Element(UnitRectangle r) {
 		this.r = r;
 		this.rFunc = r.clone();
@@ -71,6 +73,7 @@ public abstract class Element {
 		fill = Fill.None;
 		xCentered = false;
 		yCentered = false;
+		collumnRelative = false;
 	}
 	
 	public void setX(UnitValue p) {
@@ -186,6 +189,9 @@ public abstract class Element {
 	}
 	public boolean isXCentered() {return xCentered;}
 	public boolean isYCentered() {return yCentered;}
+
+	public void setCollumnRelative(boolean c) {collumnRelative = c;}
+	public boolean isCollumnRelative() {return collumnRelative;}
 	
 	public Element getParent() {return parent;}
 	public void setParent(Element e) {parent = e;}
@@ -269,7 +275,7 @@ public abstract class Element {
 		childUpdated();
 	}
 	
-	public void cleanComponents() {
+	public void clearComponents() {
 		componentsLock.lock();
 		components.clear();
 		componentsLock.unlock();
@@ -371,6 +377,9 @@ public abstract class Element {
 		
 		//Do relative positioning
 		if (getPosition()==Position.Relative) positionRelatively();
+
+		//Do collumn relative positioning
+		if (isCollumnRelative()) positionCollumnRelatively();
 		
 		//Do fill
 		if (getFill()!=Fill.None) fillToNextElement();
@@ -461,6 +470,31 @@ public abstract class Element {
 		}
 		//No eligable relative sibling, still need to handle float as described aboves
 		else if (getFloat()==Float.Right) floatRight();
+	}
+
+	private void positionCollumnRelatively() {
+		List<Component> siblings = parent.getComponents();
+		if (siblings==null||siblings.isEmpty()) return;
+		
+		//Find location of this element in siblings
+		int loc = 0;
+		for (; loc<siblings.size(); loc++) if (siblings.get(loc)==this) break;
+
+		//Get last added eligable relative component
+		Component lastSibling = null;
+		for (int i=loc; i>=0; i--) { //Search back from this component
+			Component sibling = siblings.get(i);
+			if (sibling!=this) {
+				lastSibling = sibling;
+				break;
+			}
+		}
+		if (lastSibling==null) return;
+
+		//Position this element vertically down from last sibling
+		UnitValue sibY = translateToUnit(lastSibling.getFuncY(), lastSibling, getY().u, this);
+		UnitValue sibHeight = translateToUnit(lastSibling.getFuncHeight(), lastSibling, getY().u, this);
+		rFunc.y = new UnitValue(sibY.v+sibHeight.v+getY().v, getY().u);
 	}
 	
 	private void floatRight() {
@@ -717,8 +751,8 @@ public abstract class Element {
 	*/
 	public boolean isOver(Point p) {
 		Rectangle rS = getRealRec();
-		if (p.x>=rS.x && p.x<=rS.x+rS.width
-		&& p.y>=rS.y && p.y<=rS.y+rS.height) {
+		if (p.x>=rS.x && p.x<=rS.x+rS.width &&
+			p.y>=rS.y && p.y<=rS.y+rS.height) {
 			return true;
 		}
 		
@@ -793,7 +827,7 @@ public abstract class Element {
 			if (c.isVisible()&&c.isOver(p)) {
 				c.doClick(p); //Will recur down
 				clicked = c;
-				break;
+				//break;
 			}
 		}
 		

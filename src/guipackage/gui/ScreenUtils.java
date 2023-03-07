@@ -117,32 +117,29 @@ public class ScreenUtils {
 	
 	public void drawSimpleBox(Graphics2D g, SimpleBox b) {
 		Rectangle r = b.getRealRec();
+		Color col = b.getColor();
+		col = new Color(col.getRed(), col.getGreen(), col.getBlue(), percToCol(b.getOpacity()));
+		if (b.getColor().getAlpha()==0) return; //Duck tape fix as this method does net respect the boxe's alpha channel
 		
 		if (b.isFilled()) {
-			Color col = b.getColor();
-			col = new Color(col.getRed(), col.getGreen(), col.getBlue(), percToCol(b.getOpacity()));
-			if (b.getColor().getAlpha()==0) return; //Duck tape fix as this method does net respect the boxe's alpha channel
-			
 			if (b.isOval()) fillOval(g, col, r);
 			else if (b.isRounded()) {
 				if (b.getRoundedCorners()!=null) fillRoundRect(g, col, r, b.getRoundedCorners(), b.getArcSize());
 				else fillRoundRect(g, col, r, b.getArcSize());
 			}
-			else fillRect(g, col, r); 
+			else fillRect(g, col, r);
 		}
 		
 		//Border
 		if (b.hasBorder()) {
 			if (b.isOval()) drawOval(g, b.getBorderColor(), r, b.getBorderWidth());
 			else if (b.isRounded()) {
-				if (b.getRoundedCorners()!=null) {
-					Color koCol = b.getColor();
-					koCol = new Color(koCol.getRed(), koCol.getGreen(), koCol.getBlue(), percToCol(b.getOpacity()));
-					drawRoundRect(g, b.getBorderColor(), koCol, r, b.getBorderWidth(),  b.getRoundedCorners(), b.getArcSize());
-				}
+				if (b.getRoundedCorners()!=null) drawRoundRect(g, b.getBorderColor(), col, r, b.getBorderWidth(),  b.getRoundedCorners(), b.getArcSize());
 				else drawRoundRect(g, b.getBorderColor(), r, b.getBorderWidth(), b.getArcSize());
 			}
 			else drawRect(g, b.getBorderColor(), r, b.getBorderWidth());
+			
+			if (b.getBorderSides()!=null) knockoutBorderSides(g, col, b.getBorderSides(), r, b.getBorderWidth());
 		}
 	}
 	
@@ -162,6 +159,16 @@ public class ScreenUtils {
 		g.setColor(c);
 		g.drawRect((int) r.x, (int) r.y, (int) r.width, (int) r.height);
 	}
+
+	public void knockoutBorderSides(Graphics2D g, Color ko, int[] sides, Rectangle r, double strokeW) {
+		if (sides.length==0) return;
+		List<Integer> s = Arrays.stream(sides).boxed().collect(Collectors.toList());
+		g.setColor(ko);
+		if (!s.contains(1)) g.fillRect((int) (r.x-strokeW), (int) (r.y+strokeW), (int) (r.width*0.2), (int) (r.height-strokeW*2));
+		if (!s.contains(2)) g.fillRect((int) (r.x+strokeW), (int) (r.y+r.height*0.8), (int) (r.width-strokeW*2), (int) (r.height*0.2+strokeW));
+		if (!s.contains(3)) g.fillRect((int) (r.x+r.width*0.8), (int) (r.y+strokeW), (int) (r.width*0.2+strokeW), (int) (r.height-strokeW*2));
+		if (!s.contains(4)) g.fillRect((int) (r.x+strokeW), (int) (r.y-strokeW), (int) (r.width-strokeW*2), (int) (r.height*0.2));
+	}
 	
 	public void fillRect(Graphics2D g, Color c, Rectangle r) {
 		g.setColor(c);
@@ -177,7 +184,7 @@ public class ScreenUtils {
 		g.setColor(c);
 		g.drawRoundRect((int) r.x, (int) r.y, (int) r.width, (int) r.height, arcSize, arcSize);
 	}
-
+	
 	public void drawRoundRect(Graphics2D g, Color c, Color knockoutCol, Rectangle r, double strokeW, int[] corners, int arcSize) {
 		g.setStroke(new BasicStroke((float) strokeW));
 		g.setColor(c);

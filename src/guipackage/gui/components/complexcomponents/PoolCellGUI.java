@@ -62,7 +62,7 @@ public class PoolCellGUI extends Component {
                 mainBox.setColor(new Color(20, 20, 20));
                 break;
             case Filled:
-                idLabel.setLabelColor(GUI.textMain);
+                idLabel.setTextColor(GUI.textMain);
                 break;
         }
     }

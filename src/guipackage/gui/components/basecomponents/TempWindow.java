@@ -2,7 +2,11 @@ package guipackage.gui.components.basecomponents;
 
 import java.awt.Color;
 import java.awt.Font;
+import java.util.ArrayList;
+import java.util.List;
 
+import guipackage.cli.CLI;
+import guipackage.general.Tag;
 import guipackage.general.UnitPoint;
 import guipackage.general.UnitRectangle;
 import guipackage.general.UnitValue;
@@ -20,11 +24,13 @@ public class TempWindow extends CollumnBox {
 	FlexBox tabBar;
 	FlexBox contentBox;
 	
+	List<FlexBox> tabs;
 	int activeTab;
 	
 	public TempWindow(String label) {
 		super(new UnitPoint(0, Unit.vw, 0, Unit.vh));
 		activeTab = -1;
+		tabs = new ArrayList<FlexBox>();
 		setCentered(true);
 		setMinWidth(new UnitValue(40, Unit.vw));
 		
@@ -48,13 +54,13 @@ public class TempWindow extends CollumnBox {
 		exit.setBorder(1, new Color(80, 80, 80));
 		exit.setRounded(10);
 		topBar.addComponent(exit);
-
+		
 		//Tab bar
 		tabBar = new FlexBox(new UnitPoint());
 		tabBar.setMinWidth(new UnitValue(100, Unit.pcw));
-		tabBar.setColor(GUI.fg);
-		SimpleBox tBB = new SimpleBox(new UnitRectangle(0, 96.7, 100, 5, Unit.pcw, Unit.pch), new Color(245, 0, 66));
-		tabBar.addComponent(tBB);
+		tabBar.setColor(GUI.focus);
+		SimpleBox tBB = new SimpleBox(new UnitRectangle(0, 96.7, 100, 5, Unit.pcw, Unit.pch), GUI.focusOrange);
+		//tabBar.addComponent(tBB);
 		addComponent(tabBar);
 		
 		//Content box
@@ -62,37 +68,65 @@ public class TempWindow extends CollumnBox {
 		contentBox.setMinWidth(new UnitValue(100, Unit.pcw));
 		contentBox.setColor(GUI.fg);
 		addComponent(contentBox);
-		
-		Table table = new Table(new UnitPoint(0, Unit.px, 5, Unit.vh));
-		table.addCollumn(Label.class, "Attrib", new UnitValue(50, Unit.px));
-		table.addCollumn(Label.class, "Inter", new UnitValue(150, Unit.px));
-		table.addCollumn(Label.class, "Mode", new UnitValue(50, Unit.px));
-		table.addRow();
-		contentBox.addComponent(table);
-	}
-
-	public void addTab(String name) {
-		SimpleBox tab = new SimpleBox(new UnitRectangle(0, 0, 80, 30, Unit.px), GUI.focus);
-		tab.setPosition(Position.Relative);
-		tab.setRounded(new int[]{1, 4});
-		tab.setBorder(new Color(245, 185, 66));
-		Label tabName = new Label(new UnitRectangle(0, 0, 100, 100, Unit.pcw, Unit.pch), name, new Font(GUI.baseFont, Font.BOLD, 18), new Color(230, 230, 230));
-		tabName.setTextCentered(true);
-		tab.addComponent(tabName);
-		tabBar.addComponent(tab);
-		if (activeTab==-1) activeTab = 1;
 	}
 	
+	public void addTab(String name) {
+		Label tab = new Label(new UnitRectangle(0, 0, 80, 30, Unit.px), name, new Font(GUI.baseFont, Font.BOLD, 11), new Color(230, 230, 230));
+		tab.setPosition(Position.Relative);
+		tab.setColor(GUI.fg);
+		tab.setRounded(new int[]{1, 4});
+		tab.setBorder(GUI.focusOrange);
+		tab.setTextCentered(true);
+		tabBar.addComponent(tab);
+
+		int tabi = tabs.size();
+		tab.setClickAction(() -> switchTab(tabi));
+		
+		if (activeTab==-1) { //Add current contentbox as tab 1 box
+			tabs.add(contentBox);
+			switchTab(0);
+		}
+		else { //Add new content box for new tab
+			FlexBox tabBox = new FlexBox(new UnitPoint());
+			tabBox.setMinWidth(new UnitValue(100, Unit.pcw));
+			tabBox.setColor(GUI.fg);
+			tabs.add(tabBox);
+		}
+	}
+	
+	public void switchTab(int i) {
+		if (i>tabs.size()) return;
+		
+		//Switch content box
+		removeComponent(contentBox);
+		addComponent(tabs.get(i));
+		
+		//Style tab bar
+		if (activeTab!=-1) {
+			((SimpleBox) tabBar.getComponents().get(activeTab)).setBorder(GUI.focusOrange);
+		}
+		((SimpleBox) tabBar.getComponents().get(i)).setBorder(new int[]{1, 3, 4}, GUI.focusOrange);
+		activeTab = i;
+	}
+	
+
+	public void addContent(Component c) {
+		contentBox.addComponent(c);
+	}
+
+	public void addContent(Component c, int tab) {
+		if (tab>tabs.size()) return;
+		FlexBox tabBox = tabs.get(tab);
+		if (tabBox!=null) tabBox.addComponent(c);
+	}
+
 	public void addSmother(double opacity) {
 		//Smother
 		SimpleBox smother = new SimpleBox(new UnitRectangle(0, 0, 100, 100), new Color(0, 0, 0));
 		smother.setOpacity(opacity);
 		smother.setPosition(Position.Absolute);
+		smother.decreasePriority();
 		addComponent(smother);
-	}
-
-	public void addContent(Component c) {
-
 	}
 	
 	public void setCloseAction(Runnable r) {this.onClose = r;}
