@@ -7,10 +7,9 @@ import guipackage.cli.CLI;
 import guipackage.general.Submitter;
 import guipackage.gui.GUI;
 import guipackage.gui.IO;
-import light.Zone;
 import light.uda.guiinterfaces.CommandLineInterface;
 
-public class CommandLine extends Zone {
+public class CommandLine {
     
     CommandLineInterface gui;
     ArrayDeque<CommandProxy> command;

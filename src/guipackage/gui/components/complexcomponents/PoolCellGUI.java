@@ -48,11 +48,11 @@ public class PoolCellGUI extends Component {
                 
                 //Image address and title
                 mainBox.addComponent(new Image(new UnitRectangle(20, 5, 60, 40), "icon.png"));
-                Label l = new Label(new UnitRectangle(0, 62, 100, 22), poolGUI.pool.address.prefix+"", new Font("Geneva", Font.BOLD, 20), GUI.textMain);
+                Label l = new Label(new UnitRectangle(0, 62, 100, 22), poolGUI.zone.getZone().address.prefix+"", new Font("Geneva", Font.BOLD, 20), GUI.textMain);
                 l.setTextXCentered(true);
                 l.fitFont();
                 mainBox.addComponent(l);
-                l = new Label(new UnitRectangle(0, 80, 100, 22), poolGUI.pool.type.toString(), new Font("Geneva", Font.BOLD, 20), GUI.textMain);
+                l = new Label(new UnitRectangle(0, 80, 100, 22), "hello", new Font("Geneva", Font.BOLD, 20), GUI.textMain);
                 l.setTextXCentered(true);
                 l.fitFont();
                 mainBox.addComponent(l);

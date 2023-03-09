@@ -3,8 +3,8 @@ package guipackage.gui.components.complexcomponents;
 import java.awt.Color;
 import java.awt.Font;
 
-import guipackage.cli.CLI;
 import guipackage.general.Point;
+import guipackage.general.Rectangle;
 import guipackage.general.UnitPoint;
 import guipackage.general.UnitRectangle;
 import guipackage.general.UnitValue;
@@ -15,8 +15,9 @@ import guipackage.gui.components.basecomponents.Label;
 import guipackage.gui.components.basecomponents.TempWindow;
 import guipackage.gui.components.boxes.CollumnBox;
 import guipackage.gui.components.boxes.SimpleBox;
+import light.Light;
+import light.stores.Preset.PresetType;
 import light.uda.UDA;
-import light.uda.Pool.PoolType;
 import light.uda.guiinterfaces.UDAInterface;
 
 public class UDAGUI extends Component implements UDAInterface {
@@ -68,39 +69,42 @@ public class UDAGUI extends Component implements UDAInterface {
         
         int x = (int) Math.abs((p1.x*100)/translateToUnit(cellDims.x, this, Unit.pcw, this).v);
         int y = (int) Math.abs((p1.y*100)/translateToUnit(cellDims.y, this, Unit.pch, this).v);
-        uda.cellClicked(x, y);
+        uda.doClick(x, y);
         super.doClick(p);
     }
     
-    public void openWindowPicker() {
+    public void openZonePicker(Rectangle zoneRec) {
         if (windowPickerOpen) return;
         
-        TempWindow tB = new TempWindow("Create Window");
+        TempWindow tB = new TempWindow("Create Zone");
         addComponent(tB);
+        tB.addTab("Presets");
         tB.addTab("Pools");
         tB.addTab("Sheets");
         tB.addTab("Playbacks");
         tB.addTab("Other");
         
         //Pools tab
-        CollumnBox cB = new CollumnBox(new UnitPoint());
+        CollumnBox cB = new CollumnBox(new UnitPoint(25, Unit.px, 0, Unit.px));
         cB.setPosition(Position.Relative);
         
         int i = 0;
-        for (PoolType p : PoolType.values()) {
+        for (PresetType p : PresetType.values()) {
             if (i==3) {
                 tB.addContent(cB, 0);
-                cB = new CollumnBox(new UnitPoint());
+                cB = new CollumnBox(new UnitPoint(25, Unit.px, 0, Unit.px));
                 cB.setPosition(Position.Relative);
                 i = 0;
             }
-            Label l = new Label(new UnitRectangle(25, 10, 100, 50, Unit.px), p.toString(), new Font(GUI.baseFont, Font.BOLD, 11), new Color(230, 230, 230));
+            Label l = new Label(new UnitRectangle(0, 10, 100, 50, Unit.px), p.toString(), new Font(GUI.baseFont, Font.BOLD, 11), new Color(230, 230, 230));
             l.setColor(GUI.bg);
             l.setRounded(true);
             l.setBorder(GUI.focusOrange);
             l.setTextCentered(true);
+
+            l.setClickAction(() -> uda.addPool(Light.getInstance().getPresetPool(p), zoneRec));
+
             cB.addComponent(l);
-            
             i++;
         }
         

@@ -24,7 +24,6 @@ import guipackage.gui.components.basecomponents.MessageBox;
 import guipackage.gui.components.complexcomponents.CommandLineGUI;
 import guipackage.gui.components.complexcomponents.PoolGUI;
 import guipackage.gui.components.complexcomponents.UDAGUI;
-import light.Zone;
 import light.uda.Pool;
 import light.uda.UDA;
 import light.uda.commandline.CommandLine;
@@ -90,19 +89,19 @@ public class GUI extends JPanel {
 
 	public void setParent(Object parent) {this.parent = parent;}
 	
-	public GUIInterface addToGUI(Zone z, Object... extras) {
+	public GUIInterface addToGUI(Object o, Object... extras) {
 		GUIInterface c = null;
-		if (z instanceof CommandLine) {
+		if (o instanceof CommandLine) {
 			c = new CommandLineGUI(new UnitRectangle(5, 93, 80, 5));
 			currentRoot.addComponent((Component) c);
 		}
-		else if (z instanceof UDA) {
-			c = new UDAGUI(new UnitRectangle(5, 0, 95, 93), (UDA) z);
+		else if (o instanceof UDA) {
+			c = new UDAGUI(new UnitRectangle(5, 0, 95, 93), (UDA) o);
 			currentRoot.addComponent((Component) c);
-			uda = new Pair<UDAGUI, UDA>((UDAGUI) c, (UDA) z);
+			uda = new Pair<UDAGUI, UDA>((UDAGUI) c, (UDA) o);
 		}
-		else if (z instanceof Pool) {
-			c = new PoolGUI((Pool) z);
+		else if (o instanceof Pool) {
+			c = new PoolGUI((Pool) o);
 			uda.a.addComponent((Component) c);
 		}
 
