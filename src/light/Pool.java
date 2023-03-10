@@ -1,19 +1,35 @@
 package light;
 
+import java.io.Console;
 import java.util.ArrayList;
 import java.util.List;
 
+import light.general.Addressable;
 import light.general.ConsoleAddress;
 
-public class Pool<T> {
-    
-    public ConsoleAddress address;
+public class Pool<T extends Addressable> extends Addressable{
 
     List<T> elements;
 
-    public Pool() {
+    public Pool(ConsoleAddress address) {
+        super(address);
         elements = new ArrayList<T>();
     }
 
-    public void addElement(T t) {elements.add(t);}
+    public T getPoolElementWithAddress(ConsoleAddress address) {
+        for (T t : elements) {
+            if (t.getAddress().equals(address)) return t;
+        }
+        return null;
+    }
+
+    public void add(T t) {elements.add(t);}
+
+    public void remove(T t) {elements.remove(t);}
+
+    public void remove(ConsoleAddress address) {
+        for (T t : elements) {
+            if (t.getAddress().equals(address)) elements.remove(t);
+        }
+    }
 }

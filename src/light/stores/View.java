@@ -2,20 +2,25 @@ package light.stores;
 
 import java.io.Console;
 
+import javax.lang.model.SourceVersion;
+
+import light.general.Addressable;
 import light.general.ConsoleAddress;
 import light.uda.UDA;
 
-public class View {
+public class View extends Addressable {
     
     private UDA uda;
-    private ConsoleAddress address;
 
     public View(UDA uda) {
+        super(new ConsoleAddress(View.class, 0, 0));
         this.uda = uda;
     }
 
-    public boolean hasAddress() {return address!=null;}
-    public void setAddress(ConsoleAddress address) {this.address = address;}
+    public View(ConsoleAddress address, UDA uda) {
+        super(address);
+        this.uda = uda;
+    }
 
     public UDA getUDA() {return uda;}
 

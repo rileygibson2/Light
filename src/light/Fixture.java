@@ -2,26 +2,23 @@ package light;
 
 import java.util.List;
 
+import light.general.Addressable;
 import light.general.Attribute;
 import light.general.ConsoleAddress;
 import light.general.DMXAddress;
 
-public class Fixture {
+public class Fixture extends Addressable {
     
-    private ConsoleAddress id;
     private String name;
     private DMXAddress address;
     private List<Attribute> attributes;
 
-    public Fixture(ConsoleAddress id) {
-        this.id = id;
+    public Fixture(ConsoleAddress address) {
+        super(address);
     }
 
-    public void setAddress(DMXAddress ad) {this.address = ad;}
-    public DMXAddress getAddress() {return address;}
-
-    public ConsoleAddress getID() {return id;}
-    public void setID(ConsoleAddress id) {this.id = id;}
+    public void setDMXAddress(DMXAddress ad) {this.address = ad;}
+    public DMXAddress getDMXAddress() {return address;}
 
     public void setName(String n) {name = n;}
     public String getName() {return name;}
@@ -35,7 +32,6 @@ public class Fixture {
         if (attributes==null||!attributes.contains(attribute)) return null;
         if (address==null) return null;
 
-        DMXAddress result = null;
         int i = address.getAddress();
         for (Attribute a : attributes) {
             if (a==attribute) return new DMXAddress(address.getUniverse(), i);

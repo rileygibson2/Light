@@ -1,14 +1,20 @@
 package light;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import guipackage.gui.GUI;
-import light.stores.Effect;
+import light.general.ConsoleAddress;
+import light.stores.Group;
 import light.stores.Preset;
 import light.stores.Preset.PresetType;
 import light.stores.Sequence;
 import light.stores.View;
+import light.stores.effects.Effect;
 import light.uda.UDA;
 import light.uda.commandline.CommandLine;
 
@@ -22,18 +28,11 @@ public class Light {
 
 
     //Pools
-    private Pool<Preset> dimmerPool;
-    public Pool<Preset> colorPool;
-    private Pool<Preset> positionPool;
-    private Pool<Preset> focusPool;
-    private Pool<Preset> beamPool;
-    private Pool<Preset> goboPool;
-    private Pool<Preset> prisimPool;
-    private Pool<Preset> shaperPool;
-
+    private Map<PresetType, Pool<Preset>> presetPools;
     private Pool<Effect> effectPool;
     private Pool<View> viewPool;
     private Pool<Sequence> sequencePool;
+    private Pool<Group> groupPool;
 
     private View currentView;
 
@@ -50,17 +49,36 @@ public class Light {
     }
 
     public Pool<Preset> getPresetPool(PresetType p) {
-        switch (p) {
-            case Beam: return beamPool;
-            case Color: return colorPool;
-            case Dimmer: return dimmerPool;
-            case Focus: return focusPool;
-            case Gobo: return goboPool;
-            case Position: return positionPool;
-            case Shaper: return shaperPool;
-            case Prisim: return prisimPool;
-            default: return null;
+        return presetPools.get(p);
+    }
+
+    /**
+     * Will not work for preset pools
+     * @param scope
+     * @return
+     */
+    public Pool<?> getPoolWithScope(Class<?> scope) {
+        if (scope==Group.class) return groupPool;
+        if (scope==Sequence.class) return sequencePool;
+        if (scope==Effect.class) return effectPool;
+        if (scope==View.class) return viewPool;
+        return null;
+    }
+
+    public Fixture resolveAddressToFixture(ConsoleAddress address) {
+        for (Fixture f : fixtures) {
+            if (f.getAddress().equals(address)) return f;
         }
+        return null;
+    }
+
+    public List<Fixture> resolveAddressesToFixtures(List<ConsoleAddress> addresses) {
+        List<Fixture> fixtures = new ArrayList<>();
+
+        for (Fixture f : fixtures) {
+            if (addresses.contains(f.getAddress())) fixtures.add(f);
+        }
+        return fixtures;
     }
 
     private void setup() {
@@ -70,18 +88,15 @@ public class Light {
 
         fixtures = new HashSet<Fixture>();
 
-        dimmerPool = new Pool<Preset>();
-        colorPool = new Pool<Preset>();
-        positionPool = new Pool<Preset>();
-        focusPool = new Pool<Preset>();
-        beamPool = new Pool<Preset>();
-        goboPool = new Pool<Preset>();
-        prisimPool = new Pool<Preset>();
-        shaperPool = new Pool<Preset>();
+        presetPools = new HashMap<PresetType, Pool<Preset>>();
+        for (PresetType pT : PresetType.values()) {
+            presetPools.put(pT, new Pool<Preset>(new ConsoleAddress(Preset.class, pT.ordinal(), 0)));
+        }
 
-        sequencePool = new Pool<Sequence>();
-        effectPool = new Pool<Effect>();
-        viewPool = new Pool<View>();
+        groupPool = new Pool<Group>(new ConsoleAddress(Group.class, 0, 0));
+        sequencePool = new Pool<Sequence>(new ConsoleAddress(Sequence.class, 0, 0));
+        effectPool = new Pool<Effect>(new ConsoleAddress(Effect.class, 0, 0));
+        viewPool = new Pool<View>(new ConsoleAddress(View.class, 0, 0));
 
         currentView = new View(new UDA());
     }

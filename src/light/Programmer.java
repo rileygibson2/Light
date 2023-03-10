@@ -1,15 +1,19 @@
 package light;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import light.stores.DataStore;
 
-public class Programmer {
+public class Programmer extends DataStore {
     
     private static Programmer singleton;
-    
-    private DataStore data;
+
+    List<Fixture> selectedFixtures;
 
     private Programmer() {
-        data = new DataStore();
+        super();
+        selectedFixtures = new ArrayList<Fixture>();
     }
 
     public static Programmer getInstance() {
@@ -17,4 +21,11 @@ public class Programmer {
         return singleton;
     }
 
+    public void selectFixture(Fixture f) {selectedFixtures.add(f);}
+    public void selectFixtures(List<Fixture> f) {selectedFixtures.addAll(f);}
+
+    public void deselectFixture(Fixture f) {selectedFixtures.remove(f);}
+    public void deselectFixtures(List<Fixture> f) {selectedFixtures.removeAll(f);}
+
+    public void clearSelectedFixtures() {selectedFixtures.clear();}
 }

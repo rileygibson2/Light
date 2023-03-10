@@ -1,6 +1,7 @@
 package light.stores;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -15,10 +16,11 @@ public class DataStore {
         store = new HashMap<Fixture, Map<Attribute, Integer>>();
     }
     
-    public void add(Fixture fixture, Attribute attribute, Integer value) {
+    public void set(Fixture fixture, Attribute attribute, Integer value) {
         if (fixture==null) throw new Error("Cannot add null fixture to datastore");
         if (attribute==null) throw new Error("Cannot add null attribute to datastore");
         if (value<0||value>255) throw new Error("Value "+value+" outside of dmx bounds");
+        if (!fixture.hasAttribute(attribute)) return;
         
         Map<Attribute, Integer> attributes;
         if (store.containsKey(fixture)&&store.get(fixture)!=null) {
@@ -29,6 +31,22 @@ public class DataStore {
             attributes.put(attribute, value);
             store.put(fixture, attributes);
         }
+    }
+
+    public void set(Fixture fixture, Map<Attribute, Integer> attributes) {
+        if (fixture==null) throw new Error("Cannot add null fixture to datastore");
+        if (attributes==null) throw new Error("Cannot add null values/attributes to datastore");
+
+        //Check target fixture has all attributes in map and that values are within bounds
+        Set<Attribute> toRemove = new HashSet<>();
+        for (Map.Entry<Attribute, Integer> v : attributes.entrySet()) {
+            if (!fixture.hasAttribute(v.getKey())) toRemove.add(v.getKey());
+            if (v.getValue()<0||v.getValue()>255) toRemove.add(v.getKey());
+        }
+        attributes.keySet().removeAll(toRemove);
+
+        //Assign values to this fixture's mapping
+        store.put(fixture, attributes);
     }
     
     public void remove(Fixture fixture) {
@@ -41,7 +59,7 @@ public class DataStore {
 
     public void clear() {store.clear();}
 
-    public Set<Fixture> getFixtures() {return store.keySet();}
+    public Set<Fixture> getFixtureSet() {return store.keySet();}
 
     public Map<Attribute, Integer> getFixtureValues(Fixture fixture) {return store.get(fixture);}
 

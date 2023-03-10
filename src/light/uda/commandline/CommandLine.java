@@ -14,6 +14,14 @@ public class CommandLine {
     CommandLineInterface gui;
     ArrayDeque<CommandProxy> command;
 
+    public enum Operator {
+        Plus,
+        Minus,
+        At,
+        Thru,
+        If;
+    }
+
     public CommandLine() {
         gui = (CommandLineInterface) GUI.getInstance().addToGUI(this);
         command = new ArrayDeque<CommandProxy>();

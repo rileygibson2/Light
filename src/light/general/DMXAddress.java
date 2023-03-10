@@ -1,10 +1,11 @@
 package light.general;
 
-public class DMXAddress {
+public class DMXAddress extends ConsoleAddress {
     private int universe;
     private int address;
 
     public DMXAddress(int universe, int address) {
+        super(GenericAddressScope.class, universe, address);
         this.universe = universe;
         this.address = address;
         validate();
