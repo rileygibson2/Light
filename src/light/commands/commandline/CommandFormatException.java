@@ -1,4 +1,4 @@
-package light.uda.commandline;
+package light.commands.commandline;
 
 public class CommandFormatException extends Exception {
 

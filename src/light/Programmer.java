@@ -2,8 +2,11 @@ package light;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-import light.stores.DataStore;
+import light.general.Attribute;
+import light.general.DataStore;
 
 public class Programmer extends DataStore {
     

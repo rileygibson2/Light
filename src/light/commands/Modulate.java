@@ -1,5 +1,6 @@
 package light.commands;
 
+import java.io.ObjectInputStream.GetField;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -45,29 +46,22 @@ public class Modulate implements Command {
     @Override
     public void execute() {
         //Resolve target addresses into fixtures
-        List<Fixture> fixtures = Light.getInstance().resolveAddressesToFixtures(targetFixtures);
+        List<Fixture> fixtures = Light.getInstance().getFixtures(targetFixtures);
         Programmer prog = Programmer.getInstance();
-
+        prog.clearSelectedFixtures();
+        
         if (source instanceof Double) { //Change intensity for target fixture/s
-            prog.clearSelectedFixtures();
-            for (Fixture f : fixtures) {
-                prog.set(f, Attribute.Intensity, (Integer) source);
-            }
-            prog.selectFixtures(fixtures);
+            for (Fixture f : fixtures) prog.set(f, Attribute.Intensity, (Integer) source, true);
         }
         if (source instanceof ConsoleAddress) { //Set all values of target fixture/s to values of source fixture's
             //Resolve source addresses into fixtures
-            Fixture sourceFixture = Light.getInstance().resolveAddressToFixture((ConsoleAddress) source);
+            Fixture sourceFixture = Light.getInstance().getFixture((ConsoleAddress) source);
             Map<Attribute, Integer> attributes = prog.getFixtureValues(sourceFixture);
-
             //TODO Clone values
-           
-            prog.clearSelectedFixtures();
-            for (Fixture f : fixtures) {
-                prog.set(f, attributes);
-            }
-            prog.selectFixtures(fixtures);
+            
+            for (Fixture f : fixtures) prog.set(f, attributes, true);
         }
+        prog.selectFixtures(fixtures);
     }
     
 }

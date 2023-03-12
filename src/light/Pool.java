@@ -1,13 +1,13 @@
 package light;
 
-import java.io.Console;
 import java.util.ArrayList;
 import java.util.List;
 
 import light.general.Addressable;
 import light.general.ConsoleAddress;
+import light.stores.AbstractStore;
 
-public class Pool<T extends Addressable> extends Addressable{
+public class Pool<T extends AbstractStore> extends Addressable {
 
     List<T> elements;
 
@@ -16,7 +16,9 @@ public class Pool<T extends Addressable> extends Addressable{
         elements = new ArrayList<T>();
     }
 
-    public T getPoolElementWithAddress(ConsoleAddress address) {
+    public T get(ConsoleAddress address) {
+        if (!address.matchesScope(getAddress())) return null;
+
         for (T t : elements) {
             if (t.getAddress().equals(address)) return t;
         }

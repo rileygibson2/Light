@@ -1,14 +1,9 @@
 package light.stores;
 
-import java.io.Console;
-
-import javax.lang.model.SourceVersion;
-
-import light.general.Addressable;
 import light.general.ConsoleAddress;
 import light.uda.UDA;
 
-public class View extends Addressable {
+public class View extends AbstractStore {
     
     private UDA uda;
 

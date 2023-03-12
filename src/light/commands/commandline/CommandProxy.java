@@ -1,4 +1,4 @@
-package light.uda.commandline;
+package light.commands.commandline;
 
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
@@ -7,13 +7,17 @@ import java.util.List;
 import guipackage.cli.CLI;
 import light.commands.Command;
 import light.general.ConsoleAddress;
-import light.uda.commandline.CommandLine.Operator;
 
 /**
 * 
 * Store Cue 1.1
 * Store
-*      ConsoleAddress(CueScope)  
+*      ConsoleAddress(SequenceScope)  
+* Resolves to Store(ConsoleAddress)  
+
+Store Preset 2.3
+* Store
+*      ConsoleAddress(PresetScope)  
 * Resolves to Store(ConsoleAddress)  
 * 
 * Fixture 1 at 100
@@ -51,14 +55,34 @@ public class CommandProxy {
         Address,
         Value;
     }
+
+    public enum Operator {
+        Plus,
+        Minus,
+        At,
+        Thru,
+        If;
+
+        @Override
+        public String toString() {
+            if (this==Operator.At) return "at";
+            if (this==Operator.Thru) return "thru";
+            if (this==Operator.Plus) return "+";
+            if (this==Operator.Minus) return "-";
+            if (this==Operator.If) return "if";
+            return "";
+        }
+    }
     
     private CommandProxyType type;
     private List<CommandProxy> args;
     
+    //Potential values
     private Operator operator;
     private Class<? extends Command> commandClass;
     private ConsoleAddress consoleAddress;
     private double value;
+    private String valueString;
     
     
     public CommandProxy(Class<? extends Command> commandClass) {
@@ -84,14 +108,24 @@ public class CommandProxy {
         type = CommandProxyType.Value;
         args = new ArrayList<CommandProxy>();
     }
+
+    public CommandProxy(String valueString) {
+        this.valueString = valueString;
+        type = CommandProxyType.Value;
+        args = new ArrayList<CommandProxy>();
+    }
     
     public CommandProxyType getType() {return type;}
+
+    public List<CommandProxy> getArgs() {return args;}
     
     //Returns type this proxy will resolve to
     public Class<?> getResolveType() {
         switch (type) {
             case Address: return ConsoleAddress.class;
-            case Value: return double.class;
+            case Value: 
+                if (valueString!=null) return String.class;
+                else return double.class;
             case Operator:
             switch (operator) {
                 case Plus: return List.class;
@@ -128,7 +162,11 @@ public class CommandProxy {
                 return null;
             
             case Address: return consoleAddress;
-            case Value: return value;
+            
+            case Value:
+                if (valueString!=null) return valueString;
+                else return value;
+                
             case Operator:
             switch (operator) {
                 case Plus: return resolvePlus();
@@ -169,7 +207,7 @@ public class CommandProxy {
         if (!(b instanceof ConsoleAddress)) throw new CommandFormatException("Second argument of thru must be ConsoleAddress");
         ConsoleAddress bAd = (ConsoleAddress) a;
         
-        if (!aAd.sameScope(bAd)||!aAd.samePrefix(bAd)) throw new CommandFormatException("First argument address must be same scope and prefix as second argument address");
+        if (!aAd.matchesScope(bAd)||!aAd.matchesPrefix(bAd)) throw new CommandFormatException("First argument address must be same scope and prefix as second argument address");
         if (!aAd.lessThan(bAd)) throw new CommandFormatException("First argument address must be less than second argument address");
         
         //Build address list
@@ -178,5 +216,16 @@ public class CommandProxy {
             result.add(new ConsoleAddress(aAd.getScope(), aAd.getPrefix(), i));
         }
         return result;
+    }
+
+    @Override
+    public String toString() {
+        switch (type) {
+            case Address: return consoleAddress.toString();
+            case Command: return commandClass.getSimpleName();
+            case Operator: return operator.toString();
+            case Value: return Double.toString(value);
+        }
+        return "";
     }
 }

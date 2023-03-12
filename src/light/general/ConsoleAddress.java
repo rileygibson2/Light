@@ -20,12 +20,14 @@ public class ConsoleAddress {
 
     public Class<? extends Addressable> getScope() {return this.scope;}
 
-    public boolean sameScope(ConsoleAddress a) {return this.scope==a.scope;}
+    public boolean matchesScope(ConsoleAddress a) {return this.scope==a.scope;}
 
-    public boolean samePrefix(ConsoleAddress a) {return this.prefix==a.prefix;}
+    public boolean matchesScope(Class<? extends Addressable> c) {return this.scope==c;}
+
+    public boolean matchesPrefix(ConsoleAddress a) {return this.prefix==a.prefix;}
 
     public boolean lessThan(ConsoleAddress a) {
-        return sameScope(a)&&samePrefix(a)&&this.prefix<a.prefix;
+        return matchesScope(a)&&matchesPrefix(a)&&this.prefix<a.prefix;
     }
 
     @Override

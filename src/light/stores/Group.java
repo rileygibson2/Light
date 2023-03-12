@@ -4,10 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import light.Fixture;
-import light.general.Addressable;
+import light.Programmer;
 import light.general.ConsoleAddress;
 
-public class Group extends Addressable {
+public class Group extends AbstractStore {
 
     List<Fixture> fixtures;
 
@@ -23,5 +23,9 @@ public class Group extends Addressable {
     public boolean contains(Fixture fixture) {return fixtures.contains(fixture);}
 
     public int getSize() {return fixtures.size();}
+
+    public void selectFixtures() {
+        Programmer.getInstance().selectFixtures(fixtures);
+    }
 
 }

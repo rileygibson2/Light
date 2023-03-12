@@ -1,5 +1,7 @@
 package light.general;
 
+import light.stores.Preset.PresetType;
+
 public enum Attribute {
     Intensity,
 
@@ -41,6 +43,10 @@ public enum Attribute {
     Shaper4A,
     Shaper4B;
 
+    public boolean isIntensity() {
+        return this==Attribute.Intensity;
+    }
+
     public boolean isColor() {
         return this==Attribute.Red||this==Attribute.Green||this==Attribute.Blue||
         this==Attribute.Amber||this==Attribute.UV||this==Attribute.Lime||this==Attribute.White||
@@ -51,7 +57,7 @@ public enum Attribute {
         return this==Attribute.Pan||this==Attribute.PanFine||this==Attribute.Tilt||this==Attribute.TiltFine;
     }
 
-    public boolean isFocus() {
+    public boolean isBeam() {
         return this==Attribute.Focus||this==Attribute.Iris||this==Attribute.Shutter||this==Attribute.Strobe;
     }
 

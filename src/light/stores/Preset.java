@@ -1,29 +1,109 @@
 package light.stores;
 
-import light.general.Addressable;
-import light.general.ConsoleAddress;
+import java.util.HashSet;
+import java.util.Set;
 
-public class Preset extends Addressable {
+import light.Fixture;
+import light.Programmer;
+import light.general.Attribute;
+import light.general.ConsoleAddress;
+import light.general.DataStore;
+
+public class Preset extends AbstractStore {
     
     public enum PresetType {
         Dimmer,
         Color,
         Position,
-        Focus,
         Beam,
         Gobo,
-        Shaper, Prisim;
+        Shaper,
+        Prisim;
     };
-
+    
     private PresetType type;
-
-    private DataStore data;
-
+    
+    private DataStore store;
+    
     public Preset(ConsoleAddress address, PresetType type) {
         super(address);
         this.type = type;
-        data = new DataStore();
+        store = new DataStore();
+    }
+    
+    /**
+     * Get type of this preset
+     * @return
+     */
+    public PresetType getType() {return type;}
+
+    /**
+     * Get the preset type related to the prefix of the address
+     * @param address
+     * @return
+     */
+    public static PresetType getTypeFromAddress(ConsoleAddress address) {
+        if (address==null||!address.matchesScope(Preset.class)) return null;
+        if (address.getPrefix()<=0||address.getPrefix()>PresetType.values().length) return null;
+        return PresetType.values()[address.getPrefix()-1];
     }
 
-    public PresetType getType() {return type;}
+    /**
+     * Returns the set of valid attributes for this preset
+     * @return
+     */
+    public Set<Attribute> getValidAttributes() {
+        Set<Attribute> attributes = new HashSet<>();
+
+        for (Attribute a : Attribute.values()) {
+            if (isValid(a)) attributes.add(a);
+        }
+        return attributes;
+    }
+    
+    public void set(Fixture fixture, Attribute attribute, Integer value) {
+        if (!isValid(attribute)) return;  //Check attribute being added is present in this preset type
+        store.set(fixture, attribute, value, true);
+    }
+    
+    /**
+     * Overwrites the current data store with the new one. Does not perform attribute checkin atm
+     * @param store
+     */
+    public void set(DataStore store) {
+        this.store = store;
+    }
+
+    /**
+     * Evaluates whether the provided attribute is valid for this preset
+     * @param a
+     * @return
+     */
+    public boolean isValid(Attribute a) {
+        return isValidForPresetType(a, type);
+    }
+
+    /**
+     * Evaluates whether the provided attribute is valid for the given preset type
+     * @param a
+     * @param p
+     * @return
+     */
+    public static boolean isValidForPresetType(Attribute a, PresetType p) {
+        switch (p) {
+            case Beam: return a.isBeam();
+            case Color: return a.isColor();
+            case Dimmer: return a.isIntensity();
+            case Gobo: return a.isGobo();
+            case Position: return a.isPosition();
+            case Prisim: return a.isPrisim();
+            case Shaper: return a.isShaper();
+        }
+        return false;
+    }
+
+    public void loadToProgrammer() {
+        Programmer prog = Programmer.getInstance();
+        prog.combine(store, true);
+    }
 }

@@ -6,13 +6,13 @@ import java.util.List;
 import java.util.Map;
 
 import light.Fixture;
-import light.general.Addressable;
 import light.general.Attribute;
 import light.general.ConsoleAddress;
+import light.general.DataStore;
 import light.output.OutputCapable;
-import light.stores.DataStore;
+import light.stores.AbstractStore;
 
-public class Effect extends Addressable implements OutputCapable {
+public class Effect extends AbstractStore implements OutputCapable {
     
     private Map<Attribute, EffectLine> lines;
     private List<Fixture> fixtures;
