@@ -105,11 +105,17 @@ public class Light {
         if (address.matchesScope(Preset.class)) {
             PresetType t = Preset.getTypeFromAddress(address);
             if (t==null) return null;
+            Pool<Preset> pool = getPresetPool(t);
+            if (pool==null) return null;
+
+            if (address.equals(pool.getAddress())) return pool;
             return getPresetPool(t).get(address);
         }
 
         Pool<? extends Addressable> pool = getPoolWithScope(address.getScope());
         if (pool==null) return null;
+        
+        if (address.equals(pool.getAddress())) return pool;
         return pool.get(address);
     }
 

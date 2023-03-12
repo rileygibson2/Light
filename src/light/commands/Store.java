@@ -21,9 +21,8 @@ public class Store implements Command {
 
     @Override
     public void execute() {
-        if (address.matchesScope(Preset.class)) {
-            storePreset();
-        }
+        if (address.matchesScope(Preset.class)) storePreset();
+        if (address.matchesScope(Sequence.class)) storePreset();
     }
 
     private void storePreset() {
@@ -45,7 +44,7 @@ public class Store implements Command {
         if (address==null) return;
 
         //Find sequence
-        Sequence sequence = Light.getInstance().getSequencePool().get(new ConsoleAddress(Sequence.class, address.getPrefix(), 0));
+        Sequence sequence = (Sequence) Light.getInstance().resolveAddress(new ConsoleAddress(Sequence.class, address.getPrefix(), 0));
         if (sequence==null) return;
 
         //If address was given as base address of sequence then expectation is add as next cue

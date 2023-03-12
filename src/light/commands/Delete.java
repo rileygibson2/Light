@@ -16,6 +16,6 @@ public class Delete implements Command {
     @Override
     public void execute() { //Delete command at this stage can only be used to delete something that will live in a pool
         Pool<? extends AbstractStore> pool = Light.getInstance().getPoolWithScope(target.getScope());
-        if (pool!=null) pool.remove(target);
+        if (pool!=null)pool.remove(target);
     }
 }
