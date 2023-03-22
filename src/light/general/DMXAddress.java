@@ -1,33 +1,32 @@
 package light.general;
 
 public class DMXAddress extends ConsoleAddress {
-    private int universe;
-    private int address;
 
     public DMXAddress(int universe, int address) {
         super(GenericAddressScope.class, universe, address);
-        this.universe = universe;
-        this.address = address;
         validate();
     }
 
-    public int getUniverse() {return universe;}
+    public int getUniverse() {return getPrefix();}
     public void setUniverse(int universe) {
-        this.universe = universe;
+        setPrefix(universe);
         validate();
     }
 
-    public int getAddress() {return address;}
+    public int getAddress() {return getSuffix();}
     public void setAddress(int address) {
-        this.address = address;
+        setSuffix(address);
         validate();
     }
+
+    public DMXAddress getBaseUniverseAddress() {return new DMXAddress(getPrefix(), 0);}
 
     public void validate() {
-        if (universe<0) throw new Error("Universe cannot be less than 0");
-        if (address<0||address>512) throw new Error("Invalid address - "+address);
+        if (getPrefix()<0) setPrefix(0);
+        if (getSuffix()<0) setSuffix(0);
+        if (getSuffix()>512) setSuffix(512);
     }
 
     @Override
-    public String toString() {return universe+"."+address;}
+    public String toString() {return getPrefix()+"."+getSuffix();}
 }

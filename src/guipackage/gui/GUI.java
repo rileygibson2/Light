@@ -25,10 +25,9 @@ import guipackage.gui.components.complexcomponents.CommandLineGUI;
 import guipackage.gui.components.complexcomponents.PoolGUI;
 import guipackage.gui.components.complexcomponents.UDAGUI;
 import light.Pool;
-import light.stores.Preset;
+import light.commands.commandline.CommandLine;
 import light.uda.UDA;
 import light.uda.UDAZone;
-import light.uda.commandline.CommandLine;
 import light.uda.guiinterfaces.GUIInterface;
 
 

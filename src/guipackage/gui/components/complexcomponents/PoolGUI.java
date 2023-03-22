@@ -53,4 +53,10 @@ public class PoolGUI extends Component implements PoolInterface {
 
         poolCells.get(poolCells.size()-1).addDragIcon();
     }
+
+    @Override
+    public void update() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'update'");
+    }
 }

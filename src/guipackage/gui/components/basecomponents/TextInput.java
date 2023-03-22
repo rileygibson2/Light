@@ -9,7 +9,7 @@ import guipackage.general.Getter;
 import guipackage.general.Point;
 import guipackage.general.Submitter;
 import guipackage.general.UnitRectangle;
-import guipackage.general.Utils;
+import guipackage.general.GUIUtils;
 import guipackage.gui.GUI;
 import guipackage.gui.IO;
 import guipackage.gui.components.InputComponent;
@@ -108,12 +108,12 @@ public class TextInput extends InputComponent<String> {
 	
 	@Override
 	public void doHover() {
-		Utils.setCursor(Cursor.HAND_CURSOR);
+		GUIUtils.setCursor(Cursor.HAND_CURSOR);
 	}
 	
 	@Override
 	public void doUnhover() {
-		Utils.setCursor(Cursor.DEFAULT_CURSOR);
+		GUIUtils.setCursor(Cursor.DEFAULT_CURSOR);
 	}
 	
 	@Override

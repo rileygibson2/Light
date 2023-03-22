@@ -5,6 +5,8 @@ import java.util.Set;
 
 import light.Fixture;
 import light.Programmer;
+import light.commands.commandline.CommandLine;
+import light.commands.commandline.CommandProxy;
 import light.general.Attribute;
 import light.general.ConsoleAddress;
 import light.general.DataStore;
@@ -23,12 +25,9 @@ public class Preset extends AbstractStore {
     
     private PresetType type;
     
-    private DataStore store;
-    
     public Preset(ConsoleAddress address, PresetType type) {
         super(address);
         this.type = type;
-        store = new DataStore();
     }
     
     /**
@@ -63,7 +62,7 @@ public class Preset extends AbstractStore {
     
     public void set(Fixture fixture, Attribute attribute, Integer value) {
         if (!isValid(attribute)) return;  //Check attribute being added is present in this preset type
-        store.set(fixture, attribute, value, true);
+        getStore().set(fixture, attribute, value, true);
     }
     
     /**
@@ -71,7 +70,7 @@ public class Preset extends AbstractStore {
      * @param store
      */
     public void set(DataStore store) {
-        this.store = store;
+        setStore(store);
     }
 
     /**
@@ -102,8 +101,21 @@ public class Preset extends AbstractStore {
         return false;
     }
 
-    public void loadToProgrammer() {
-        Programmer prog = Programmer.getInstance();
-        prog.combine(store, true);
+    /*@Override
+    public void go() {
+        //Load to programmer
+        Programmer.getInstance().combine(getStore(), true);
+    }*/
+
+    @Override
+    public void merge(AbstractStore toMerge) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'merge'");
+    }
+
+    @Override
+    public void replace(AbstractStore toReplace) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'replace'");
     }
 }

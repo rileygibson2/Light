@@ -5,9 +5,8 @@ import java.util.List;
 
 import light.general.Addressable;
 import light.general.ConsoleAddress;
-import light.stores.AbstractStore;
 
-public class Pool<T extends AbstractStore> extends Addressable {
+public class Pool<T extends Addressable> extends Addressable {
 
     List<T> elements;
 

@@ -17,6 +17,7 @@ import light.commands.Modulate;
 import light.commands.Move;
 import light.commands.Store;
 import light.commands.commandline.CommandLine;
+import light.executors.Executor;
 import light.general.Addressable;
 import light.general.ConsoleAddress;
 import light.stores.AbstractStore;
@@ -43,6 +44,7 @@ public class Light {
     private Pool<View> viewPool;
     private Pool<Sequence> sequencePool;
     private Pool<Group> groupPool;
+    private Pool<Executor> executorPool;
 
     private View currentView;
 
@@ -63,6 +65,7 @@ public class Light {
     public Pool<Sequence> getSequencePool() {return sequencePool;}
     public Pool<Effect> getEffectPool() {return effectPool;}
     public Pool<View> getViewPool() {return viewPool;}
+    public Pool<Executor> getExecutorPool() {return executorPool;}
 
     /**
      * Will not work for preset pools
@@ -135,6 +138,7 @@ public class Light {
         sequencePool = new Pool<Sequence>(new ConsoleAddress(Sequence.class, 0, 0));
         effectPool = new Pool<Effect>(new ConsoleAddress(Effect.class, 0, 0));
         viewPool = new Pool<View>(new ConsoleAddress(View.class, 0, 0));
+        executorPool = new Pool<Executor>(new ConsoleAddress(Executor.class, 0, 0));
 
         //Setup command line and add commands
         CommandLine commandLine = CommandLine.getInstance();

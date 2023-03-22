@@ -25,5 +25,17 @@ public class View extends AbstractStore {
 
     public void load() {
         
-    };
+    }
+
+    @Override
+    public void merge(AbstractStore toMerge) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'merge'");
+    }
+
+    @Override
+    public void replace(AbstractStore toReplace) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'replace'");
+    }
 }

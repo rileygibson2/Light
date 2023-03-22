@@ -40,6 +40,12 @@ public class CommandLineGUI extends Component implements CommandLineInterface{
         prefix.setText("["+p+"]>");
     }
 
-    public void setCommandString(String c) {command.setText(c);} 
+    public void setCommandString(String c) {command.setText(c);}
+
+    @Override
+    public void update() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'update'");
+    } 
 
 }

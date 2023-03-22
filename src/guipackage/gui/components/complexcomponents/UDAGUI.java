@@ -119,5 +119,11 @@ public class UDAGUI extends Component implements UDAInterface {
         GUI.getInstance().scanDOM(tB, "");
         windowPickerOpen = true;
     }
+
+    @Override
+    public void update() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'update'");
+    }
     
 }

@@ -31,7 +31,7 @@ public class Fixture extends Addressable {
     public DMXAddress getAddressForAttribute(Attribute attribute) {
         if (attributes==null||!attributes.contains(attribute)) return null;
         if (address==null) return null;
-
+        
         int i = address.getAddress();
         for (Attribute a : attributes) {
             if (a==attribute) return new DMXAddress(address.getUniverse(), i);

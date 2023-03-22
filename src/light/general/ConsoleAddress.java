@@ -1,6 +1,6 @@
 package light.general;
 
-public class ConsoleAddress {
+public class ConsoleAddress implements Comparable {
     
     private final Class<? extends Addressable> scope;
     private int prefix;
@@ -28,6 +28,14 @@ public class ConsoleAddress {
 
     public boolean lessThan(ConsoleAddress a) {
         return matchesScope(a)&&matchesPrefix(a)&&this.prefix<a.prefix;
+    }
+
+    @Override
+    public int compareTo(Object o) {
+        if (!(o instanceof ConsoleAddress)) return -1;
+        ConsoleAddress o1 = (ConsoleAddress) o;
+        if (o1.prefix!=prefix) return prefix-o1.prefix;
+        return suffix-o1.suffix;
     }
 
     @Override

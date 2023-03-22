@@ -1,9 +1,7 @@
 package light.commands;
 
 import light.Light;
-import light.Pool;
 import light.Programmer;
-import light.general.Addressable;
 import light.general.ConsoleAddress;
 import light.general.DataStore;
 import light.stores.Cue;
@@ -51,7 +49,7 @@ public class Store implements Command {
         if (address.equals(sequence.getAddress())) {
             Cue cue = new Cue(address);
             cue.setData(Programmer.getInstance().clone());
-            sequence.addAsNext(cue);
+            sequence.addNext(cue);
             return;
         }
 

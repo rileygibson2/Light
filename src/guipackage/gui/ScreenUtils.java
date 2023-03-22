@@ -3,6 +3,7 @@ package guipackage.gui;
 import java.awt.AlphaComposite;
 import java.awt.BasicStroke;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.GradientPaint;
@@ -11,7 +12,6 @@ import java.awt.GraphicsEnvironment;
 import java.awt.MultipleGradientPaint.CycleMethod;
 import java.awt.RadialGradientPaint;
 import java.awt.RenderingHints;
-import java.awt.Dimension;
 import java.awt.font.FontRenderContext;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
@@ -31,11 +31,11 @@ import guipackage.general.Rectangle;
 import guipackage.general.UnitRectangle;
 import guipackage.general.UnitValue;
 import guipackage.general.UnitValue.Unit;
-import guipackage.general.Utils;
 import guipackage.gui.components.Component;
 import guipackage.gui.components.basecomponents.Image;
 import guipackage.gui.components.basecomponents.Label;
 import guipackage.gui.components.boxes.SimpleBox;
+import light.general.Utils;
 
 public class ScreenUtils {
 	

@@ -12,8 +12,7 @@ public class Cue extends AbstractStore implements OutputCapable {
         TimeCode
     }
     
-    //Cue data 
-    private DataStore store;
+    //Real cue data
     private DataStore storeReal; //Real/current values for this cue, used to implement fading
     
     //Cue attributes
@@ -28,12 +27,11 @@ public class Cue extends AbstractStore implements OutputCapable {
 
     public Cue(ConsoleAddress address, DataStore store) {
         super(address);
-        this.store = store;
         if (store!=null) this.storeReal = store.getZeroedClone();
     }
 
     public void setData(DataStore store) {
-        this.store = store;
+        setStore(store);
         if (store!=null) this.storeReal = store.getZeroedClone();
     }
 
@@ -49,16 +47,26 @@ public class Cue extends AbstractStore implements OutputCapable {
     public Command getCommand() {return command;}
     public void setCommand(Command c) {this.command = c;}
 
-    public void go() {
-
-    };
-
-    public void release() {
-
+    @Override
+    public DataStore getOutput() {
+        return getStore();
     }
 
     @Override
-    public DataStore getOutput() {
-        throw new UnsupportedOperationException("Unimplemented method 'getOutput'");
-    };
+    public void merge(AbstractStore toMerge) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'merge'");
+    }
+
+    @Override
+    public void replace(AbstractStore toReplace) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'replace'");
+    }
+
+	@Override
+	public boolean registrationCheck() {
+		// TODO Auto-generated method stub
+		throw new UnsupportedOperationException("Unimplemented method 'registrationCheck'");
+	};
 }

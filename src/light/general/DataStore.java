@@ -94,11 +94,13 @@ public class DataStore {
      * 
      * @param o - the data store to combine into this data store.
      * @param combineMethod - if set then the given data store's values will overwrite the current stores values. Otherwsie the current data stores values will persist 
+     * @return this Datastore to allow chaining
      */
-    public void combine(DataStore o, boolean overwritePriority) {
+    public DataStore combine(DataStore o, boolean overwritePriority) {
         for (Fixture f : o.getFixtureSet()) {
             set(f, o.getFixtureValues(f), overwritePriority);
         }
+        return this;
     }
 
     /**

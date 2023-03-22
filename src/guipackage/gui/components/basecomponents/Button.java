@@ -6,7 +6,7 @@ import java.awt.Graphics2D;
 
 import guipackage.general.Point;
 import guipackage.general.UnitRectangle;
-import guipackage.general.Utils;
+import guipackage.general.GUIUtils;
 import guipackage.gui.components.Component;
 import guipackage.gui.components.boxes.SimpleBox;
 import guipackage.threads.ThreadController;
@@ -39,7 +39,7 @@ public class Button extends Component {
 
 	@Override
 	public void doClick(Point p) {
-		Utils.setCursor(Cursor.DEFAULT_CURSOR);
+		GUIUtils.setCursor(Cursor.DEFAULT_CURSOR);
 		super.doClick(p);
 	};
 
