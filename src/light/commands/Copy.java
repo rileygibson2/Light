@@ -7,5 +7,4 @@ public class Copy implements Command {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'execute'");
     }
-    
 }

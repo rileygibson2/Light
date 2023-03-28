@@ -7,12 +7,12 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import guipackage.general.Pair;
 import light.Fixture;
 import light.Programmer;
 import light.general.Attribute;
 import light.general.DMXAddress;
 import light.general.DataStore;
+import light.guipackage.general.Pair;
 import light.stores.Sequence;
 import light.stores.effects.Effect;
 

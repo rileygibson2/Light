@@ -1,6 +1,10 @@
 package light.general;
 
-public class ConsoleAddress implements Comparable {
+import light.persistency.Persistency;
+import light.persistency.PersistencyCapable;
+import light.persistency.PersistencyWriter;
+
+public class ConsoleAddress implements Comparable<ConsoleAddress>, PersistencyCapable {
     
     private final Class<? extends Addressable> scope;
     private int prefix;
@@ -31,11 +35,9 @@ public class ConsoleAddress implements Comparable {
     }
 
     @Override
-    public int compareTo(Object o) {
-        if (!(o instanceof ConsoleAddress)) return -1;
-        ConsoleAddress o1 = (ConsoleAddress) o;
-        if (o1.prefix!=prefix) return prefix-o1.prefix;
-        return suffix-o1.suffix;
+    public int compareTo(ConsoleAddress o) {
+        if (o.prefix!=prefix) return prefix-o.prefix;
+        return suffix-o.suffix;
     }
 
     @Override
@@ -56,5 +58,21 @@ public class ConsoleAddress implements Comparable {
             super(address);
         }
 
+    }
+
+    @Override
+    public byte[] getBytes() {
+        PersistencyWriter pW = new PersistencyWriter();
+        pW.put(this.scope.getName().getBytes());
+        pW.put((byte) prefix);
+        pW.put((byte) suffix);
+        pW.wrapInSegment();
+        return pW.toArray();
+    }
+
+    @Override
+    public void generateFromBytes(byte[] bytes) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'generateFromBytes'");
     }
 }

@@ -1,9 +1,10 @@
 package light.stores;
 
 import light.general.ConsoleAddress;
+import light.persistency.PersistencyCapable;
 import light.uda.UDA;
 
-public class View extends AbstractStore {
+public class View extends AbstractStore implements PersistencyCapable {
     
     private UDA uda;
 
@@ -37,5 +38,17 @@ public class View extends AbstractStore {
     public void replace(AbstractStore toReplace) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'replace'");
+    }
+
+    @Override
+    public byte[] getBytes() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getBytes'");
+    }
+
+    @Override
+    public void generateFromBytes(byte[] bytes) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'generateFromBytes'");
     }
 }

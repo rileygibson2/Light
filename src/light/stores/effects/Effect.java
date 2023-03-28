@@ -10,9 +10,10 @@ import light.executors.ExecutorCapable;
 import light.general.Attribute;
 import light.general.ConsoleAddress;
 import light.general.DataStore;
+import light.persistency.PersistencyCapable;
 import light.stores.AbstractStore;
 
-public class Effect extends AbstractStore implements ExecutorCapable {
+public class Effect extends AbstractStore implements ExecutorCapable, PersistencyCapable {
     
     private Map<Attribute, EffectLine> lines;
     private List<Fixture> fixtures;
@@ -108,5 +109,23 @@ public class Effect extends AbstractStore implements ExecutorCapable {
 	public void swop() {
 		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException("Unimplemented method 'swop'");
+	}
+
+	@Override
+	public void load() {
+		// TODO Auto-generated method stub
+		throw new UnsupportedOperationException("Unimplemented method 'load'");
+	}
+
+	@Override
+	public byte[] getBytes() {
+		// TODO Auto-generated method stub
+		throw new UnsupportedOperationException("Unimplemented method 'getBytes'");
+	}
+
+	@Override
+	public void generateFromBytes(byte[] bytes) {
+		// TODO Auto-generated method stub
+		throw new UnsupportedOperationException("Unimplemented method 'generateFromBytes'");
 	}
 }

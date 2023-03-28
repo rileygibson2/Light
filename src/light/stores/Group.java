@@ -6,8 +6,9 @@ import java.util.List;
 import light.Fixture;
 import light.Programmer;
 import light.general.ConsoleAddress;
+import light.persistency.PersistencyCapable;
 
-public class Group extends AbstractStore {
+public class Group extends AbstractStore implements PersistencyCapable {
 
     List<Fixture> fixtures;
 
@@ -24,7 +25,8 @@ public class Group extends AbstractStore {
 
     public int getSize() {return fixtures.size();}
 
-    public void selectFixtures() {
+    @Override
+    public void load() {
         Programmer.getInstance().selectFixtures(fixtures);
     }
 
@@ -40,4 +42,15 @@ public class Group extends AbstractStore {
         throw new UnsupportedOperationException("Unimplemented method 'replace'");
     }
 
+    @Override
+    public byte[] getBytes() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getBytes'");
+    }
+
+    @Override
+    public void generateFromBytes(byte[] bytes) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'generateFromBytes'");
+    }
 }

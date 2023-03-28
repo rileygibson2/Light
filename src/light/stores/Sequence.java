@@ -8,8 +8,9 @@ import java.util.List;
 import light.executors.ExecutorCapable;
 import light.general.ConsoleAddress;
 import light.general.DataStore;
+import light.persistency.PersistencyCapable;
 
-public class Sequence extends AbstractStore implements ExecutorCapable {
+public class Sequence extends AbstractStore implements ExecutorCapable, PersistencyCapable {
     
     List<Cue> cues;
     Cue currentCue;
@@ -205,4 +206,22 @@ public class Sequence extends AbstractStore implements ExecutorCapable {
 		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException("Unimplemented method 'swop'");
 	}
+
+    @Override
+    public void load() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'load'");
+    }
+
+    @Override
+    public byte[] getBytes() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getBytes'");
+    }
+
+    @Override
+    public void generateFromBytes(byte[] bytes) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'generateFromBytes'");
+    }
 }

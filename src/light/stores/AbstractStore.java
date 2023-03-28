@@ -25,10 +25,20 @@ public abstract class AbstractStore extends Addressable {
 
     public void setLabel(String label) {this.label = label;}
 
+    /**
+     * Can be overridden but by default will load this store's address into the commandline
+     */
     public void select() {
         //Load into command line
         CommandLine.getInstance().addToCommand(new CommandProxy(getAddress()));
     }
+
+    /**
+     * Used as a general purpose method trigger this store's primary action.
+     * Other more specific actions can be implemented by the inheriting store or by using
+     * the executor interfaces
+     */
+    public abstract void load();
 
     public abstract void merge(AbstractStore toMerge);
     public abstract void replace(AbstractStore toReplace);

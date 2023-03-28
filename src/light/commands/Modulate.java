@@ -16,14 +16,14 @@ public class Modulate implements Command {
     List<ConsoleAddress> targetFixtures;
     Object source;
     
-    public Modulate(List<ConsoleAddress> targetFixtures, double value) {
-        this.targetFixtures = targetFixtures;
-        this.source = value;
-    }
-    
     public Modulate(ConsoleAddress targetFixture, double value) {
         targetFixtures = new ArrayList<ConsoleAddress>();
         targetFixtures.add(targetFixture);
+        this.source = value;
+    }
+
+    public Modulate(List<ConsoleAddress> targetFixtures, double value) {
+        this.targetFixtures = targetFixtures;
         this.source = value;
     }
     
@@ -63,5 +63,4 @@ public class Modulate implements Command {
         }
         prog.selectFixtures(fixtures);
     }
-    
 }

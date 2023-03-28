@@ -3,16 +3,16 @@ package light.uda;
 import java.util.HashSet;
 import java.util.Set;
 
-import guipackage.cli.CLI;
-import guipackage.general.Point;
-import guipackage.general.Rectangle;
-import guipackage.gui.GUI;
 import light.Pool;
-import light.uda.guiinterfaces.UDAInterface;
+import light.guipackage.cli.CLI;
+import light.guipackage.general.Point;
+import light.guipackage.general.Rectangle;
+import light.guipackage.gui.GUI;
+import light.uda.guiinterfaces.UDAGUIInterface;
 
 public class UDA {
 
-    UDAInterface gui;
+    UDAGUIInterface gui;
     public Point size;
     public Set<UDAZone<?>> zones;
 
@@ -20,7 +20,7 @@ public class UDA {
         size = new Point(15, 0);
         zones = new HashSet<UDAZone<?>>();
 
-        gui = (UDAInterface) GUI.getInstance().addToGUI(this);
+        gui = (UDAGUIInterface) GUI.getInstance().addToGUI(this);
         size = gui.getSize();
     }
 

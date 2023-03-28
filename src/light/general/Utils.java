@@ -2,13 +2,14 @@ package light.general;
 
 import java.io.InputStream;
 import java.net.URL;
+import java.nio.ByteBuffer;
 
 import light.executors.Executor.ExecType;
 import light.executors.ExecutorCapable;
 
 public class Utils {
-    
-    public static InputStream getInputStream(String path) {
+	
+	public static InputStream getInputStream(String path) {
 		return Utils.class.getClassLoader().getResourceAsStream(path);
 	}
 	
@@ -16,42 +17,57 @@ public class Utils {
 		return Utils.class.getClassLoader().getResource(path);
 	}
 
-    public void runAction(ExecType action, ExecutorCapable element) {
-        switch (action) {
+	public static byte[] combineByteArrays(byte[]... args) {
+		int l = 0;
+		for (byte[] b : args) l += b.length;
+
+		ByteBuffer buff = ByteBuffer.allocate(l);
+		for (byte[] b : args) buff.put(b);
+		return buff.array();
+	}
+
+	public static byte[] generateByteArray(byte... args) {
+		byte[] result = new byte[args.length];
+		for (int i=0; i<result.length; i++) result[i] = args[i];
+		return result; //?? just return args maybe
+	}
+	
+	public void runAction(ExecType action, ExecutorCapable element) {
+		switch (action) {
 			case DoubleRate:
-				break;
+			break;
 			case DoubleSpeed:
-				break;
+			break;
 			case Flash:
-				break;
+			break;
 			case FlashOff:
-				break;
+			break;
 			case FlashOn:
-				break;
+			break;
 			case Go:
-				break;
+			break;
 			case GoBack:
-				break;
+			break;
 			case HalfRate:
-				break;
+			break;
 			case HalfSpeed:
-				break;
+			break;
 			case Master:
-				break;
+			break;
 			case Off:
-				break;
+			break;
 			case On:
-				break;
+			break;
 			case Pause:
-				break;
+			break;
 			case Swop:
-				break;
+			break;
 			case Temp:
-				break;
+			break;
 			case Toggle:
-				break;
+			break;
 			default:
-				break;
-        }
-    }
+			break;
+		}
+	}
 }

@@ -5,13 +5,12 @@ import java.util.Set;
 
 import light.Fixture;
 import light.Programmer;
-import light.commands.commandline.CommandLine;
-import light.commands.commandline.CommandProxy;
 import light.general.Attribute;
 import light.general.ConsoleAddress;
 import light.general.DataStore;
+import light.persistency.PersistencyCapable;
 
-public class Preset extends AbstractStore {
+public class Preset extends AbstractStore implements PersistencyCapable {
     
     public enum PresetType {
         Dimmer,
@@ -101,11 +100,11 @@ public class Preset extends AbstractStore {
         return false;
     }
 
-    /*@Override
-    public void go() {
-        //Load to programmer
+    @Override
+    public void load() {
+        //Load into programmer
         Programmer.getInstance().combine(getStore(), true);
-    }*/
+    }
 
     @Override
     public void merge(AbstractStore toMerge) {
@@ -117,5 +116,17 @@ public class Preset extends AbstractStore {
     public void replace(AbstractStore toReplace) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'replace'");
+    }
+
+    @Override
+    public byte[] getBytes() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getBytes'");
+    }
+
+    @Override
+    public void generateFromBytes(byte[] bytes) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'generateFromBytes'");
     }
 }

@@ -68,5 +68,11 @@ public class Cue extends AbstractStore implements OutputCapable {
 	public boolean registrationCheck() {
 		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException("Unimplemented method 'registrationCheck'");
-	};
+	}
+
+    @Override
+    public void load() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'load'");
+    };
 }

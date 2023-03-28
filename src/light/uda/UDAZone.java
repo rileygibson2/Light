@@ -1,6 +1,6 @@
 package light.uda;
 
-import guipackage.general.Rectangle;
+import light.guipackage.general.Rectangle;
 
 public class UDAZone<Z> {
     

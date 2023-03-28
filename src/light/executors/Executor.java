@@ -2,6 +2,7 @@ package light.executors;
 
 import light.general.Addressable;
 import light.general.ConsoleAddress;
+import light.persistency.PersistencyCapable;
 
 /**
  * An executor is just a method of controlling a store
@@ -14,7 +15,7 @@ import light.general.ConsoleAddress;
  * As such an interface is provided that all elements that may be assigned to an executor must implement that
  * ensures that the all assignable elements can be controlled by the same mechanisms.
  */
-public class Executor extends Addressable {
+public class Executor extends Addressable implements PersistencyCapable {
 
     private ExecutorCapable assignment;
 
@@ -55,4 +56,16 @@ public class Executor extends Addressable {
     public ExecutorCapable getAssignedElement() {return assignment;}
 
     public void clearAssignment() {assignment = null;}
+
+    @Override
+    public byte[] getBytes() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getBytes'");
+    }
+
+    @Override
+    public void generateFromBytes(byte[] bytes) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'generateFromBytes'");
+    }
 }

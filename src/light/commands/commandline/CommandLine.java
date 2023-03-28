@@ -1,30 +1,34 @@
 package light.commands.commandline;
 
 import java.awt.event.KeyEvent;
+import java.util.ArrayDeque;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
-import guipackage.cli.CLI;
-import guipackage.general.Submitter;
-import guipackage.gui.GUI;
-import guipackage.gui.IO;
 import light.commands.Command;
 import light.commands.commandline.CommandProxy.Operator;
-import light.uda.guiinterfaces.CommandLineInterface;
+import light.guipackage.cli.CLI;
+import light.guipackage.general.Submitter;
+import light.guipackage.gui.GUI;
+import light.guipackage.gui.IO;
+import light.uda.guiinterfaces.CommandLineGUIInterface;
 
 public class CommandLine {
 
     private static CommandLine singleton;
 
-    private CommandLineInterface gui;
+    private CommandLineGUIInterface gui;
     private Map<Class<? extends Command>, String> registeredCommands; //Register of currently active commands that should be parsed
     
     private CommandProxy commandRoot;
-    private CommandProxy lastCommandProxy; //Used for building command
-    private String workingText; //Used for typed input, will fill up until a command proxy type can be extracted
+    private ArrayDeque<CommandProxy> commandStack; //Working stack of all parts of this command
+    private String workingText; //Used for typed input, will fill up until a command proxy type can be extracted from it
 
     private CommandLine() {
-        gui = (CommandLineInterface) GUI.getInstance().addToGUI(this);
+        gui = (CommandLineGUIInterface) GUI.getInstance().addToGUI(this);
         commandRoot = null;
+        commandStack = new ArrayDeque<CommandProxy>();
         
         IO.getInstance().registerKeyListener(this, new Submitter<KeyEvent>() {
             @Override
@@ -39,7 +43,10 @@ public class CommandLine {
 
     public boolean isClear() {return commandRoot==null;}
 
-    public void clear() {commandRoot = null;}
+    public void clear() {
+        commandRoot = null;
+        commandStack.clear();
+    }
 
     /**
      * Register command class with command line using the class's simple name as the name mapping
@@ -58,11 +65,38 @@ public class CommandLine {
     public void deregisterCommand(Class<? extends Command> c) {registeredCommands.remove(c);}
 
     /**
-     * Used to add a part to this command
+     * Used to add a component to this command
      * @param cP
      */
     public void addToCommand(CommandProxy cP) {
+        //Work back through command stack to find last non-terminal proxy
+        CommandProxy lastNonTerminal = null;
+        Iterator<CommandProxy> i = commandStack.iterator();
         
+        while (i.hasNext()) {
+            CommandProxy next = i.next();
+            if (!next.isTerminal()) {
+                lastNonTerminal = next;
+                break;
+            }
+        }
+        
+        if (lastNonTerminal==null) { //Start new command
+            commandRoot = cP;
+            commandStack.push(cP);
+            return;
+        }
+
+        //+ and thru edge case
+        if (cP.getResolveType()==List.class) {
+            CommandProxy firstArg = commandStack.peek();
+            cP.addArgument(firstArg);
+            if (!cP.isTerminal()) commandStack.push(cP);
+        }
+        else { //General case
+            lastNonTerminal.addArgument(cP);
+            commandStack.push(cP);
+        }
     }
 
     public void executeCommand() {
@@ -108,6 +142,7 @@ public class CommandLine {
 
         if (parsed!=null) {
             //Add to tree
+            addToCommand(parsed);
         }
     }
 
@@ -120,7 +155,7 @@ public class CommandLine {
 
     private String commandStringDFS(CommandProxy cP) {
         String s = cP.toString();
-        for (CommandProxy child : cP.getArgs()) {
+        for (CommandProxy child : cP.getArguments()) {
             if (child!=null) s += commandStringDFS(child);
         }
         return s;

@@ -1,8 +1,8 @@
 package light.general;
 
-import light.stores.Preset.PresetType;
+import light.persistency.PersistencyCapable;
 
-public enum Attribute {
+public enum Attribute implements PersistencyCapable {
     Intensity,
 
     Red,
@@ -74,5 +74,16 @@ public enum Attribute {
         return this==Attribute.Shaper1A||this==Attribute.Shaper1B||this==Attribute.Shaper2A||
         this==Attribute.Shaper2B||this==Attribute.Shaper3A||this==Attribute.Shaper3B||
         this==Attribute.Shaper4A|| this==Attribute.Shaper4B;
+    }
+
+    @Override
+    public byte[] getBytes() {
+        return new byte[] {(byte) this.ordinal()};
+    }
+
+    @Override
+    public void generateFromBytes(byte[] bytes) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'generateFromBytes'");
     }
 }

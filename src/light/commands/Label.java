@@ -19,5 +19,4 @@ public class Label implements Command {
         AbstractStore store = (AbstractStore) Light.getInstance().resolveAddress(target);
         store.setLabel(label);
     }
-    
 }

@@ -5,13 +5,12 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import javax.naming.directory.AttributeInUseException;
-
-import org.w3c.dom.Attr;
-
 import light.Fixture;
+import light.persistency.Persistency;
+import light.persistency.PersistencyCapable;
+import light.persistency.PersistencyWriter;
 
-public class DataStore {
+public class DataStore implements PersistencyCapable {
     
     protected Map<Fixture, Map<Attribute, Integer>> store;
     
@@ -148,5 +147,30 @@ public class DataStore {
         DataStore clone = new DataStore();
         clone.store = newStore;
         return clone;
+    }
+
+    @Override
+    public byte[] getBytes() {
+        PersistencyWriter pW = new PersistencyWriter();
+
+        for (Fixture f : getFixtureSet()) {
+            pW.openSegment();
+            pW.put(f.getAddress().getBytes());
+    
+            for (Map.Entry<Attribute, Integer> e : getFixtureValues(f).entrySet()) {
+                pW.put(e.getKey().getBytes());
+                pW.put(e.getValue().byteValue());
+            }
+            pW.closeSegmenet();
+        }
+
+        pW.wrapInSegment();
+        return pW.toArray();
+    }
+
+    @Override
+    public void generateFromBytes(byte[] bytes) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'generateFromBytes'");
     }
 }

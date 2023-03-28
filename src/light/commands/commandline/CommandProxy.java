@@ -4,9 +4,9 @@ import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.List;
 
-import guipackage.cli.CLI;
 import light.commands.Command;
 import light.general.ConsoleAddress;
+import light.guipackage.cli.CLI;
 
 /**
 * 
@@ -115,9 +115,19 @@ public class CommandProxy {
         args = new ArrayList<CommandProxy>();
     }
     
+    public void addArgument(CommandProxy argument) {
+        if (!isTerminal()) args.add(argument);
+    }
+
+    public List<CommandProxy> getArguments() {return args;}
+
     public CommandProxyType getType() {return type;}
 
-    public List<CommandProxy> getArgs() {return args;}
+    /**
+     * If this command proxy is a terminal (i.e will not accept arguments) this method will return true.
+     * @return
+     */
+    public boolean isTerminal() {return type==CommandProxyType.Value;}
     
     //Returns type this proxy will resolve to
     public Class<?> getResolveType() {

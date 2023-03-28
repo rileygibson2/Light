@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import guipackage.gui.GUI;
 import light.commands.Clear;
 import light.commands.Copy;
 import light.commands.Delete;
@@ -20,6 +19,7 @@ import light.commands.commandline.CommandLine;
 import light.executors.Executor;
 import light.general.Addressable;
 import light.general.ConsoleAddress;
+import light.guipackage.gui.GUI;
 import light.stores.AbstractStore;
 import light.stores.Group;
 import light.stores.Preset;
@@ -95,6 +95,8 @@ public class Light {
         }
         return fixtures;
     }
+
+    public Set<Fixture> getAllFixtures() {return fixtures;}
 
     /**
      * Resolves an address to a real object if it can be
