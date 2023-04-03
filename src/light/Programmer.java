@@ -1,22 +1,27 @@
 package light;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import light.encoders.EncoderCapable;
 import light.encoders.Encoders;
 import light.encoders.Encoders.Encoder;
 import light.general.DataStore;
+import light.stores.effects.Effect;
 
 public class Programmer extends DataStore implements EncoderCapable {
     
     private static Programmer singleton;
 
-    List<Fixture> selectedFixtures;
+    private List<Fixture> selectedFixtures;
+    private Set<Effect> activeEffects;
 
     private Programmer() {
         super();
         selectedFixtures = new ArrayList<Fixture>();
+        activeEffects = new HashSet<Effect>();
     }
 
     public static Programmer getInstance() {
@@ -42,10 +47,16 @@ public class Programmer extends DataStore implements EncoderCapable {
         if (selectedFixtures.isEmpty()) Encoders.getInstance().clearEncoders();
     }
 
+    public List<Fixture> getSelectedFixtures() {return selectedFixtures;}
+
     public void clearSelectedFixtures() {
         selectedFixtures.clear();
         Encoders.getInstance().clearEncoders();
     }
+
+    public void addEffect(Effect e) {activeEffects.add(e);}
+
+    public void removeEffect(Effect e) {activeEffects.remove(e);}
 
     @Override
     public String getEncoderTitle(Encoder encoder) {

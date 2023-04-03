@@ -1,9 +1,6 @@
 package light.stores.effects;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 import light.Fixture;
 import light.executors.ExecutorCapable;
@@ -15,18 +12,39 @@ import light.stores.AbstractStore;
 
 public class Effect extends AbstractStore implements ExecutorCapable, PersistencyCapable {
     
-    private Map<Attribute, EffectLine> lines;
-    private List<Fixture> fixtures;
+	public static final int defaultSpeed = 5;
+	public static final int defaultWidth = 50;
+	public static final int defaultBlocks = 0;
+	public static final int defaultPhase = 0;
+
+	public static final int maxSpeed = 1000;
+
+    private HashMap<Attribute, EffectLine> lines;
 
     private int priority;
 
     public Effect(ConsoleAddress address) {
         super(address);
-        fixtures = new ArrayList<Fixture>();
         lines = new HashMap<Attribute, EffectLine>();
     }
 
     public int getPriority() {return priority;}
+
+	public void addFixture(Fixture f) {
+		//Check there is an effect line for attributes of this fixture
+		for (Attribute a : f.getAttributes()) {
+			if (!lines.containsKey(a)) {
+				lines.put(a, new EffectLine(a, this));
+			}
+		}
+
+		//Add fixture to all effect lines ???
+		for (EffectLine line : lines.values()) line.addFixture(f);
+	}
+
+	public void activeLine(Attribute attribute) {
+		lines.get(attribute).setActive(true);
+	}
 
     @Override
     public DataStore getOutput() {

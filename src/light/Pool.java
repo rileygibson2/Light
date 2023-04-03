@@ -42,7 +42,7 @@ public class Pool<T extends Addressable & PersistencyCapable> extends Addressabl
         for (T t : elements) {
             pW.put(t.getBytes());
         }
-        
+
         pW.wrapInSegment();
         return pW.toArray();
     }

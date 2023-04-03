@@ -3,7 +3,9 @@ package light.uda;
 import java.util.HashSet;
 import java.util.Set;
 
+import light.Light;
 import light.Pool;
+import light.general.ConsoleAddress;
 import light.guipackage.cli.CLI;
 import light.guipackage.general.Point;
 import light.guipackage.general.Rectangle;
@@ -24,8 +26,19 @@ public class UDA {
         size = gui.getSize();
     }
 
+
+    public void createZone(Object tag, Rectangle zoneRec) {
+        if (tag instanceof ConsoleAddress) {
+            UDAZone<Pool<?>> zone = new UDAZone<Pool<?>>(Light.getInstance().getPool((ConsoleAddress) tag), zoneRec);
+            CLI.debug(tag+" "+zone+" "+zone.getZone());
+            GUI.getInstance().addToGUI(zone);
+            zones.add(zone);
+        }
+    }
+
     public void addPool(Pool<?> pool, Rectangle zoneRec) {
-        UDAZone<Pool<?>> zone = new UDAZone<Pool<?>>(pool, null);
+        UDAZone<Pool<?>> zone = new UDAZone<Pool<?>>(pool, zoneRec);
+        GUI.getInstance().addToGUI(zone);
         zones.add(zone);
     }
 

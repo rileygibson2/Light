@@ -110,7 +110,7 @@ public class AnimationFactory {
 					c.setX(new UnitValue(sineCurve(start.x.v, to.x, p), c.getX().u));
 					c.setY(new UnitValue(sineCurve(start.y.v, to.y, p), c.getY().u));
 
-					if (p>=100) end();
+					if (p>=100) finish();
 					iterate();
 				}
 				finish();
@@ -138,7 +138,7 @@ public class AnimationFactory {
 					c.setWidth(new UnitValue(sineCurve(start.width.v, to.width, p), c.getWidth().u));
 					c.setHeight(new UnitValue(sineCurve(start.height.v, to.height, p), c.getHeight().u));
 
-					if (p>=100) end();
+					if (p>=100) finish();
 					iterate();
 				}
 				finish();
@@ -173,7 +173,7 @@ public class AnimationFactory {
 						components[i].setOpacity(sineCurve(start.get(i), to, p));
 					}
 
-					if (p>=100) end();
+					if (p>=100) finish();
 					iterate();
 				}
 				finish();

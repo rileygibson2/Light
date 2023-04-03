@@ -20,6 +20,10 @@ public class Preset extends AbstractStore implements PersistencyCapable {
         Gobo,
         Shaper,
         Prisim;
+
+        public ConsoleAddress getBaseAddress() {
+            return new ConsoleAddress(Preset.class, this.ordinal()+1, 0);
+        }
     };
     
     private PresetType type;
@@ -42,7 +46,7 @@ public class Preset extends AbstractStore implements PersistencyCapable {
      */
     public static PresetType getTypeFromAddress(ConsoleAddress address) {
         if (address==null||!address.matchesScope(Preset.class)) return null;
-        if (address.getPrefix()<=0||address.getPrefix()>PresetType.values().length) return null;
+        if (address.getPrefix()<=0||address.getPrefix()-1>PresetType.values().length) return null;
         return PresetType.values()[address.getPrefix()-1];
     }
 

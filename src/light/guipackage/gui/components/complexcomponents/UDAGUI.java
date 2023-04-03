@@ -3,7 +3,7 @@ package light.guipackage.gui.components.complexcomponents;
 import java.awt.Color;
 import java.awt.Font;
 
-import light.Light;
+import light.guipackage.cli.CLI;
 import light.guipackage.general.Point;
 import light.guipackage.general.Rectangle;
 import light.guipackage.general.UnitPoint;
@@ -25,7 +25,7 @@ public class UDAGUI extends Component implements UDAGUIInterface {
     UDA uda;
     private UnitPoint cellDims; //Dimensions of a cell relative to the mainBox
     
-    private boolean windowPickerOpen;
+    private TempWindow openZonePicker;
     
     public UDAGUI(UnitRectangle r, UDA uda) {
         super(r);
@@ -33,7 +33,6 @@ public class UDAGUI extends Component implements UDAGUIInterface {
         cellDims = new UnitPoint(8, Unit.vw, 8, Unit.vw); //Cell dimensions
         
         setDOMEntryAction(() -> {
-            
             //Add dots
             for (int i=0; i<300; i++) {
                 SimpleBox sB = new SimpleBox(new UnitRectangle(new UnitValue(), new UnitValue(), cellDims));
@@ -74,7 +73,7 @@ public class UDAGUI extends Component implements UDAGUIInterface {
     }
     
     public void openZonePicker(Rectangle zoneRec) {
-        if (windowPickerOpen) return;
+        if (openZonePicker!=null) return;
         
         TempWindow tB = new TempWindow("Create Zone");
         addComponent(tB);
@@ -90,7 +89,7 @@ public class UDAGUI extends Component implements UDAGUIInterface {
         
         int i = 0;
         for (PresetType p : PresetType.values()) {
-            if (i==3) {
+            if (i==2) {
                 tB.addContent(cB, 0);
                 cB = new CollumnBox(new UnitPoint(25, Unit.px, 0, Unit.px));
                 cB.setPosition(Position.Relative);
@@ -101,14 +100,18 @@ public class UDAGUI extends Component implements UDAGUIInterface {
             l.setRounded(true);
             l.setBorder(GUI.focusOrange);
             l.setTextCentered(true);
+            l.setTag(p.getBaseAddress());
 
-            l.setClickAction(() -> uda.addPool(Light.getInstance().getPresetPool(p), zoneRec));
+            l.setClickAction(() -> {
+                uda.createZone(l.getTag(), zoneRec);
+                closeZonePicker();
+            });
 
             cB.addComponent(l);
             i++;
         }
         
-        if (i==3) tB.addContent(cB, 0);
+        if (i==2) tB.addContent(cB, 0);
         
         // Table table = new Table(new UnitPoint(0, Unit.px, 5, Unit.vh));
         // table.addCollumn(Label.class, "Attrib", new UnitValue(50, Unit.px));
@@ -116,8 +119,13 @@ public class UDAGUI extends Component implements UDAGUIInterface {
         // table.addCollumn(Label.class, "Mode", new UnitValue(50, Unit.px));
         // table.addRow();
         // contentBox.addComponent(table);
-        GUI.getInstance().scanDOM(tB, "");
-        windowPickerOpen = true;
+        openZonePicker = tB;
+    }
+
+    public void closeZonePicker() {
+        if (openZonePicker==null) return;
+        removeComponent(openZonePicker);
+        openZonePicker = null;
     }
 
     @Override

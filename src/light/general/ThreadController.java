@@ -39,8 +39,6 @@ public class ThreadController extends Thread {
 	 
 	//External use
 	
-	public void end() {stop = true;}
-	
 	public boolean hasEnded() {return !this.isAlive();}
 	
 	public boolean isDoomed() {return stop&&!hasEnded();}
@@ -75,8 +73,13 @@ public class ThreadController extends Thread {
 		sleep(wait);
 	}
 
-	public void finish() {
-		stop = true;
+	public void end() {stop = true;}
+
+	/**
+	 * End thread and run finish action if applicable
+	 */
+	protected void finish() {
+		end();
 		if (finishAction!=null) finishAction.run();
 	}
 	

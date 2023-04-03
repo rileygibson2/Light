@@ -33,7 +33,7 @@ public class PoolGUI extends Component implements PoolGUIInterface {
         setY(new UnitValue(zone.cells.y*cellDims.y.v,cellDims.y.u));
         setWidth(new UnitValue(zone.cells.width*cellDims.x.v, cellDims.x.u));
         setHeight(new UnitValue(zone.cells.height*cellDims.y.v, cellDims.y.u));
-
+        
         //Make cells
         poolCells = new ArrayList<PoolCellGUI>();
         PoolCellGUI p;

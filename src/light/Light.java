@@ -37,7 +37,6 @@ public class Light {
     private Set<Fixture> fixtures;
     private Programmer programmer;
 
-
     //Pools
     private Map<PresetType, Pool<Preset>> presetPools;
     private Pool<Effect> effectPool;
@@ -58,6 +57,7 @@ public class Light {
     }
 
     public Pool<Preset> getPresetPool(PresetType p) {
+        if (p==null) return null;
         return presetPools.get(p);
     }
 
@@ -66,6 +66,19 @@ public class Light {
     public Pool<Effect> getEffectPool() {return effectPool;}
     public Pool<View> getViewPool() {return viewPool;}
     public Pool<Executor> getExecutorPool() {return executorPool;}
+
+    public Pool<?> getPool(ConsoleAddress address) {
+        if (address.matchesScope(Group.class)) return groupPool;
+        if (address.matchesScope(Sequence.class)) return sequencePool;
+        if (address.matchesScope(Effect.class)) return effectPool;
+        if (address.matchesScope(View.class)) return viewPool;
+        if (address.matchesScope(Executor.class)) return executorPool;
+        if (address.matchesScope(Preset.class)) {
+            return getPresetPool(Preset.getTypeFromAddress(address));
+        }
+
+        return null;
+    }
 
     /**
      * Will not work for preset pools
@@ -125,7 +138,7 @@ public class Light {
     }
 
     private void setup() {
-        GUI.initialise(this, null);
+        GUI.initialise(this, null); //Passing null forces full screen
         programmer = Programmer.getInstance();
 
         fixtures = new HashSet<Fixture>();

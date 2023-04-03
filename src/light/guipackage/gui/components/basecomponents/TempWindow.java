@@ -5,8 +5,6 @@ import java.awt.Font;
 import java.util.ArrayList;
 import java.util.List;
 
-import light.guipackage.cli.CLI;
-import light.guipackage.general.Tag;
 import light.guipackage.general.UnitPoint;
 import light.guipackage.general.UnitRectangle;
 import light.guipackage.general.UnitValue;

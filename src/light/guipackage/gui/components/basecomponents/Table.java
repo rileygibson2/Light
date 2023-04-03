@@ -7,9 +7,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.w3c.dom.Text;
+import javax.swing.text.html.HTML.Tag;
 
-import light.guipackage.general.Tag;
 import light.guipackage.general.UnitPoint;
 import light.guipackage.general.UnitRectangle;
 import light.guipackage.general.UnitValue;
@@ -34,7 +33,7 @@ public class Table extends FlexBox {
         addCollumn(type, null, title, width);
     }
 
-    public void addCollumn(Class<?> type, Tag tag, String title, UnitValue width) {
+    public void addCollumn(Class<?> type, Object tag, String title, UnitValue width) {
         CollumnBox c = new CollumnBox();
         c.setPosition(Position.Relative);
         c.setMinWidth(width);
@@ -82,11 +81,11 @@ public class Table extends FlexBox {
         }
     }
 
-    public Map<Tag, Object> getValuesForRow(int i) {
+    public Map<Object, Object> getValuesForRow(int i) {
         if (collumns.isEmpty()) return null;
         if (i==0||i>collumns.get(0).cBox.getNumComponents()-1) return null;
 
-        Map<Tag, Object> values = new HashMap<>();
+        Map<Object, Object> values = new HashMap<>();
         for (int z=0; z<collumns.size(); z++) {
             Component c = collumns.get(z).cBox.getNthComponent(i-1);
             if (!(c instanceof InputComponent)) continue;
@@ -98,9 +97,9 @@ public class Table extends FlexBox {
     private class TableCollumn {
         CollumnBox cBox;
         Class<?> type;
-        Tag tag;
+        Object tag;
 
-        public TableCollumn(CollumnBox cBox, Class<?> type, Tag tag) {
+        public TableCollumn(CollumnBox cBox, Class<?> type, Object tag) {
             this.cBox = cBox;
             this.type = type;
             this.tag = tag;

@@ -1,8 +1,6 @@
 package light.guipackage.gui.components;
 
-import light.guipackage.cli.CLI;
 import light.guipackage.general.Point;
-import light.guipackage.general.Tag;
 import light.guipackage.general.UnitRectangle;
 import light.guipackage.general.UnitValue;
 import light.guipackage.gui.Element;
@@ -27,7 +25,7 @@ public abstract class Component extends Element {
 	private UnitRectangle shadowR;
 	private String testName;
 
-	private Tag tag;
+	private Object tag;
 	public String tagString;
 
 	public Component(UnitRectangle r) {
@@ -62,9 +60,9 @@ public abstract class Component extends Element {
 		return this; //To allow for chaining
 	}
 
-	public void setTag(Tag t) {tag = t;}
+	public void setTag(Object t) {tag = t;}
 	public boolean hasTag() {return tag!=null;}
-	public Tag getTag() {return tag;}
+	public Object getTag() {return tag;}
 
 	public boolean isSelected() {return selected;}
 	public void setSelected(boolean s) {selected = s;}

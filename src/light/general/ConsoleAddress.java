@@ -49,7 +49,7 @@ public class ConsoleAddress implements Comparable<ConsoleAddress>, PersistencyCa
 
     @Override
     public String toString() {
-        return prefix+"."+suffix;
+        return "["+scope.getSimpleName()+" "+prefix+"."+suffix+"]";
     }
 
     public class GenericAddressScope extends Addressable {

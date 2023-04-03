@@ -2,6 +2,7 @@ package light.commands.commandline;
 
 import java.awt.event.KeyEvent;
 import java.util.ArrayDeque;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -29,6 +30,7 @@ public class CommandLine {
         gui = (CommandLineGUIInterface) GUI.getInstance().addToGUI(this);
         commandRoot = null;
         commandStack = new ArrayDeque<CommandProxy>();
+        registeredCommands = new HashMap<Class<? extends Command>, String>();
         
         IO.getInstance().registerKeyListener(this, new Submitter<KeyEvent>() {
             @Override

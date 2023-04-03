@@ -31,6 +31,8 @@ public class Fixture extends Addressable implements PersistencyCapable {
         return attributes.contains(attribute);
     }
 
+    public List<Attribute> getAttributes() {return attributes;}
+
     public DMXAddress getAddressForAttribute(Attribute attribute) {
         if (attributes==null||!attributes.contains(attribute)) return null;
         if (dmxAddress==null) return null;

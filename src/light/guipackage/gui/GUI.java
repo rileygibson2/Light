@@ -42,7 +42,6 @@ public class GUI extends JPanel {
 	private static ScreenUtils screenUtils;
 	private IO io;
 
-	private Set<Element> roots; //Roots of all the views loaded
 	private RootElement currentRoot;
 	private static Pair<UDAGUI, UDA> uda;
 
@@ -84,7 +83,7 @@ public class GUI extends JPanel {
 	}
 	
 	public static GUI getInstance() {
-		if (singleton==null) singleton = new GUI();
+		if (singleton==null) throw new Error("This GUI has not been initialised yet");
 		return singleton;
 	}
 
@@ -164,7 +163,7 @@ public class GUI extends JPanel {
 		if (dom.visualiserVisible()) dom.update(getCurrentRoot());
 	}
 
-	public static GUI initialise(Object controller, Rectangle screen) {
+	public static void initialise(Object controller, Rectangle screen) {
 		//Full screen check
 		if (screen==null) {
 			GraphicsDevice device = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
@@ -173,8 +172,8 @@ public class GUI extends JPanel {
 		GUI.screen = screen;
 
 		//Make GUI
-		GUI panel = GUI.getInstance();
-		panel.setParent(controller);
+		GUI.singleton = new GUI();
+		GUI.singleton.setParent(controller);
 
 		javax.swing.SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
@@ -182,8 +181,8 @@ public class GUI extends JPanel {
 				System.setProperty("apple.laf.useScreenMenuBar", "true");
 				frame = new JFrame();
 				
-				panel.setPreferredSize(new Dimension((int) GUI.screen.width, (int) GUI.screen.height));
-				frame.getContentPane().add(panel);
+				GUI.singleton.setPreferredSize(new Dimension((int) GUI.screen.width, (int) GUI.screen.height));
+				frame.getContentPane().add(GUI.singleton);
 
 				//Label and build
 				frame.setTitle("Light");
@@ -194,6 +193,5 @@ public class GUI extends JPanel {
 				frame.pack();
 			}
 		});
-		return panel;
 	}
 }

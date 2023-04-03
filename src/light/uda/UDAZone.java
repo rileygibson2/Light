@@ -3,7 +3,7 @@ package light.uda;
 import light.guipackage.general.Rectangle;
 
 public class UDAZone<Z> {
-    
+
     Z z;
     public Rectangle cells;
 
@@ -13,4 +13,6 @@ public class UDAZone<Z> {
     }
 
     public Z getZone() {return z;}
+
+    public Rectangle getCells() {return cells;}
 }
