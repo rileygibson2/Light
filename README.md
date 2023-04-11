@@ -11,7 +11,7 @@ So far front end and back end are seperated with a networking sub folder to be i
 
 The idea is extremely loose coupling so one gui look can be swapped out for future updates and stuff
 
-## Components To Come
+## Components to Come
 
 Some of the things I intend to add over the course of the project include:
 
