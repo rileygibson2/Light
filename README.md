@@ -6,7 +6,7 @@ This is my current devalopment project for April 2023 onwards. Light is a lighti
 
 So far front end and back end are seperated with a networking sub folder to be introduced when I get to that stage
 
-- `light.gui.*`: contains all gui base components and infrastructure and backend interface implementing classes
+- `light.guipackage.*`: contains all gui base components and infrastructure and backend interface implementing classes
 - `light.*`: all backend control components
 
 The idea is extremely loose coupling so one gui 'look' can be swapped out for future updates and stuff
