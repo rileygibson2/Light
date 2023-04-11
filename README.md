@@ -11,8 +11,8 @@ So far front end and back end are seperated with a networking sub folder to be i
 
 The idea is extremely loose coupling so one gui 'look' can be swapped out for future updates and stuff
 
-## Components I intend to add over the course of the project include:
+# Components I intend to add over the course of the project include:
 
-* Outputting directly from the laptop via ArtNet, sACN as well as outputting MANet and HogNet (without the distributed processing).
-* 3D visualiser using work from one of my pervious repos.
-* Support for MIDI controllers - plug and play style. Idea is to be able to map the button or fader of any detected controller to basically any element of the control software to allow maximum control and usability for operators.
+- Outputting directly from the laptop via ArtNet, sACN as well as outputting MANet and HogNet (without the distributed processing).
+- 3D visualiser using work from one of my pervious repos.
+- Support for MIDI controllers - plug and play style. Idea is to be able to map the button or fader of any detected controller to basically any element of the control software to allow maximum control and usability for operators.
