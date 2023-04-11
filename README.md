@@ -2,7 +2,7 @@
 
 This is my current devalopment project for April 2023 onwards. Light is a lighting control software that (currently) leans heavily on the design and influence of MA and Hog softwares. I want to build a lighting software that can run efficiently on a laptop, and brings together all the good elements of lighting consoles that I use every day while putting in features that I would find useful/removing the problems I have with industry standard consoles in the hope that this is useful to other lighting techs.
 
-## Folder Structure
+## Project Structure
 
 So far front end and back end are seperated with a networking sub folder to be introduced when I get to that stage
 
