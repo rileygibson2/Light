@@ -7,6 +7,7 @@ import java.awt.Graphics2D;
 import light.general.ThreadController;
 import light.guipackage.general.GUIUtils;
 import light.guipackage.general.Point;
+import light.guipackage.general.Submitter;
 import light.guipackage.general.UnitRectangle;
 import light.guipackage.gui.components.Component;
 import light.guipackage.gui.components.boxes.SimpleBox;
@@ -25,6 +26,14 @@ public class Button extends Component {
 
 		Image img = new Image(new UnitRectangle(0, 0, 100, 100), imgSrc);
 		mainBox.addComponent(img);
+
+		//Click action
+		setClickAction(new Submitter<Point>() {
+			@Override
+			public void submit(Point p) {
+				click(p);
+			}
+		});
 	}
 	
 	public void addButtonComponent(Component c) {
@@ -37,10 +46,8 @@ public class Button extends Component {
 	
 	public void setOval(boolean o) {mainBox.setOval(o);}
 
-	@Override
-	public void doClick(Point p) {
+	public void click(Point p) {
 		GUIUtils.setCursor(Cursor.DEFAULT_CURSOR);
-		super.doClick(p);
 	};
 
 

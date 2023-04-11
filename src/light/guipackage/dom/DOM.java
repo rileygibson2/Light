@@ -27,7 +27,7 @@ public class DOM {
 	public DOMNode getRoot() {return root;}
 
 	private void populate(DOMNode node) {
-		node.getElement().sortComponents();
+		//node.getElement().sortComponents();
 		
 		for (Element e : node.getElement().getComponents()) {
 			DOMNode n = new DOMNode(e);

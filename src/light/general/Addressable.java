@@ -3,9 +3,11 @@ package light.general;
 public abstract class Addressable {
     
     private ConsoleAddress address;
+    private String label;
 
     public Addressable(ConsoleAddress address) {
         this.address = address;
+        this.label = "";
     }
 
     public ConsoleAddress getAddress() {return address;}
@@ -13,4 +15,8 @@ public abstract class Addressable {
     public void setAddress(ConsoleAddress address) {this.address = address;}
 
     public boolean hasAddress() {return address!=null;}
+
+    public String getLabel() {return label;}
+
+    public void setLabel(String label) {this.label = label;}
 }

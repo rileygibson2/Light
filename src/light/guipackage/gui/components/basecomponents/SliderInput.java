@@ -3,6 +3,7 @@ package light.guipackage.gui.components.basecomponents;
 import java.awt.Color;
 
 import light.guipackage.general.Point;
+import light.guipackage.general.Submitter;
 import light.guipackage.general.UnitRectangle;
 import light.guipackage.general.UnitValue;
 import light.guipackage.general.UnitValue.Unit;
@@ -38,6 +39,14 @@ public class SliderInput extends InputComponent<Double> {
 		ball = new SimpleBox(new UnitRectangle(groove.getX().v, 20, 14, 60), new Color(255, 100, 100));
 		ball.setOval(true);
 		mainBox.addComponent(ball);
+
+		//Click action
+		setClickAction(new Submitter<Point>() {
+			@Override
+			public void submit(Point p) {
+				click(p);
+			}
+		});
 	}
 
 	@Override
@@ -47,8 +56,7 @@ public class SliderInput extends InputComponent<Double> {
 		grooveFill.setWidth(new UnitValue(getValue()*groove.getWidth().v, Unit.pcw));
 	}
 	
-	@Override
-	public void doClick(Point p) {
+	public void click(Point p) {
 		double x = scalePoint(p).x*100;
 		
 		if (x>=groove.getX().v&&x<=groove.getX().v+groove.getWidth().v) { //Check within bounds of groove
@@ -57,8 +65,6 @@ public class SliderInput extends InputComponent<Double> {
 			grooveFill.setWidth(new UnitValue(x-grooveFill.getX().v, Unit.pcw));
 		}
 		if (hasActions()) getActions().submit(getValue());
-
-		super.doClick(p);
 	}
 	
 	@Override

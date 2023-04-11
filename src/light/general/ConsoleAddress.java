@@ -1,6 +1,7 @@
 package light.general;
 
-import light.persistency.Persistency;
+import java.io.Console;
+
 import light.persistency.PersistencyCapable;
 import light.persistency.PersistencyWriter;
 
@@ -10,6 +11,12 @@ public class ConsoleAddress implements Comparable<ConsoleAddress>, PersistencyCa
     private int prefix;
     private int suffix;
 
+    public ConsoleAddress(Class<? extends Addressable> scope) {
+        this.scope = scope;
+        this.prefix = 0;
+        this.suffix = 0;
+    }
+
     public ConsoleAddress(Class<? extends Addressable> scope, int prefix, int suffix) {
         this.scope = scope;
         this.prefix = prefix;
@@ -17,10 +24,18 @@ public class ConsoleAddress implements Comparable<ConsoleAddress>, PersistencyCa
     }
 
     public int getPrefix() {return prefix;}
-    public void setPrefix(int prefix) {this.prefix = prefix;}
+
+    public ConsoleAddress setPrefix(int prefix) {
+        this.prefix = prefix;
+        return this;
+    }
 
     public int getSuffix() {return suffix;}
-    public void setSuffix(int suffix) {this.suffix = suffix;}
+
+    public ConsoleAddress setSuffix(int suffix) {
+        this.suffix = suffix;
+        return this;
+    }
 
     public Class<? extends Addressable> getScope() {return this.scope;}
 
@@ -34,8 +49,13 @@ public class ConsoleAddress implements Comparable<ConsoleAddress>, PersistencyCa
         return matchesScope(a)&&matchesPrefix(a)&&this.prefix<a.prefix;
     }
 
+    public ConsoleAddress clone() {
+        return new ConsoleAddress(scope, prefix, suffix);
+    }
+
     @Override
     public int compareTo(ConsoleAddress o) {
+        if (o.scope!=scope) return -100;
         if (o.prefix!=prefix) return prefix-o.prefix;
         return suffix-o.suffix;
     }
@@ -52,12 +72,10 @@ public class ConsoleAddress implements Comparable<ConsoleAddress>, PersistencyCa
         return "["+scope.getSimpleName()+" "+prefix+"."+suffix+"]";
     }
 
-    public class GenericAddressScope extends Addressable {
+    public String toAddressString() {return prefix+"."+suffix;}
 
-        public GenericAddressScope(ConsoleAddress address) {
-            super(address);
-        }
-
+    public static ConsoleAddress getBase(Class<? extends Addressable> scope) {
+        return new ConsoleAddress(scope);
     }
 
     @Override
@@ -74,5 +92,13 @@ public class ConsoleAddress implements Comparable<ConsoleAddress>, PersistencyCa
     public void generateFromBytes(byte[] bytes) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'generateFromBytes'");
+    }
+
+    public class GenericAddressScope extends Addressable {
+
+        public GenericAddressScope(ConsoleAddress address) {
+            super(address);
+        }
+
     }
 }

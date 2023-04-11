@@ -97,7 +97,8 @@ public class TempWindow extends CollumnBox {
 		
 		//Switch content box
 		removeComponent(contentBox);
-		addComponent(tabs.get(i));
+		contentBox = tabs.get(i);
+		addComponent(contentBox);
 		
 		//Style tab bar
 		if (activeTab!=-1) {

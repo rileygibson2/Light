@@ -3,8 +3,8 @@ package light.stores.effects;
 import java.util.HashMap;
 import java.util.Map;
 
-import light.Fixture;
-import light.general.Attribute;
+import light.fixtures.Attribute;
+import light.fixtures.Fixture;
 import light.general.ThreadController;
 
 public class EffectLine {

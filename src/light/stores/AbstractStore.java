@@ -9,21 +9,15 @@ import light.general.DataStore;
 public abstract class AbstractStore extends Addressable {
 
     private DataStore store;
-    private String label;
 
     public AbstractStore(ConsoleAddress address) {
         super(address);
-        label = "";
         store = new DataStore();
     }
-
-    public String getLabel() {return label;}
 
     public DataStore getStore() {return store;}
 
     public void setStore(DataStore store) {this.store = store;}
-
-    public void setLabel(String label) {this.label = label;}
 
     /**
      * Can be overridden but by default will load this store's address into the commandline
@@ -42,9 +36,4 @@ public abstract class AbstractStore extends Addressable {
 
     public abstract void merge(AbstractStore toMerge);
     public abstract void replace(AbstractStore toReplace);
-
-    @Override
-    public String toString() {
-        return this.getClass().toString()+" - "+label;
-    }
 }

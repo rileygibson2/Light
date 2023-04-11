@@ -1,4 +1,4 @@
-package light.general;
+package light.fixtures;
 
 import light.persistency.PersistencyCapable;
 

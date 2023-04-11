@@ -1,8 +1,8 @@
 package light.stores.effects;
 
-import light.Fixture;
 import light.Programmer;
-import light.general.Attribute;
+import light.fixtures.Attribute;
+import light.fixtures.Fixture;
 import light.general.ConsoleAddress;
 
 public class EffectManager {

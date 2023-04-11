@@ -1,6 +1,7 @@
 package light;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -8,6 +9,7 @@ import java.util.Set;
 import light.encoders.EncoderCapable;
 import light.encoders.Encoders;
 import light.encoders.Encoders.Encoder;
+import light.fixtures.Fixture;
 import light.general.DataStore;
 import light.stores.effects.Effect;
 
@@ -33,7 +35,7 @@ public class Programmer extends DataStore implements EncoderCapable {
         selectedFixtures.add(f);
         Encoders.getInstance().aquireEncoders(this);
     }
-    public void selectFixtures(List<Fixture> f) {
+    public void selectFixtures(Collection<Fixture> f) {
         selectedFixtures.addAll(f);
         Encoders.getInstance().aquireEncoders(this);
     }

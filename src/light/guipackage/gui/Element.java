@@ -281,14 +281,28 @@ public abstract class Element {
 		componentsLock.unlock();
 	}
 	
-	public void sortComponents() {
-		Collections.sort(components, new Comparator<Component>() {
+	private List<Component> getSortedReversedComponents() {
+		List<Component> co = getComponents();
+
+		Collections.sort(co, new Comparator<Component>() {
 			public int compare(Component c1, Component c2) {
-				if (c1.getPriority()>c2.getPriority()) return -1;
-				if (c1.getPriority()<c2.getPriority()) return 1;
-				return 0;
+				return c1.getPriority()-c2.getPriority();
 			}
 		});
+
+		Collections.reverse(co);
+		return co;
+	}
+
+	private List<Component> getSortedComponents() {
+		List<Component> co = getComponents();
+
+		Collections.sort(co, new Comparator<Component>() {
+			public int compare(Component c1, Component c2) {
+				return c1.getPriority()-c2.getPriority();
+			}
+		});
+		return co;
 	}
 	
 	/**
@@ -761,7 +775,7 @@ public abstract class Element {
 		* a component is setup outside the bounds of this box, but isOver should still
 		* trigger so events can reach that component.
 		*/
-		for (Component c : components) {
+		for (Component c : getComponents()) {
 			if (c.isOver(p)) return true;
 		}
 		return false;
@@ -782,9 +796,8 @@ public abstract class Element {
 	
 	public void drawComponents(Graphics2D g) {
 		componentsLock.lock();
-		sortComponents();
-		Collections.reverse(components);
-		for (Component c : components) {
+		
+		for (Component c : getSortedComponents()) {
 			if (c.isVisible()) c.draw(g);
 		}
 		componentsLock.unlock();
@@ -792,16 +805,15 @@ public abstract class Element {
 	
 	public void drawComponentShadows(Graphics2D g) {
 		componentsLock.lock();
-		sortComponents();
-		Collections.reverse(components);
-		for (Component c : components) {
+
+		for (Component c : getSortedComponents()) {
 			if (c.isVisible()&&c.hasShadow()) GUI.getScreenUtils().drawShadow(g, c);
 		}
 		componentsLock.unlock();
 	}
 	
 	public void draw(Graphics2D g) {
-		drawComponentShadows(g);
+		//drawComponentShadows(g);
 		drawComponents(g);
 	}
 	
@@ -811,38 +823,57 @@ public abstract class Element {
 		componentsLock.unlock();
 	}
 	
-	protected void doClick(Point p) {
+	/**
+	 * Need to search to leaf before implementing a click action. If a child is able to preform
+	 * a click action on these coordinates then that should be triggered rather than this. Only one
+	 * element should be able to do an action for every one click. If no children have succesfully performed
+	 * a click then this element should perform a click.
+	 * 
+	 * Therefore - method searches down child tree. If no child returns true then this element will return true
+	 * which indicates that it may perform a click action. If a child returns true then that child has performed
+	 * a click action and this method will return false as this method may perform a click action
+	 * 
+	 * 
+	 * Chain is
+	 * Element class will check if children will preform a click
+	 * This is done by calling onclick for all children components. Child call will first go to Component method
+	 * which will call Element method and verify that child has no clickable children. Then component method will return
+	 * true if a click action has been registered and run otherwise will return false.
+	 * 
+	 * The point of this being that a parent element will preform a click even if click happens over a child element,
+	 * given that the child element and all it's decendents have no click action registered. Otherwise a click
+	 * action will be preformed in that descendent.
+	 * This is opposed to a parent simply not preforming a click action whenever the mouse is over a child, even if that
+	 * child has no action to actually perform.
+	 * 
+	 * @param p
+	 * @return whether or not this element may perform a click action
+	 */
+	protected boolean doClick(Point p) {
 		componentsLock.lock();
-		/*
-		* Components with higher priority may have overrided their isOver method,
-		* allowing them to take up more space for example when a selector is open.
-		* In this case we don't want an element potentially under an expanded element
-		* to register a click. Thats why we sort components first and only allow one 
-		* element to register a click at any one time.
-		*/
 		
-		sortComponents();
-		Component clicked = null;
-		for (Component c : getComponents()) {
+		boolean hasClicked = false;
+		for (Component c : getSortedReversedComponents()) {
 			if (c.isVisible()&&c.isOver(p)) {
-				c.doClick(p); //Will recur down
-				clicked = c;
-				//break;
+				hasClicked = c.doClick(p); //Will recur down
+				if (hasClicked) break;
 			}
 		}
 		
 		//Deselect all non clicked components
-		for (Component c : getComponents()) {
+		/*for (Component c : getComponents()) {
 			if (clicked==null||c!=clicked) {
 				if (c.isVisible()&&c.isSelected()) c.doDeselect();
 			}
-		}
+		}*/
+
 		componentsLock.unlock();
+		return !hasClicked;
 	}
 	
 	protected void doMove(Point p) {
-		componentsLock.lock();
-		sortComponents();
+		/*componentsLock.lock();
+		//sortComponents();
 		
 		for (Component c : getComponents()) {
 			if (!c.isVisible()) continue;
@@ -852,12 +883,12 @@ public abstract class Element {
 			}
 			else c.doUnhover();
 		}
-		componentsLock.unlock();
+		componentsLock.unlock();*/
 	}
 	
 	protected void doDrag(Point entry, Point current) {
-		componentsLock.lock();
-		sortComponents();
+		/*componentsLock.lock();
+		//sortComponents();
 		
 		for (Component c : getComponents()) {
 			if (!c.isVisible()) continue;
@@ -866,12 +897,12 @@ public abstract class Element {
 				break;
 			}
 		}
-		componentsLock.unlock();
+		componentsLock.unlock();*/
 	}
 	
 	protected void doScroll(Point p, int amount) {
-		componentsLock.lock();
-		sortComponents();
+		/*componentsLock.lock();
+		//sortComponents();
 		
 		for (Component c : getComponents()) {
 			if (c.isVisible()&&c.isOver(p)) {
@@ -879,7 +910,7 @@ public abstract class Element {
 				break;
 			}
 		}
-		componentsLock.unlock();
+		componentsLock.unlock();*/
 	}
 	
 	protected void doKeyPress(KeyEvent k) {}; //Doesn't need to recur due to key listener registration in IO

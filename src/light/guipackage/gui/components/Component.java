@@ -1,6 +1,8 @@
 package light.guipackage.gui.components;
 
+import light.guipackage.cli.CLI;
 import light.guipackage.general.Point;
+import light.guipackage.general.Submitter;
 import light.guipackage.general.UnitRectangle;
 import light.guipackage.general.UnitValue;
 import light.guipackage.gui.Element;
@@ -11,7 +13,8 @@ public abstract class Component extends Element {
 	private boolean hovered;
 	private boolean pauseHover; //Hover effects are pause when this is true
 
-	public Runnable onClick;
+	public Submitter<Point> onClick;
+	public Runnable onClickSimple; //Runnable onclick method
 	public Runnable onHover;
 	public Runnable onUnHover;
 
@@ -44,7 +47,9 @@ public abstract class Component extends Element {
 	public String getTestName() {return testName;}
 	public void setTestName(String testName) {this.testName = testName;}
 
-	public void setClickAction(Runnable r) {this.onClick = r;}
+	public void setClickAction(Submitter<Point> s) {this.onClick = s;}
+	public void setClickAction(Runnable r) {this.onClickSimple = r;}
+	public boolean hasClickAction() {return this.onClick!=null||this.onClickSimple!=null;}
 	public void setHoverAction(Runnable r) {this.onHover = r;}
 	public void setUnHoverAction(Runnable r) {this.onUnHover = r;}
 
@@ -85,11 +90,19 @@ public abstract class Component extends Element {
 		if (getParent()!=null) getParent().removeComponent(this);
 	}
 
+	/**
+	 * Runs a click action.
+	 * If this element has no click action registered then this method will return false
+	 * Element super class does job of verifying click area and that all children subtrees don't
+	 * have a click action to preform. This is why method returns false if super method says dont preform action.
+	 */
 	@Override
-	public void doClick(Point p) {
+	public boolean doClick(Point p) {
+		if (!super.doClick(p)) return true; //Super says cannot click as child has clicked so return signal saying this has clicked
 		selected = true;
-		if (onClick!=null) onClick.run();
-		super.doClick(p);
+		if (onClick!=null) onClick.submit(p);
+		if (onClickSimple!=null) onClickSimple.run();
+		return hasClickAction();
 	}
 
 	public void doDeselect() {selected = false;}

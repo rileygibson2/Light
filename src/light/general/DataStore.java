@@ -5,17 +5,17 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import light.Fixture;
-import light.persistency.Persistency;
+import light.fixtures.Attribute;
+import light.fixtures.Fixture;
 import light.persistency.PersistencyCapable;
 import light.persistency.PersistencyWriter;
 
 public class DataStore implements PersistencyCapable {
     
-    protected Map<Fixture, Map<Attribute, Integer>> store;
+    protected Map<Fixture, Map<Attribute, Double>> store;
     
     public DataStore() {
-        store = new HashMap<Fixture, Map<Attribute, Integer>>();
+        store = new HashMap<Fixture, Map<Attribute, Double>>();
     }
     
     /**
@@ -25,8 +25,9 @@ public class DataStore implements PersistencyCapable {
      * @param value
      * @param overwritePriority - if set then the given value will overwrite the stores value. Otherwsie the data stores value will persist 
      */
-    public void set(Fixture fixture, Attribute attribute, Integer value, boolean overwritePriority) {
+    public void set(Fixture fixture, Attribute attribute, Double value, boolean overwritePriority) {
         if (fixture==null||attribute==null||!fixture.hasAttribute(attribute)||value<0||value>255) return;
+        value = validate(value);
 
         //If not overwrite then return if store already contains value 
         if (!overwritePriority&&contains(fixture, attribute)) return;
@@ -35,29 +36,39 @@ public class DataStore implements PersistencyCapable {
             store.get(fixture).put(attribute, value);
         }
         else { //Add when fixture not present in store
-            Map<Attribute, Integer> attributes = new HashMap<Attribute, Integer>();
+            Map<Attribute, Double> attributes = new HashMap<Attribute, Double>();
             attributes.put(attribute, value);
             store.put(fixture, attributes);
         }
     }
 
-    public void set(Fixture fixture, Map<Attribute, Integer> attributes, boolean overwritePriority) {
+    public void set(Fixture fixture, Map<Attribute, Double> attributes, boolean overwritePriority) {
         if (fixture==null) throw new Error("Cannot add null fixture to datastore");
         if (attributes==null) throw new Error("Cannot add null values/attributes to datastore");
 
-        //Validate
+        //Check target fixture has attributes
         Set<Attribute> toRemove = new HashSet<>();
-        for (Map.Entry<Attribute, Integer> v : attributes.entrySet()) {
-            //Check target fixture has all attributes in given map and that values are within bounds
-            if (v.getValue()<0||v.getValue()>255||!fixture.hasAttribute(v.getKey())) toRemove.add(v.getKey());
+        for (Map.Entry<Attribute, Double> v : attributes.entrySet()) {
+            if (!fixture.hasAttribute(v.getKey())) toRemove.add(v.getKey());
 
             //Check value not present if overwrite
             if (!overwritePriority&&contains(fixture, v.getKey())) toRemove.add(v.getKey());
         }
         attributes.keySet().removeAll(toRemove);
 
+        //Validate values TODO: make more elegant
+        for (Map.Entry<Attribute, Double> v : attributes.entrySet()) {
+            attributes.put(v.getKey(), validate(v.getValue()));
+        }
+
         //Assign values to this fixture's mapping
         store.put(fixture, attributes);
+    }
+
+    public double validate(double d) {
+        if (d<0) return 0;
+        if (d>100) return 100;
+        return d;
     }
 
     public boolean contains(Fixture fixture, Attribute attribute) {
@@ -78,7 +89,7 @@ public class DataStore implements PersistencyCapable {
 
     public Set<Fixture> getFixtureSet() {return store.keySet();}
 
-    public Map<Attribute, Integer> getFixtureValues(Fixture fixture) {return store.get(fixture);}
+    public Map<Attribute, Double> getFixtureValues(Fixture fixture) {return store.get(fixture);}
 
     public boolean hasFixture(Fixture fixture) {return store.containsKey(fixture);}
 
@@ -111,7 +122,7 @@ public class DataStore implements PersistencyCapable {
         DataStore filtered = new DataStore();
 
         for (Fixture f : getFixtureSet()) {
-            for (Map.Entry<Attribute, Integer> v: getFixtureValues(f).entrySet()) {
+            for (Map.Entry<Attribute, Double> v: getFixtureValues(f).entrySet()) {
                 if (filter.contains(v.getKey())) filtered.set(f, v.getKey(), v.getValue(), true);
             }
         }
@@ -121,9 +132,9 @@ public class DataStore implements PersistencyCapable {
     public DataStore getZeroedClone() {
         DataStore clone = this.clone();
 
-        for (Map.Entry<Fixture, Map<Attribute, Integer>> e : clone.store.entrySet()) {
+        for (Map.Entry<Fixture, Map<Attribute, Double>> e : clone.store.entrySet()) {
             if (e.getKey()==null||e.getValue()==null) continue;
-            for (Attribute attr : e.getValue().keySet()) clone.store.get(e.getKey()).put(attr, 0);
+            for (Attribute attr : e.getValue().keySet()) clone.store.get(e.getKey()).put(attr, 0d);
         }
 
         return clone;
@@ -131,14 +142,14 @@ public class DataStore implements PersistencyCapable {
 
     @Override
     public DataStore clone() {
-        Map<Fixture, Map<Attribute, Integer>> newStore = new HashMap<>();
+        Map<Fixture, Map<Attribute, Double>> newStore = new HashMap<>();
 
-        for (Map.Entry<Fixture, Map<Attribute, Integer>> e : store.entrySet()) {
+        for (Map.Entry<Fixture, Map<Attribute, Double>> e : store.entrySet()) {
             if (e.getKey()==null||e.getValue()==null) continue;
 
-            Map<Attribute, Integer> attrs = new HashMap<>();
-            for (Map.Entry<Attribute, Integer> e1 : e.getValue().entrySet()) {
-                int i = e1.getValue();
+            Map<Attribute, Double> attrs = new HashMap<>();
+            for (Map.Entry<Attribute, Double> e1 : e.getValue().entrySet()) {
+                double i = e1.getValue();
                 attrs.put(e1.getKey(), i);
             }
             newStore.put(e.getKey(), attrs);
@@ -157,7 +168,7 @@ public class DataStore implements PersistencyCapable {
             pW.openSegment();
             pW.put(f.getAddress().getBytes());
     
-            for (Map.Entry<Attribute, Integer> e : getFixtureValues(f).entrySet()) {
+            for (Map.Entry<Attribute, Double> e : getFixtureValues(f).entrySet()) {
                 pW.put(e.getKey().getBytes());
                 pW.put(e.getValue().byteValue());
             }

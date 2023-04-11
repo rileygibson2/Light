@@ -3,6 +3,7 @@ package light.guipackage.gui.components.basecomponents;
 import light.general.ThreadController;
 import light.guipackage.general.Point;
 import light.guipackage.general.Rectangle;
+import light.guipackage.general.Submitter;
 import light.guipackage.general.UnitRectangle;
 import light.guipackage.gui.GUI;
 import light.guipackage.gui.components.InputComponent;
@@ -31,6 +32,14 @@ public class CheckBoxInput extends InputComponent<Boolean> {
 		tick = new Image(new UnitRectangle(15, 10, 80, 80), "ok.png");
 		tick.setVisible(false);
 		addComponent(tick);
+
+		//Click action
+		setClickAction(new Submitter<Point>() {
+			@Override
+			public void submit(Point p) {
+				click(p);
+			}
+		});
 	}
 
 	@Override
@@ -45,8 +54,7 @@ public class CheckBoxInput extends InputComponent<Boolean> {
 		}
 	}
 
-	@Override
-	public void doClick(Point p) {
+	public void click(Point p) {
 		if (hasActions()) {
 			getActions().submit(!getValue());
 			setValue(getActions().get());
@@ -64,7 +72,5 @@ public class CheckBoxInput extends InputComponent<Boolean> {
 		}
 		transform.setWait(5);
 		transform.start();
-		
-		super.doClick(p);
 	}
 }

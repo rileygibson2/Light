@@ -31,7 +31,7 @@ public class CommandLineGUI extends Component implements CommandLineGUIInterface
         prefix.setTextYCentered(true);
         mainBox.addComponent(prefix);
         
-        command = new Label(new UnitRectangle(prefix.getWidth().v+2, 50, 0, 0), "", new Font("Geneva", Font.PLAIN, 14), GUI.textMain);
+        command = new Label(new UnitRectangle(15, 50, 0, 0), "", new Font("Geneva", Font.PLAIN, 14), GUI.textMain);
         command.setTextYCentered(true);
         mainBox.addComponent(command);
     }

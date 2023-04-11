@@ -17,8 +17,13 @@ import light.commands.Move;
 import light.commands.Store;
 import light.commands.commandline.CommandLine;
 import light.executors.Executor;
+import light.fixtures.Attribute;
+import light.fixtures.Fixture;
+import light.fixtures.FixtureProfile;
+import light.fixtures.PatchManager;
 import light.general.Addressable;
 import light.general.ConsoleAddress;
+import light.guipackage.cli.CLI;
 import light.guipackage.gui.GUI;
 import light.stores.AbstractStore;
 import light.stores.Group;
@@ -32,10 +37,6 @@ import light.uda.UDA;
 public class Light {
 
     static Light singleton;
-
-    //Logic
-    private Set<Fixture> fixtures;
-    private Programmer programmer;
 
     //Pools
     private Map<PresetType, Pool<Preset>> presetPools;
@@ -93,24 +94,6 @@ public class Light {
         return null;
     }
 
-    public Fixture getFixture(ConsoleAddress address) {
-        for (Fixture f : fixtures) {
-            if (f.getAddress().equals(address)) return f;
-        }
-        return null;
-    }
-
-    public List<Fixture> getFixtures(List<ConsoleAddress> addresses) {
-        List<Fixture> fixtures = new ArrayList<>();
-
-        for (Fixture f : fixtures) {
-            if (addresses.contains(f.getAddress())) fixtures.add(f);
-        }
-        return fixtures;
-    }
-
-    public Set<Fixture> getAllFixtures() {return fixtures;}
-
     /**
      * Resolves an address to a real object if it can be
      * 
@@ -118,7 +101,7 @@ public class Light {
      * @return
      */
     public Addressable resolveAddress(ConsoleAddress address) {
-        if (address.matchesScope(Fixture.class)) return getFixture(address);
+        if (address.matchesScope(Fixture.class)) return PatchManager.getInstance().getFixture(address);
 
         if (address.matchesScope(Preset.class)) {
             PresetType t = Preset.getTypeFromAddress(address);
@@ -139,14 +122,15 @@ public class Light {
 
     private void setup() {
         GUI.initialise(this, null); //Passing null forces full screen
-        programmer = Programmer.getInstance();
+        
+        //Insantiate logic components
+        Programmer.getInstance();
+        PatchManager.getInstance();
 
-        fixtures = new HashSet<Fixture>();
-
-        //Make pool
+        //Make pools
         presetPools = new HashMap<PresetType, Pool<Preset>>();
         for (PresetType pT : PresetType.values()) {
-            presetPools.put(pT, new Pool<Preset>(new ConsoleAddress(Preset.class, pT.ordinal(), 0)));
+            presetPools.put(pT, new Pool<Preset>(new ConsoleAddress(Preset.class, pT.ordinal()+1, 0)));
         }
 
         groupPool = new Pool<Group>(new ConsoleAddress(Group.class, 0, 0));
@@ -168,6 +152,22 @@ public class Light {
 
         //Setup view
         currentView = new View(new UDA());
+
+        mock();
+    }
+
+    private void mock() {
+        Preset p = new Preset(PresetType.Color.getBaseAddress().setSuffix(2), PresetType.Color);
+        getPresetPool(PresetType.Color).add(p);
+
+        FixtureProfile fP = new FixtureProfile("Robe Robin Beam100");
+        fP.addAttribute(Attribute.Intensity);
+        fP.addAttribute(Attribute.Red);
+        fP.addAttribute(Attribute.Green);
+        fP.addAttribute(Attribute.Blue);
+
+        Fixture f = new Fixture(new ConsoleAddress(Fixture.class, 0, 1), fP);
+
     }
 
     public static void main(String args[]) {

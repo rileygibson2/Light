@@ -31,6 +31,7 @@ public class CommandLine {
         commandRoot = null;
         commandStack = new ArrayDeque<CommandProxy>();
         registeredCommands = new HashMap<Class<? extends Command>, String>();
+        workingText = "";
         
         IO.getInstance().registerKeyListener(this, new Submitter<KeyEvent>() {
             @Override
@@ -99,6 +100,8 @@ public class CommandLine {
             lastNonTerminal.addArgument(cP);
             commandStack.push(cP);
         }
+
+        gui.setCommandString(toString());
     }
 
     public void executeCommand() {
@@ -156,7 +159,7 @@ public class CommandLine {
     }
 
     private String commandStringDFS(CommandProxy cP) {
-        String s = cP.toString();
+        String s = cP.toString()+" ";
         for (CommandProxy child : cP.getArguments()) {
             if (child!=null) s += commandStringDFS(child);
         }

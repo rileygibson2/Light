@@ -41,6 +41,14 @@ public class TextInput extends InputComponent<String> {
 		descriptionLabel = new Label(new UnitRectangle(8, 55, 0, 0), getValue(), new Font(GUI.baseFont, Font.ITALIC, 15), new Color(140, 140, 140));
 		descriptionLabel.setVisible(false);
 		addComponent(descriptionLabel);
+
+		//Click action
+		setClickAction(new Submitter<Point>() {
+			@Override
+			public void submit(Point p) {
+				click(p);
+			}
+		});
 	}
 	
 	@Override
@@ -63,8 +71,7 @@ public class TextInput extends InputComponent<String> {
 		else descriptionLabel.setVisible(false);
 	}
 	
-	@Override
-	public void doClick(Point p) {
+	public void click(Point p) {
 		setSelected(true);
 		TextInput t = this;
 		IO.getInstance().registerKeyListener(this, new Submitter<KeyEvent>() {

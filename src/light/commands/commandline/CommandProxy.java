@@ -231,7 +231,7 @@ public class CommandProxy {
     @Override
     public String toString() {
         switch (type) {
-            case Address: return consoleAddress.toString();
+            case Address: return consoleAddress.getScope().getSimpleName()+" "+consoleAddress.toAddressString();
             case Command: return commandClass.getSimpleName();
             case Operator: return operator.toString();
             case Value: return Double.toString(value);

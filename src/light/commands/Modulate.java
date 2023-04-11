@@ -1,14 +1,14 @@
 package light.commands;
 
-import java.io.ObjectInputStream.GetField;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
-import light.Fixture;
-import light.Light;
 import light.Programmer;
-import light.general.Attribute;
+import light.fixtures.Attribute;
+import light.fixtures.Fixture;
+import light.fixtures.PatchManager;
 import light.general.ConsoleAddress;
 
 public class Modulate implements Command {
@@ -46,17 +46,17 @@ public class Modulate implements Command {
     @Override
     public void execute() {
         //Resolve target addresses into fixtures
-        List<Fixture> fixtures = Light.getInstance().getFixtures(targetFixtures);
+        Set<Fixture> fixtures = PatchManager.getInstance().getFixtures(targetFixtures);
         Programmer prog = Programmer.getInstance();
         prog.clearSelectedFixtures();
         
         if (source instanceof Double) { //Change intensity for target fixture/s
-            for (Fixture f : fixtures) prog.set(f, Attribute.Intensity, (Integer) source, true);
+            for (Fixture f : fixtures) prog.set(f, Attribute.Intensity, (Double) source, true);
         }
         if (source instanceof ConsoleAddress) { //Set all values of target fixture/s to values of source fixture's
             //Resolve source addresses into fixtures
-            Fixture sourceFixture = Light.getInstance().getFixture((ConsoleAddress) source);
-            Map<Attribute, Integer> attributes = prog.getFixtureValues(sourceFixture);
+            Fixture sourceFixture = PatchManager.getInstance().getFixture((ConsoleAddress) source);
+            Map<Attribute, Double> attributes = prog.getFixtureValues(sourceFixture);
             //TODO Clone values
             
             for (Fixture f : fixtures) prog.set(f, attributes, true);

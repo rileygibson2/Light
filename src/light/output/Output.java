@@ -7,9 +7,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import light.Fixture;
 import light.Programmer;
-import light.general.Attribute;
+import light.fixtures.Attribute;
+import light.fixtures.Fixture;
 import light.general.DMXAddress;
 import light.general.DataStore;
 import light.guipackage.general.Pair;
@@ -58,16 +58,16 @@ public class Output {
         Map<DMXAddress, List<Pair<DMXAddress, Integer>>> dmx = new LinkedHashMap<>();
         
         for (Fixture f : data.getFixtureSet()) {
-            for (Map.Entry<Attribute, Integer> v : data.getFixtureValues(f).entrySet()) {
+            for (Map.Entry<Attribute, Double> v : data.getFixtureValues(f).entrySet()) {
                 DMXAddress d = f.getAddressForAttribute(v.getKey());
                 
                 //Add to dmx at correct dmx address
                 if (dmx.containsKey(d.getBaseUniverseAddress())) { //Universe exists in dmx
-                    dmx.get(d.getBaseUniverseAddress()).add(new Pair<DMXAddress, Integer> (d, v.getValue()));
+                    dmx.get(d.getBaseUniverseAddress()).add(new Pair<DMXAddress, Integer> (d, percToDMX(v.getValue())));
                 }
                 else { //Universe does not exist in dmx
                     List<Pair<DMXAddress, Integer>> u = new ArrayList<>();
-                    u.add(new Pair<DMXAddress, Integer> (d, v.getValue()));
+                    u.add(new Pair<DMXAddress, Integer> (d, percToDMX(v.getValue())));
                     dmx.put(d.getBaseUniverseAddress(), u);
                 }
             }
@@ -83,6 +83,8 @@ public class Output {
             });
         }
     }
+
+    public static int percToDMX(double p) {return (int) ((p/100)*255);}
 }
 
 class OutputCapableComparator implements Comparator<OutputCapable> {

@@ -3,8 +3,8 @@ package light.stores;
 import java.util.ArrayList;
 import java.util.List;
 
-import light.Fixture;
 import light.Programmer;
+import light.fixtures.Fixture;
 import light.general.ConsoleAddress;
 import light.persistency.PersistencyCapable;
 

@@ -1,23 +1,20 @@
-package light;
-
-import java.util.List;
+package light.fixtures;
 
 import light.general.Addressable;
-import light.general.Attribute;
 import light.general.ConsoleAddress;
 import light.general.DMXAddress;
-import light.persistency.Persistency;
 import light.persistency.PersistencyCapable;
 import light.persistency.PersistencyWriter;
 
 public class Fixture extends Addressable implements PersistencyCapable {
     
+    private FixtureProfile profile;
     private String name;
     private DMXAddress dmxAddress;
-    private List<Attribute> attributes;
 
-    public Fixture(ConsoleAddress address) {
+    public Fixture(ConsoleAddress address, FixtureProfile profile) {
         super(address);
+        this.profile = profile;
     }
 
     public void setDMXAddress(DMXAddress ad) {this.dmxAddress = ad;}
@@ -26,19 +23,22 @@ public class Fixture extends Addressable implements PersistencyCapable {
     public void setName(String n) {name = n;}
     public String getName() {return name;}
 
-    public boolean hasAttribute(Attribute attribute) {
-        if (attributes==null) return false;
-        return attributes.contains(attribute);
+    public void setProfile(FixtureProfile profile) {
+        this.profile = profile;
+        PatchManager.getInstance().fixtureProfileUpdated(this);
+        //TODO: Update all stores containing this fixture
     }
 
-    public List<Attribute> getAttributes() {return attributes;}
+    public FixtureProfile getProfile() {return this.profile;}
+
+    public boolean hasAttribute(Attribute a) {return profile.hasAttribute(a);}
 
     public DMXAddress getAddressForAttribute(Attribute attribute) {
-        if (attributes==null||!attributes.contains(attribute)) return null;
+        if (profile==null||!profile.hasAttribute(attribute)) return null;
         if (dmxAddress==null) return null;
         
         int i = dmxAddress.getAddress();
-        for (Attribute a : attributes) {
+        for (Attribute a : profile.getAttributes()) {
             if (a==attribute) return new DMXAddress(dmxAddress.getUniverse(), i);
             i++;
         }
@@ -55,9 +55,7 @@ public class Fixture extends Addressable implements PersistencyCapable {
 
         //Attributes
         pW.openSegment();
-        for (Attribute a : attributes) {
-            pW.put(a.getBytes());
-        }
+        for (Attribute a : profile.getAttributes()) pW.put(a.getBytes());
         pW.closeSegmenet();
         pW.wrapInSegment();
 

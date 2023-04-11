@@ -3,9 +3,9 @@ package light.stores;
 import java.util.HashSet;
 import java.util.Set;
 
-import light.Fixture;
 import light.Programmer;
-import light.general.Attribute;
+import light.fixtures.Attribute;
+import light.fixtures.Fixture;
 import light.general.ConsoleAddress;
 import light.general.DataStore;
 import light.persistency.PersistencyCapable;
@@ -31,6 +31,7 @@ public class Preset extends AbstractStore implements PersistencyCapable {
     public Preset(ConsoleAddress address, PresetType type) {
         super(address);
         this.type = type;
+        setLabel("Preset "+address.toAddressString());
     }
     
     /**
@@ -63,7 +64,7 @@ public class Preset extends AbstractStore implements PersistencyCapable {
         return attributes;
     }
     
-    public void set(Fixture fixture, Attribute attribute, Integer value) {
+    public void set(Fixture fixture, Attribute attribute, Double value) {
         if (!isValid(attribute)) return;  //Check attribute being added is present in this preset type
         getStore().set(fixture, attribute, value, true);
     }

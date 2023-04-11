@@ -100,13 +100,18 @@ public class SimpleBox extends Component {
 		rounded = true;
 		arcSize = a;
 	}
-	public void setRounded(int[] r) {
+	public void setRounded(int[] corners) {
 		rounded = true;
-		roundedCorners = r;
+		roundedCorners = corners;
+	}
+	public void setRounded(int[] corners, int arcSize) {
+		rounded = true;
+		roundedCorners = corners;
+		this.arcSize = arcSize;
 	}
 	public boolean isRounded() {return rounded;}
 	public int[] getRoundedCorners() {return roundedCorners;}
-	public void setArcSize(int a) {arcSize = a;}
+	public void setArcSize(int arcSize) {this.arcSize = arcSize;}
 	public int getArcSize() {return arcSize;}
 	
 	public void setOval(boolean o) {oval = o;}

@@ -23,11 +23,11 @@ public class UnitRectangle {
         height = new UnitValue(0, u);
     }
 
-    public UnitRectangle(double x, double y, double width, double height) {
-        this.x = new UnitValue(x, Unit.pcw);
-        this.y = new UnitValue(y, Unit.pch);
-        this.width = new UnitValue(width, Unit.pcw);
-        this.height = new UnitValue(height, Unit.pch);
+    public UnitRectangle(double xpcw, double ypch, double widthpcw, double heightpch) {
+        this.x = new UnitValue(xpcw, Unit.pcw);
+        this.y = new UnitValue(ypch, Unit.pch);
+        this.width = new UnitValue(widthpcw, Unit.pcw);
+        this.height = new UnitValue(heightpch, Unit.pch);
     }
 
     public UnitRectangle(double x, double y, double width, double height, Unit u) {

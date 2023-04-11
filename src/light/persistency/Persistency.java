@@ -7,8 +7,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import light.Fixture;
 import light.Light;
+import light.fixtures.Fixture;
+import light.fixtures.PatchManager;
 import light.general.Addressable;
 
 public class Persistency {
@@ -47,7 +48,7 @@ public class Persistency {
         
         //Fixtures
         pW.openSegment();
-        for (Fixture f : light.getAllFixtures()) pW.put(f.getBytes());
+        for (Fixture f : PatchManager.getInstance().allFixtureSet()) pW.put(f.getBytes());
         pW.closeSegmenet();
 
         //Groups
