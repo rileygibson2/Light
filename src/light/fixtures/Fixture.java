@@ -1,5 +1,7 @@
 package light.fixtures;
 
+import light.fixtures.profile.Profile;
+import light.fixtures.profile.ProfileChannel;
 import light.general.Addressable;
 import light.general.ConsoleAddress;
 import light.general.DMXAddress;
@@ -8,11 +10,11 @@ import light.persistency.PersistencyWriter;
 
 public class Fixture extends Addressable implements PersistencyCapable {
     
-    private FixtureProfile profile;
+    private Profile profile;
     private String name;
     private DMXAddress dmxAddress;
 
-    public Fixture(ConsoleAddress address, FixtureProfile profile) {
+    public Fixture(ConsoleAddress address, Profile profile) {
         super(address);
         this.profile = profile;
     }
@@ -23,26 +25,28 @@ public class Fixture extends Addressable implements PersistencyCapable {
     public void setName(String n) {name = n;}
     public String getName() {return name;}
 
-    public void setProfile(FixtureProfile profile) {
+    public void setProfile(Profile profile) {
         this.profile = profile;
         PatchManager.getInstance().fixtureProfileUpdated(this);
         //TODO: Update all stores containing this fixture
     }
 
-    public FixtureProfile getProfile() {return this.profile;}
+    public Profile getProfile() {return this.profile;}
 
     public boolean hasAttribute(Attribute a) {return profile.hasAttribute(a);}
 
+    public DMXAddress getAddressForChannel(ProfileChannel channel) {
+        if (dmxAddress==null||profile==null||!profile.hasChannel(channel)) return null;
+
+        return new DMXAddress(dmxAddress.getUniverse(), channel.getIndex()+1);
+    }
+
     public DMXAddress getAddressForAttribute(Attribute attribute) {
-        if (profile==null||!profile.hasAttribute(attribute)) return null;
-        if (dmxAddress==null) return null;
-        
-        int i = dmxAddress.getAddress();
-        for (Attribute a : profile.getAttributes()) {
-            if (a==attribute) return new DMXAddress(dmxAddress.getUniverse(), i);
-            i++;
-        }
-        return null;
+        if (dmxAddress==null||profile==null||!profile.hasAttribute(attribute)) return null;
+       
+        ProfileChannel channel = profile.getChannelWithAttribute(attribute);
+        if (channel==null) return null;
+        return new DMXAddress(dmxAddress.getUniverse(), channel.getIndex()+1);
     }
 
     @Override
@@ -55,7 +59,7 @@ public class Fixture extends Addressable implements PersistencyCapable {
 
         //Attributes
         pW.openSegment();
-        for (Attribute a : profile.getAttributes()) pW.put(a.getBytes());
+        //for (Feature a : profile.getAttributes()) pW.put(a.getBytes());
         pW.closeSegmenet();
         pW.wrapInSegment();
 

@@ -1,22 +1,22 @@
 package light.fixtures;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import light.fixtures.profile.Profile;
 import light.general.ConsoleAddress;
 
 public class PatchManager {
     
     private static PatchManager singleton;
     
-    private Map<FixtureProfile, Set<Fixture>> patch;
+    private Map<Profile, Set<Fixture>> patch;
     
     private PatchManager() {
-        patch = new HashMap<FixtureProfile, Set<Fixture>>();
+        patch = new HashMap<Profile, Set<Fixture>>();
     }
     
     public static PatchManager getInstance() {

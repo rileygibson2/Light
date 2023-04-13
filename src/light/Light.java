@@ -1,11 +1,7 @@
 package light;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import light.commands.Clear;
 import light.commands.Copy;
@@ -17,10 +13,10 @@ import light.commands.Move;
 import light.commands.Store;
 import light.commands.commandline.CommandLine;
 import light.executors.Executor;
-import light.fixtures.Attribute;
 import light.fixtures.Fixture;
-import light.fixtures.FixtureProfile;
 import light.fixtures.PatchManager;
+import light.fixtures.profile.ProfileParseException;
+import light.fixtures.profile.ProfileParser;
 import light.general.Addressable;
 import light.general.ConsoleAddress;
 import light.guipackage.cli.CLI;
@@ -160,13 +156,14 @@ public class Light {
         Preset p = new Preset(PresetType.Color.getBaseAddress().setSuffix(2), PresetType.Color);
         getPresetPool(PresetType.Color).add(p);
 
-        FixtureProfile fP = new FixtureProfile("Robe Robin Beam100");
-        fP.addAttribute(Attribute.Intensity);
-        fP.addAttribute(Attribute.Red);
-        fP.addAttribute(Attribute.Green);
-        fP.addAttribute(Attribute.Blue);
+        
+        ProfileParser pp = new ProfileParser();
+        try {
+            pp.parse("profiletest.xml");
+        }
+        catch (ProfileParseException e) {CLI.error(e.toString());}
 
-        Fixture f = new Fixture(new ConsoleAddress(Fixture.class, 0, 1), fP);
+        //Fixture f = new Fixture(new ConsoleAddress(Fixture.class, 0, 1), fP);
 
     }
 

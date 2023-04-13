@@ -6,6 +6,8 @@ import java.util.Set;
 import light.Programmer;
 import light.fixtures.Attribute;
 import light.fixtures.Fixture;
+import light.fixtures.profile.Profile;
+import light.fixtures.profile.ProfileChannel;
 import light.general.ConsoleAddress;
 import light.general.DataStore;
 import light.persistency.PersistencyCapable;
@@ -50,40 +52,39 @@ public class Preset extends AbstractStore implements PersistencyCapable {
         if (address.getPrefix()<=0||address.getPrefix()-1>PresetType.values().length) return null;
         return PresetType.values()[address.getPrefix()-1];
     }
-
-    /**
-     * Returns the set of valid attributes for this preset
-     * @return
-     */
-    public Set<Attribute> getValidAttributes() {
-        Set<Attribute> attributes = new HashSet<>();
-
-        for (Attribute a : Attribute.values()) {
-            if (isValid(a)) attributes.add(a);
-        }
-        return attributes;
-    }
     
     public void set(Fixture fixture, Attribute attribute, Double value) {
-        if (!isValid(attribute)) return;  //Check attribute being added is present in this preset type
+        if (!isValidForPresetType(fixture, attribute, type)) return;  //Check attribute being added is present in this preset type
         getStore().set(fixture, attribute, value, true);
     }
     
     /**
-     * Overwrites the current data store with the new one. Does not perform attribute checkin atm
+     * Overwrites the current data store with the new one.
      * @param store
      */
     public void set(DataStore store) {
         setStore(store);
+        clean();
     }
 
     /**
-     * Evaluates whether the provided attribute is valid for this preset
-     * @param a
-     * @return
+     * Cleans this preset's DataStore of all fixture values that should not be present in
+     * this preset.
      */
-    public boolean isValid(Attribute a) {
-        return isValidForPresetType(a, type);
+    public void clean() {
+        DataStore store = getStore();
+
+        for (Fixture fixture : store.getFixtureSet()) {
+            Set<Attribute> toRemove = new HashSet<>();
+            Profile profile = fixture.getProfile();
+
+            //Find fixture attributes that shouldn't be in this preset
+            for (Attribute attribute : store.getFixtureValues(fixture).keySet()) {
+                if (!profile.getChannelWithAttribute(attribute).getPresetType().equals(type)) toRemove.add(attribute);
+            }
+            //Remove those attributes
+            for (Attribute attribute : toRemove) store.remove(fixture, attribute);
+        }
     }
 
     /**
@@ -92,17 +93,10 @@ public class Preset extends AbstractStore implements PersistencyCapable {
      * @param p
      * @return
      */
-    public static boolean isValidForPresetType(Attribute a, PresetType p) {
-        switch (p) {
-            case Beam: return a.isBeam();
-            case Color: return a.isColor();
-            case Dimmer: return a.isIntensity();
-            case Gobo: return a.isGobo();
-            case Position: return a.isPosition();
-            case Prisim: return a.isPrisim();
-            case Shaper: return a.isShaper();
-        }
-        return false;
+    public static boolean isValidForPresetType(Fixture f, Attribute a, PresetType p) {
+        ProfileChannel c = f.getProfile().getChannelWithAttribute(a);
+        if (c==null) return false;
+        return c.getPresetType().equals(p);
     }
 
     @Override

@@ -7,6 +7,7 @@ import java.util.Set;
 
 import light.Programmer;
 import light.fixtures.Attribute;
+import light.fixtures.Feature;
 import light.fixtures.Fixture;
 import light.fixtures.PatchManager;
 import light.general.ConsoleAddress;
@@ -51,7 +52,7 @@ public class Modulate implements Command {
         prog.clearSelectedFixtures();
         
         if (source instanceof Double) { //Change intensity for target fixture/s
-            for (Fixture f : fixtures) prog.set(f, Attribute.Intensity, (Double) source, true);
+            for (Fixture f : fixtures) prog.set(f, Attribute.DIM, (Double) source, true);
         }
         if (source instanceof ConsoleAddress) { //Set all values of target fixture/s to values of source fixture's
             //Resolve source addresses into fixtures

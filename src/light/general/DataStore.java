@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Set;
 
 import light.fixtures.Attribute;
+import light.fixtures.Feature;
 import light.fixtures.Fixture;
 import light.persistency.PersistencyCapable;
 import light.persistency.PersistencyWriter;
@@ -26,7 +27,7 @@ public class DataStore implements PersistencyCapable {
      * @param overwritePriority - if set then the given value will overwrite the stores value. Otherwsie the data stores value will persist 
      */
     public void set(Fixture fixture, Attribute attribute, Double value, boolean overwritePriority) {
-        if (fixture==null||attribute==null||!fixture.hasAttribute(attribute)||value<0||value>255) return;
+        if (fixture==null||attribute==null||!fixture.getProfile().hasAttribute(attribute)||value<0||value>255) return;
         value = validate(value);
 
         //If not overwrite then return if store already contains value 
@@ -82,7 +83,12 @@ public class DataStore implements PersistencyCapable {
     }
 
     public void remove(Fixture fixture, Attribute attribute) {
-        if (store.containsKey(fixture)&&store.get(fixture)!=null) store.get(fixture).remove(attribute);
+        if (store.containsKey(fixture)&&store.get(fixture)!=null) {
+            store.get(fixture).remove(attribute);
+
+            //If no values left then remove fixture
+            if (store.get(fixture).isEmpty()) remove(fixture);
+        }
     }
 
     public void clear() {store.clear();}
@@ -169,7 +175,7 @@ public class DataStore implements PersistencyCapable {
             pW.put(f.getAddress().getBytes());
     
             for (Map.Entry<Attribute, Double> e : getFixtureValues(f).entrySet()) {
-                pW.put(e.getKey().getBytes());
+                //pW.put(e.getKey().getBytes());
                 pW.put(e.getValue().byteValue());
             }
             pW.closeSegmenet();

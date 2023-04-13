@@ -1,7 +1,14 @@
 package light.commands;
 
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
 import light.Light;
 import light.Programmer;
+import light.fixtures.Attribute;
+import light.fixtures.Fixture;
+import light.fixtures.profile.Profile;
 import light.general.ConsoleAddress;
 import light.general.DataStore;
 import light.stores.Cue;
@@ -31,9 +38,8 @@ public class Store implements Command {
         if (t==null) return;
         Preset preset = new Preset(address, t);
 
-        //Store all relevant values of programmer in new preset
-        DataStore filteredProg = Programmer.getInstance().getFilteredClone(preset.getValidAttributes());
-        preset.set(filteredProg);
+        //Store all relevant values of programmer in new preset (preset will clean automatically)
+        preset.set(Programmer.getInstance().clone());
 
         Light.getInstance().getPresetPool(preset.getType()).add(preset);
     }

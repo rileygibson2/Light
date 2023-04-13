@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import light.fixtures.Attribute;
+import light.fixtures.Feature;
 import light.fixtures.Fixture;
 import light.general.ThreadController;
 

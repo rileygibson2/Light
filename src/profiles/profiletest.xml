@@ -1,0 +1,10 @@
+<Profile>
+	<FixtureInfo>
+		<FixtureName>Mac 250 Entour</FixtureName>
+		<FixtureMode>16 bit Extended</FixtureMode>
+		<FixtureManufacturer>Martin</FixtureManufacturer>
+	</FixtureInfo>
+	<Module>
+		<Channel feature="COLORRGB" attribute="COLORRGB1"/>
+	</Module>
+</Profile>

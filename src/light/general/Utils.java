@@ -17,6 +17,8 @@ public class Utils {
 		return Utils.class.getClassLoader().getResource(path);
 	}
 
+	public static boolean validateDMX(double dmx) {return dmx>=0&&dmx<=255;}
+
 	public static byte[] combineByteArrays(byte[]... args) {
 		int l = 0;
 		for (byte[] b : args) l += b.length;

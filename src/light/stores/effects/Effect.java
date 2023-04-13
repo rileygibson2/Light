@@ -4,6 +4,7 @@ import java.util.HashMap;
 
 import light.executors.ExecutorCapable;
 import light.fixtures.Attribute;
+import light.fixtures.Feature;
 import light.fixtures.Fixture;
 import light.general.ConsoleAddress;
 import light.general.DataStore;
@@ -32,7 +33,7 @@ public class Effect extends AbstractStore implements ExecutorCapable, Persistenc
 
 	public void addFixture(Fixture f) {
 		//Check there is an effect line for attributes of this fixture
-		for (Attribute a : f.getProfile().getAttributes()) {
+		for (Attribute a : f.getProfile().getAttributeSet()) {
 			if (!lines.containsKey(a)) {
 				lines.put(a, new EffectLine(a, this));
 			}
