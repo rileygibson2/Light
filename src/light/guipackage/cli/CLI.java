@@ -134,4 +134,8 @@ public class CLI {
 		}
 		return null;
 	}
+
+	public static String wrapInPink(String color, String text) {
+		return magenta+text+reset;
+	}
 }

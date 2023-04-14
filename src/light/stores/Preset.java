@@ -15,16 +15,23 @@ import light.persistency.PersistencyCapable;
 public class Preset extends AbstractStore implements PersistencyCapable {
     
     public enum PresetType {
-        Dimmer,
-        Color,
-        Position,
-        Beam,
-        Gobo,
-        Shaper,
-        Prisim;
+        DIMMER,
+        COLOR,
+        POSITION,
+        BEAM,
+        GOBO,
+        SHAPER,
+        PRISM;
 
         public ConsoleAddress getBaseAddress() {
             return new ConsoleAddress(Preset.class, this.ordinal()+1, 0);
+        }
+
+        public static PresetType getPresetType(String text) {
+            for (PresetType type : PresetType.values()) {
+                if (type.toString().equals(text)) return type;
+            }
+            return null;
         }
     };
     

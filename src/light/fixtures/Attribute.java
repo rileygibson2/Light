@@ -22,9 +22,7 @@ public enum Attribute {
     
     //Position sub attributes
     PAN(Feature.POSITION),
-    PAN_FINE(Feature.POSITION),
     TILT(Feature.POSITION),
-    TILT_FINE(Feature.POSITION),
     
     //Gobo1 sub attributes
     GOBO1_INDEX(Feature.GOBO1),
@@ -65,4 +63,11 @@ public enum Attribute {
     public Feature getParent() {return this.parent;}
 
     public boolean verify(Feature verify) {return verify==parent;}
+
+    public static Attribute getAttribute(String text) {
+        for (Attribute attribute : Attribute.values()) {
+            if (attribute.toString().equals(text)) return attribute;
+        }
+        return null;
+    }
 }

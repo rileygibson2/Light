@@ -16,6 +16,13 @@ public enum Feature implements PersistencyCapable {
     FOCUS,
     SHAPER,
     CONTROL;
+
+    public static Feature getFeature(String text) {
+        for (Feature feature : Feature.values()) {
+            if (feature.toString().equals(text)) return feature;
+        }
+        return null;
+    }
     
     @Override
     public byte[] getBytes() {

@@ -12,11 +12,12 @@ import light.commands.Modulate;
 import light.commands.Move;
 import light.commands.Store;
 import light.commands.commandline.CommandLine;
+import light.encoders.Encoders;
 import light.executors.Executor;
 import light.fixtures.Fixture;
 import light.fixtures.PatchManager;
 import light.fixtures.profile.ProfileParseException;
-import light.fixtures.profile.ProfileParser;
+import light.fixtures.profile.ProfileManager;
 import light.general.Addressable;
 import light.general.ConsoleAddress;
 import light.guipackage.cli.CLI;
@@ -120,8 +121,10 @@ public class Light {
         GUI.initialise(this, null); //Passing null forces full screen
         
         //Insantiate logic components
-        Programmer.getInstance();
+        ProfileManager.getInstance();
         PatchManager.getInstance();
+        Programmer.getInstance();
+        Encoders.getInstance();
 
         //Make pools
         presetPools = new HashMap<PresetType, Pool<Preset>>();
@@ -153,13 +156,11 @@ public class Light {
     }
 
     private void mock() {
-        Preset p = new Preset(PresetType.Color.getBaseAddress().setSuffix(2), PresetType.Color);
-        getPresetPool(PresetType.Color).add(p);
+        Preset p = new Preset(PresetType.COLOR.getBaseAddress().setSuffix(2), PresetType.COLOR);
+        getPresetPool(PresetType.COLOR).add(p);
 
-        
-        ProfileParser pp = new ProfileParser();
         try {
-            pp.parse("profiletest.xml");
+            ProfileManager.getInstance().parseProfile("profiletest.xml");
         }
         catch (ProfileParseException e) {CLI.error(e.toString());}
 

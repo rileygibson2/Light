@@ -3,8 +3,46 @@
 		<FixtureName>Mac 250 Entour</FixtureName>
 		<FixtureMode>16 bit Extended</FixtureMode>
 		<FixtureManufacturer>Martin</FixtureManufacturer>
+		<FixtureType>SPOT</FixtureType>
 	</FixtureInfo>
 	<Module>
-		<Channel feature="COLORRGB" attribute="COLORRGB1"/>
+		<Channel index="0" attribute="SHUTTER" feature="SHUTTER" attribute_user_name="Shutter" preset="BEAM">
+			<ChannelFunction index="0" name="Shutter" min_dmx="0" max_dmx="13">
+				<ChannelMacro index="0" name="closed" from_dmx="0" to_dmx="0"/>
+				<ChannelMacro index="1" name="open" from_dmx="13" to_dmx="12"/>
+			</ChannelFunction>
+			<ChannelFunction index="1" name="Strobe 0..100%" min_dmx="14" max_dmx="100">
+				<ChannelMacro index="0" name="min" from_dmx="14" to_dmx="14"/>
+				<ChannelMacro index="1" name="max" from_dmx="100" to_dmx="100"/>
+			</ChannelFunction>
+			<ChannelFunction index="2" name="Strobe 0..100%" min_dmx="14" max_dmx="100">
+				<ChannelMacro index="0" name="min Strobe" from_dmx="14" to_dmx="14"/>
+				<ChannelMacro index="1" name="max Strobe" from_dmx="100" to_dmx="100"/>
+			</ChannelFunction>
+			<ChannelFunction index="3" name="Rnd 0..100%" min_dmx="101" max_dmx="255">
+				<ChannelMacro index="0" name="min Rnd" from_dmx="101" to_dmx="101"/>
+				<ChannelMacro index="1" name="max Rnd" from_dmx="255" to_dmx="255"/>
+			</ChannelFunction>
+		</Channel>
+		<Channel index="0" attribute="DIM" feature="DIMMER" attribute_user_name="Dim" preset="DIMMER">
+			<ChannelFunction index="0" name="Dim" min_dmx="0" max_dmx="255">
+				<ChannelMacro index="0" name="closed" from_dmx="0" to_dmx="0"/>
+				<ChannelMacro index="1" name="open" from_dmx="255" to_dmx="255"/>
+			</ChannelFunction>
+		</Channel>
+		<Channel index="1" attribute="PAN" feature="POSITION" attribute_user_name="Pan" preset="POSITION">
+			<ChannelFunction index="0" min_dmx="0" max_dmx="255" min_value="-127" max_value="127">
+				<ChannelMacro index="0" name="min" from_dmx="0" to_dmx="0"/>
+				<ChannelMacro index="1" name="center" from_dmx="127.5" to_dmx="0"/>
+				<ChannelMacro index="2" name="max" from_dmx="255" to_dmx="255"/>
+			</ChannelFunction>
+		</Channel>
+		<Channel index="2" attribute="TILT" feature="POSITION" attribute_user_name="Tilt" preset="POSITION">
+			<ChannelFunction index="0" min_dmx="0" max_dmx="255" min_value="-127" max_value="127">
+				<ChannelMacro index="0" name="min" from_dmx="0" to_dmx="0"/>
+				<ChannelMacro index="1" name="center" from_dmx="127.5" to_dmx="0"/>
+				<ChannelMacro index="2" name="max" from_dmx="255" to_dmx="255"/>
+			</ChannelFunction>
+		</Channel>
 	</Module>
 </Profile>
