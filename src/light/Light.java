@@ -2,6 +2,7 @@ package light;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Base64.Encoder;
 
 import light.commands.Clear;
 import light.commands.Copy;
@@ -21,6 +22,7 @@ import light.fixtures.profile.ProfileManager;
 import light.general.Addressable;
 import light.general.ConsoleAddress;
 import light.guipackage.cli.CLI;
+import light.guipackage.general.Rectangle;
 import light.guipackage.gui.GUI;
 import light.stores.AbstractStore;
 import light.stores.Group;
@@ -166,6 +168,8 @@ public class Light {
 
         //Fixture f = new Fixture(new ConsoleAddress(Fixture.class, 0, 1), fP);
 
+
+        currentView.getUDA().createZone(Encoders.class, new Rectangle(0, 5, 10, 2));
     }
 
     public static void main(String args[]) {

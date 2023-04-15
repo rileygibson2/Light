@@ -15,6 +15,7 @@ import javax.swing.JPanel;
 
 import light.Pool;
 import light.commands.commandline.CommandLine;
+import light.encoders.Encoders;
 import light.guipackage.cli.CLI;
 import light.guipackage.dom.DOM;
 import light.guipackage.general.Rectangle;
@@ -24,6 +25,7 @@ import light.guipackage.general.UnitValue;
 import light.guipackage.gui.components.Component;
 import light.guipackage.gui.components.basecomponents.MessageBox;
 import light.guipackage.gui.components.complexcomponents.CommandLineGUI;
+import light.guipackage.gui.components.complexcomponents.EncodersGUI;
 import light.guipackage.gui.components.complexcomponents.FixtureWindowGUI;
 import light.guipackage.gui.components.complexcomponents.PoolGUI;
 import light.guipackage.gui.components.complexcomponents.UDAGUI;
@@ -114,8 +116,9 @@ public class GUI extends JPanel {
 			
 			if (o instanceof Pool) c = new PoolGUI(r, (Pool<?>) o);
 			if (o instanceof FixtureWindow) c = new FixtureWindowGUI(r, (FixtureWindow) o);
+			if (o instanceof Encoders) c = new EncodersGUI(r);
 
-			udaGUI.addComponent((Component) c);
+			if (c!=null) udaGUI.addComponent((Component) c);
 		}
 		
 		return c;

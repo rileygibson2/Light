@@ -4,18 +4,27 @@ import light.persistency.PersistencyCapable;
 
 public enum Feature implements PersistencyCapable {
     //Super attributes
-    DIMMER,
-    SHUTTER,
-    COLORRGB,
-    COLOR1,
-    COLOR2,
-    POSITION,
-    GOBO1,
-    GOBO2,
-    BEAM,
-    FOCUS,
-    SHAPER,
-    CONTROL;
+    DIMMER(FeatureGroup.DIMMER),
+    SHUTTER(FeatureGroup.DIMMER),
+    COLORRGB(FeatureGroup.COLOR),
+    COLOR1(FeatureGroup.COLOR),
+    COLOR2(FeatureGroup.COLOR),
+    POSITION(FeatureGroup.POSITION),
+    GOBO1(FeatureGroup.GOBO),
+    GOBO2(FeatureGroup.GOBO),
+    GOBO3(FeatureGroup.GOBO),
+    BEAM(FeatureGroup.BEAM),
+    FOCUS(FeatureGroup.FOCUS),
+    SHAPER(FeatureGroup.SHAPERS),
+    CONTROL(FeatureGroup.CONTROL);
+
+    private FeatureGroup group;
+
+    private Feature(FeatureGroup group) {
+        this.group = group;
+    }
+
+    public FeatureGroup getFeatureGroup() {return this.group;}
 
     public static Feature getFeature(String text) {
         for (Feature feature : Feature.values()) {

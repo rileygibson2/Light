@@ -5,7 +5,9 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-public class Encoders {
+import light.uda.UDACapable;
+
+public class Encoders implements UDACapable {
     
     private static Encoders singleton;
 

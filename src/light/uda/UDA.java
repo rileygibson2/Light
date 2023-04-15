@@ -4,7 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import light.Light;
-import light.fixtures.Fixture;
+import light.encoders.Encoders;
 import light.general.ConsoleAddress;
 import light.guipackage.cli.CLI;
 import light.guipackage.general.Pair;
@@ -33,6 +33,7 @@ public class UDA {
         //All pools
         if (tag instanceof ConsoleAddress) o = Light.getInstance().getPool((ConsoleAddress) tag);
         if (tag==FixtureWindow.class) o = new FixtureWindow();
+        if (tag==Encoders.class) o = Encoders.getInstance();
 
         if (o!=null) {
             zones.add(new Pair<>(o, zoneRec));

@@ -5,6 +5,7 @@ import java.awt.Font;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import light.encoders.Encoders;
 import light.executors.Executor;
 import light.general.ConsoleAddress;
 import light.guipackage.general.Point;
@@ -112,6 +113,7 @@ public class UDAGUI extends Component implements UDAGUIInterface {
         //Sheets tab
         nametags.clear();
         nametags.put("Fixtures", FixtureWindow.class);
+        nametags.put("Encoders", Encoders.class);
         fillTab(tB, 2, zoneRec, nametags);
         
         openZonePicker = tB;
