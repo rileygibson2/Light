@@ -2,65 +2,69 @@ package light.fixtures;
 
 public enum Attribute {
     //Dimmer sub attributes
-    DIM(Feature.DIMMER),
+    DIM(Feature.DIMMER, "Dim"),
 
     //Shutter sub attributes
-    SHUTTER(Feature.SHUTTER),
-    STROBE(Feature.SHUTTER),
+    SHUTTER(Feature.SHUTTER, "Shutter"),
+    STROBE(Feature.SHUTTER, "Strobe"),
 
     //COLORRGB sub attributes
-    COLORRGB1(Feature.COLORRGB), //Red
-    COLORRGB2(Feature.COLORRGB), //Green
-    COLORRGB3((Feature.COLORRGB)), //Blue
-    COLORRGB4((Feature.COLORRGB)), //Amber
-    COLORRGB5((Feature.COLORRGB)), //White
-    COLORRGB6((Feature.COLORRGB)), //Lime
-    COLORRGB7((Feature.COLORRGB)), //UV
-    COLORRGB8((Feature.COLORRGB)), //Cyan
-    COLORRGB9((Feature.COLORRGB)), //Yellow
-    COLORRGB10((Feature.COLORRGB)), //Magenta
+    COLORRGB1(Feature.COLORRGB, "Red"), //Red
+    COLORRGB2(Feature.COLORRGB, "Green"), //Green
+    COLORRGB3(Feature.COLORRGB, "Blue"), //Blue
+    COLORRGB4(Feature.COLORRGB, "Amber"), //Amber
+    COLORRGB5(Feature.COLORRGB, "White"), //White
+    COLORRGB6(Feature.COLORRGB, "Lime"), //Lime
+    COLORRGB7(Feature.COLORRGB, "UV"), //UV
+    COLORRGB8(Feature.COLORRGB, "Cyan"), //Cyan
+    COLORRGB9(Feature.COLORRGB, "Yellow"), //Yellow
+    COLORRGB10(Feature.COLORRGB, "Magenta"), //Magenta
     
     //Position sub attributes
-    PAN(Feature.POSITION),
-    TILT(Feature.POSITION),
+    PAN(Feature.POSITION, "Pan"),
+    TILT(Feature.POSITION, "Tilt"),
     
     //Gobo1 sub attributes
-    GOBO1_INDEX(Feature.GOBO1),
-    GOBO1_ROTATION(Feature.GOBO1),
-    GOBO1_SPIN(Feature.GOBO1),
+    GOBO1_INDEX(Feature.GOBO1, "Index"),
+    GOBO1_ROTATION(Feature.GOBO1, "Rotate"),
+    GOBO1_SPIN(Feature.GOBO1, "Spin"),
 
     //Gobo1 sub attributes
-    GOBO2_INDEX(Feature.GOBO2),
-    GOBO2_ROTATION(Feature.GOBO2),
-    GOBO2_SPIN(Feature.GOBO2),
+    GOBO2_INDEX(Feature.GOBO2, "Index"),
+    GOBO2_ROTATION(Feature.GOBO2, "Rotate"),
+    GOBO2_SPIN(Feature.GOBO2, "Spin"),
 
     //Beam sub attributes
-    IRIS(Feature.BEAM),
-    FROST(Feature.BEAM),
-    PRISIM1(Feature.BEAM),
-    PRISIM1_ROTATION(Feature.BEAM),
+    IRIS(Feature.BEAM, "Iris"),
+    FROST(Feature.BEAM, "Frost"),
+    PRISM1(Feature.BEAM, "Prism"),
+    PRISM1_ROTATION(Feature.BEAM, "Prism Rotate"),
 
     //Focus sub attributes
-    FOCUS(Feature.FOCUS),
-    ZOOM(Feature.FOCUS),
+    FOCUS(Feature.FOCUS, "Focus"),
+    ZOOM(Feature.FOCUS, "Zoom"),
     
     //Shaper sub attributes
-    SHAPER_1A(Feature.SHAPER),
-    SHAPER_1B(Feature.SHAPER),
-    SHAPER_2A(Feature.SHAPER),
-    SHAPER_2B(Feature.SHAPER),
-    SHAPER_3A(Feature.SHAPER),
-    SHAPER_3B(Feature.SHAPER),
-    SHAPER_4A(Feature.SHAPER),
-    SHAPER_4B(Feature.SHAPER);
+    SHAPER_1A(Feature.SHAPER, "1A"),
+    SHAPER_1B(Feature.SHAPER, "1B"),
+    SHAPER_2A(Feature.SHAPER, "2A"),
+    SHAPER_2B(Feature.SHAPER, "2B"),
+    SHAPER_3A(Feature.SHAPER, "3A"),
+    SHAPER_3B(Feature.SHAPER, "3B"),
+    SHAPER_4A(Feature.SHAPER, "4A"),
+    SHAPER_4B(Feature.SHAPER, "4B");
     
     private Feature parent;
+    private String userName;
     
-    private Attribute(Feature parent) {
+    private Attribute(Feature parent, String userName) {
         this.parent = parent;
+        this.userName = userName;
     }
     
     public Feature getParent() {return this.parent;}
+
+    public String getUserName() {return this.userName;}
 
     public boolean verify(Feature verify) {return verify==parent;}
 

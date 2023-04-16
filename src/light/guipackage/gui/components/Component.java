@@ -13,10 +13,10 @@ public abstract class Component extends Element {
 	private boolean hovered;
 	private boolean pauseHover; //Hover effects are pause when this is true
 
-	public Submitter<Point> onClick;
-	public Runnable onClickSimple; //Runnable onclick method
-	public Runnable onHover;
-	public Runnable onUnHover;
+	private Submitter<Point> onClick;
+	private Runnable onClickSimple; //Runnable onclick method
+	private Runnable onHover;
+	private Runnable onUnHover;
 
 	//Visual
 	private boolean visible;
@@ -27,9 +27,6 @@ public abstract class Component extends Element {
 	private boolean freezeShadow; //Stops shadow being updated with position changes
 	private UnitRectangle shadowR;
 	private String testName;
-
-	private Object tag;
-	public String tagString;
 
 	public Component(UnitRectangle r) {
 		super (r);
@@ -64,10 +61,6 @@ public abstract class Component extends Element {
 		for (Component c : getComponents()) c.setOpacity(d); //Recur down
 		return this; //To allow for chaining
 	}
-
-	public void setTag(Object t) {tag = t;}
-	public boolean hasTag() {return tag!=null;}
-	public Object getTag() {return tag;}
 
 	public boolean isSelected() {return selected;}
 	public void setSelected(boolean s) {selected = s;}

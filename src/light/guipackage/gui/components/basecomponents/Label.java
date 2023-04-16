@@ -12,7 +12,7 @@ public class Label extends SimpleBox {
 
 	private String text;
 	public Font font;
-	public Color col;
+	public Color textCol;
 	/**
 	 * If set then label will be drawn centered on point, else
 	 * will be drawn left centered to point
@@ -20,18 +20,18 @@ public class Label extends SimpleBox {
 	private boolean xCentered;
 	private boolean yCentered; 
 	
-	public Label(UnitRectangle r, String text, Font font, Color col) {
+	public Label(UnitRectangle r, String text, Font font, Color textCol) {
 		super(r);
 		this.text = text;
 		this.font = font;
-		this.col = col;
+		this.textCol = textCol;
 	}
 
 	public String getText() {return text;}
 
 	public void setText(String t) {text = t;}
 
-	public void setTextColor(Color col) {this.col = col;}
+	public void setTextColor(Color textCol) {this.textCol = textCol;}
 	
 	public boolean isTextXCentered() {return xCentered;}
 

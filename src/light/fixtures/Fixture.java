@@ -50,6 +50,11 @@ public class Fixture extends Addressable implements PersistencyCapable {
     }
 
     @Override
+    public String toString() {
+        return "\n[Fixture: name="+name+", dmx="+dmxAddress+", profile="+profile.toString()+"]";
+    }
+
+    @Override
     public byte[] getBytes() {
         PersistencyWriter pW = new PersistencyWriter();
 

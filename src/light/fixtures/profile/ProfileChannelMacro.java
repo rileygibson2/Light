@@ -1,6 +1,7 @@
 package light.fixtures.profile;
 
 import light.general.Utils;
+import light.guipackage.cli.CLI;
 
 public class ProfileChannelMacro {
     
@@ -31,8 +32,11 @@ public class ProfileChannelMacro {
     public void setToDMX(double d) {this.toDMX = d;}
     public double getToDMX() {return toDMX;}
 
+    public double getMidDMX() {return (this.fromDMX+this.toDMX)/2;}
+
     public boolean validate() {
-        return parent!=null&&Utils.validateDMX(fromDMX)&&Utils.validateDMX(toDMX);
+        return parent!=null&&Utils.validateDMX(fromDMX)&&Utils.validateDMX(toDMX)&&fromDMX<=toDMX
+            &&fromDMX>=parent.getMinDMX()&&fromDMX<=parent.getMaxDMX()&&toDMX>=parent.getMinDMX()&&toDMX<=parent.getMaxDMX();
     }
 
     public String toProfileString(String indent) {

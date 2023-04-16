@@ -24,13 +24,21 @@ public class TempWindow extends CollumnBox {
 	
 	List<FlexBox> tabs;
 	int activeTab;
+
+	/**
+	 * List of objects that can be filled and recalled to avoid a whole class being made when 
+	 * simply a TempWindow and one or two other elements is succifient.
+	 */
+	List<Object> helpfulObjects; 
 	
 	public TempWindow(String label) {
 		super(new UnitPoint(0, Unit.vw, 0, Unit.vh));
 		activeTab = -1;
 		tabs = new ArrayList<FlexBox>();
-		setCentered(true);
+		helpfulObjects = new ArrayList<Object>();
+		setCentered(Center.xyCentered);
 		setMinWidth(new UnitValue(40, Unit.vw));
+		setPosition(Position.GlobalFixed);
 		
 		//Top bar
 		topBar = new SimpleBox(new UnitRectangle(0, Unit.px, 0, Unit.px, 100, Unit.pcw, 5, Unit.vh));
@@ -64,7 +72,7 @@ public class TempWindow extends CollumnBox {
 		//Content box
 		contentBox = new FlexBox(new UnitPoint());
 		contentBox.setMinWidth(new UnitValue(100, Unit.pcw));
-		contentBox.setColor(GUI.fg);
+		contentBox.setColor(new Color(40, 40, 40));
 		addComponent(contentBox);
 	}
 	
@@ -80,20 +88,20 @@ public class TempWindow extends CollumnBox {
 		int tabi = tabs.size();
 		tab.setClickAction(() -> switchTab(tabi));
 		
-		if (activeTab==-1) { //Add current contentbox as tab 1 box
+		if (activeTab==-1) { //Add current content box as tab 1 box
 			tabs.add(contentBox);
 			switchTab(0);
 		}
 		else { //Add new content box for new tab
 			FlexBox tabBox = new FlexBox(new UnitPoint());
 			tabBox.setMinWidth(new UnitValue(100, Unit.pcw));
-			tabBox.setColor(GUI.fg);
+			tabBox.setColor(new Color(40, 40, 40));
 			tabs.add(tabBox);
 		}
 	}
 	
 	public void switchTab(int i) {
-		if (i>tabs.size()) return;
+		if (i<0||i>tabs.size()) return;
 		
 		//Switch content box
 		removeComponent(contentBox);
@@ -107,7 +115,8 @@ public class TempWindow extends CollumnBox {
 		((SimpleBox) tabBar.getComponents().get(i)).setBorder(new int[]{1, 3, 4}, GUI.focusOrange);
 		activeTab = i;
 	}
-	
+
+	public int getActiveTabNum() {return activeTab;}
 
 	public void addContent(Component c) {
 		contentBox.addComponent(c);
@@ -119,16 +128,40 @@ public class TempWindow extends CollumnBox {
 		if (tabBox!=null) tabBox.addComponent(c);
 	}
 
+	/**
+	 * Returns current active contentBox
+	 * @return
+	 */
+	public FlexBox getContentBox() {return contentBox;}
+
+	/**
+	 * Returns the box of the tab with the provided index
+	 * @param i
+	 * @return
+	 */
+	public FlexBox getTabContentBox(int i) {
+		if (i<0||i>tabs.size()) return null;
+		return tabs.get(i);
+	}
+
 	public void addSmother(double opacity) {
 		//Smother
 		SimpleBox smother = new SimpleBox(new UnitRectangle(0, 0, 100, 100), new Color(0, 0, 0));
 		smother.setOpacity(opacity);
-		smother.setPosition(Position.Absolute);
+		smother.setPosition(Position.GlobalFixed);
 		smother.decreasePriority();
+		smother.setClickAction(() -> {}); //Registering a dummy click action stops elements underneath being clicked
 		addComponent(smother);
 	}
 	
 	public void setCloseAction(Runnable r) {this.onClose = r;}
+
+	public void addHelpfulObject(Object o) {helpfulObjects.add(o);}
+	
+	public Object getHelpfulObject(int i) {
+		if (i>=0&&i<helpfulObjects.size()) return helpfulObjects.get(i);
+		return null;
+	}
 	
 	public void close(boolean cancelled) {
 		if (onClose!=null) onClose.run();

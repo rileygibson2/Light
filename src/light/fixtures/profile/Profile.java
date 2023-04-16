@@ -118,11 +118,15 @@ public class Profile implements PersistencyCapable {
         return true;
     }
 
-    @Override
-    public String toString() {
+    public String toFullString() {
         String result = "\n["+manufacturerName+" "+name+": mode="+modeName+", type="+type+"]";
         for (ProfileChannel channel : channels) result += "\n\t"+channel.toProfileString("\t");
         return result;
+    }
+
+    @Override
+    public String toString() {
+        return "["+manufacturerName+" "+name+": mode="+modeName+", type="+type+"]";
     }
     
     @Override

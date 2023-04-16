@@ -1,6 +1,9 @@
 package light.fixtures.profile;
 
-import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Set;
 
 import light.general.Utils;
@@ -11,7 +14,7 @@ public class ProfileChannelFunction {
     private int index;
     private String name; //Name for this subattribute function
 
-    private Set<ProfileChannelMacro> macros; //Macros to codify specific functions within this channel's DMX range
+    private List<ProfileChannelMacro> macros; //Macros to codify specific functions within this channel's DMX range
 
     //User values
     private double minValue;
@@ -26,7 +29,7 @@ public class ProfileChannelFunction {
         maxDMX = -1;
         minValue = 0;
         maxValue = 100;
-        macros = new HashSet<ProfileChannelMacro>();
+        macros = new ArrayList<ProfileChannelMacro>();
     }
 
     public void setParent(ProfileChannel parent) {this.parent = parent;}
@@ -34,15 +37,28 @@ public class ProfileChannelFunction {
 
     public void setIndex(int index) {this.index = index;}
     public int getIndex() {return index;}
-
-    public Set<ProfileChannelMacro> getMacros() {return macros;}
     
     public void addMacro(ProfileChannelMacro m) {
         macros.add(m);
         m.setParent(this);
+        sortMacros();
     }
 
     public boolean hasMacro(ProfileChannelMacro m) {return macros.contains(m);}
+
+    public List<ProfileChannelMacro> getMacros() {
+        sortMacros();
+        return macros;
+    }
+
+    private void sortMacros() {
+        Collections.sort(macros, new Comparator<ProfileChannelMacro>() {
+            @Override
+            public int compare(ProfileChannelMacro o1, ProfileChannelMacro o2) {
+                return (int) (o1.getIndex()-o2.getIndex());
+            }
+        });
+    }
 
     public void setName(String name) {this.name = name;}
     public String getName() {
@@ -54,7 +70,7 @@ public class ProfileChannelFunction {
     public double getMinValue() {return minValue;}
 
     public void setMaxValue(double v) {this.maxValue = v;}
-    public double getMaValue() {return maxValue;}
+    public double getMaxValue() {return maxValue;}
 
     public void setMinDMX(double d) {this.minDMX = d;}
     public double getMinDMX() {return minDMX;}
@@ -76,7 +92,8 @@ public class ProfileChannelFunction {
     }
 
     public boolean validate() {
-        if (parent==null||index==-1||!Utils.validateDMX(minDMX)||!Utils.validateDMX(maxDMX)) return false;
+        if (parent==null||index==-1||!Utils.validateDMX(minDMX)||!Utils.validateDMX(maxDMX)
+            ||minDMX>maxDMX) return false;
         for (ProfileChannelMacro macro : macros) if (!macro.validate()) return false;
         return true;
     }

@@ -11,6 +11,8 @@ import light.guipackage.general.Pair;
 import light.guipackage.general.Point;
 import light.guipackage.general.Rectangle;
 import light.guipackage.gui.GUI;
+import light.uda.guiinterfaces.EncoderGUIInterface;
+import light.uda.guiinterfaces.GUIInterface;
 import light.uda.guiinterfaces.UDAGUIInterface;
 
 public class UDA {
@@ -37,7 +39,10 @@ public class UDA {
 
         if (o!=null) {
             zones.add(new Pair<>(o, zoneRec));
-            GUI.getInstance().addToGUI(o);
+            GUIInterface gui = GUI.getInstance().addToGUI(o);
+
+            //Special assignments
+            if (tag==Encoders.class) Encoders.getInstance().setGUI(gui);
         }
     }
 

@@ -39,7 +39,8 @@ public abstract class Element {
 	public enum Position {
 		Absolute, //Dimensions taken from top left of parent element
 		Relative, //Dimensions taken from top left of last sibling element
-		Fixed //Dimensions taken from top left of screen
+		CollumnRelative, //Y Dimensions are taken from bottom of last sibling element
+		GlobalFixed //Dimensions taken from top left of screen
 	}
 	private Position position;
 	
@@ -56,10 +57,19 @@ public abstract class Element {
 	}
 	private Fill fill;
 	
-	private boolean xCentered; //Sets element to be x centered in parent element. This requires position absolute
-	private boolean yCentered; //Sets element to be x centered in parent element. This requires position absolute
-	
-	private boolean collumnRelative;
+	public enum Center {
+		xCentered,
+		yCentered,
+		xyCentered,
+		None;
+
+		public boolean isXCentered() {return this==Center.xCentered||this==Center.xyCentered;}
+		public boolean isYCentered() {return this==Center.xCentered||this==Center.xyCentered;}
+	}
+	private Center centered;
+
+	private Object tag;
+	public String tagString;
 
 	public Element(UnitRectangle r) {
 		this.r = r;
@@ -71,9 +81,7 @@ public abstract class Element {
 		position = Position.Absolute;
 		floatType = Float.Left;
 		fill = Fill.None;
-		xCentered = false;
-		yCentered = false;
-		collumnRelative = false;
+		centered = Center.None;
 	}
 	
 	public void setX(UnitValue p) {
@@ -95,6 +103,12 @@ public abstract class Element {
 		doPositioning();
 		if (parent!=null) parent.childUpdated();
 	}
+
+	/**
+	 * Same as setX() but does not trigger an update chain throughout rest of DOM elements - has 
+	 * no consequences
+	 * @param p
+	 */
 	protected void setXNQ(UnitValue p) {
 		r.x = p;
 		doPositioning();
@@ -174,24 +188,11 @@ public abstract class Element {
 	public void setFill(Fill f) {this.fill = f;}
 	public Fill getFill() {return fill;}
 	
-	public void setXCentered(boolean c) {
-		this.xCentered = c;
-		if (c) setPosition(Position.Absolute);
+	public void setCentered(Center c) {
+		this.centered = c;
+		if (c!=Center.None) setPosition(Position.Absolute);
 	}
-	public void setYCentered(boolean c) {
-		this.yCentered = c;
-		if (c) setPosition(Position.Absolute);
-	}
-	public void setCentered(boolean c) {
-		this.xCentered = c;
-		this.yCentered = c;
-		if (c) setPosition(Position.Absolute);
-	}
-	public boolean isXCentered() {return xCentered;}
-	public boolean isYCentered() {return yCentered;}
-
-	public void setCollumnRelative(boolean c) {collumnRelative = c;}
-	public boolean isCollumnRelative() {return collumnRelative;}
+	public Center getCentered() {return centered;}
 	
 	public Element getParent() {return parent;}
 	public void setParent(Element e) {parent = e;}
@@ -201,9 +202,17 @@ public abstract class Element {
 	
 	public void setRoot() {
 		isRoot = true;
-		setPosition(Position.Fixed);
+		setPosition(Position.GlobalFixed);
 	}
 	public boolean isRoot() {return isRoot;}
+
+	public void setTag(Object t) {tag = t;}
+	public boolean hasTag() {return tag!=null;}
+	public Object getTag() {return tag;}
+
+	public void setTagString(String t) {tagString = t;}
+	public boolean hasTagString() {return tagString!=null;}
+	public String getTagString() {return tagString;}
 	
 	public List<Component> getComponents() {
 		List<Component> copy = new ArrayList<>();
@@ -238,11 +247,35 @@ public abstract class Element {
 		componentsLock.unlock();
 		return num;
 	}
-	
+
+	/**
+	 * Adds a component to this element
+	 * @param c
+	 */
 	public void addComponent(Component c) {
+		addComponent(c, getNumComponents());
+	}
+
+	/**
+	 * Adds a component as the first child of this element
+	 * @param c
+	 */
+	public void addComponentAtFront(Component c) {
+		addComponent(c, 0);
+	}
+
+	/**
+	 * Adds a component to this element at the specified index
+	 * @param c
+	 */
+	public void addComponentAtIndex(Component c, int index) {
+		if (index>=0&&index<=getNumComponents()) addComponent(c, index);
+	}
+	
+	private void addComponent(Component c, int index) {
 		c.setParent(this);
 		componentsLock.lock();
-		components.add(c);
+		components.add(index, c);
 		componentsLock.unlock();
 		
 		c.doPositioning();
@@ -370,13 +403,13 @@ public abstract class Element {
 		if (parent==null) return; //Nothing below this will work without a parent
 		
 		//Do centered
-		if (isXCentered()) xCenterElementInParent();
-		if (isYCentered()) yCenterElementInParent();
+		if (centered.isXCentered()) xCenterElementInParent();
+		if (centered.isYCentered()) yCenterElementInParent();
 		/*
 		* An element with centered set should never be relative and should not respect it's
 		* float or fill property as center overrides both of these so safe to return here
 		*/
-		if (isXCentered()||isYCentered()) return;
+		if (centered!=Center.None) return;
 		
 		/*
 		* Float should be done from right end of box if position is not relative OR
@@ -393,7 +426,7 @@ public abstract class Element {
 		if (getPosition()==Position.Relative) positionRelatively();
 
 		//Do collumn relative positioning
-		if (isCollumnRelative()) positionCollumnRelatively();
+		if (getPosition()==Position.CollumnRelative) positionCollumnRelatively();
 		
 		//Do fill
 		if (getFill()!=Fill.None) fillToNextElement();
@@ -556,8 +589,14 @@ public abstract class Element {
 	}
 	
 	private void xCenterElementInParent() {
+		if (getPosition()==Position.GlobalFixed) { //Center from top left
+			UnitValue width = translateToUnit(getFuncWidth(), this, Unit.pcw, GUI.getInstance().getCurrentRoot()); 
+			rFunc.x = new UnitValue(50-(width.v/2), Unit.pcw);
+			return;
+		}
+		
 		UnitValue parentW = translateToUnit(parent.getFuncWidth(), parent, getX().u, this);
-		UnitValue width = translateToUnit(getFuncWidth(), this, getX().u, this);
+		UnitValue width = translateToUnit(getFuncWidth(), this, getX().u, this); 
 		rFunc.x = new UnitValue((parentW.v-width.v)/2, getX().u);
 	}
 
@@ -567,6 +606,12 @@ public abstract class Element {
 	 * a little of this element will likely peek out
 	 */
 	private void yCenterElementInParent() {
+		if (getPosition()==Position.GlobalFixed) { //Center from top left
+			UnitValue height = translateToUnit(getFuncHeight(), this, Unit.pch, GUI.getInstance().getCurrentRoot()); 
+			rFunc.y = new UnitValue(50-(height.v/2), Unit.pch);
+			return;
+		}
+
 		UnitValue parentH = translateToUnit(parent.getFuncHeight(), parent, getY().u, this);
 		UnitValue height = translateToUnit(getFuncHeight(), this, getY().u, this);
 		rFunc.y = new UnitValue((parentH.v-height.v)/2, getY().u);
@@ -590,10 +635,10 @@ public abstract class Element {
 	* @return
 	*/
 	public Rectangle getRealRec(UnitRectangle r) {
-		Rectangle rNew = new Rectangle();
+		Rectangle rNew = new Rectangle(); //In px but Unit is removed as point of method is to normalise all units
 		
 		//Fixed positioning
-		if (position==Position.Fixed||isRoot()||parent==null) { //Root element should be treated as position fixed
+		if (position==Position.GlobalFixed||isRoot()||parent==null) { //Root element should be treated as position fixed
 			switch (r.x.u) {
 				case pcw:
 				case vw: rNew.x = GUI.getScreenUtils().cW(r.x.v); break;
@@ -917,8 +962,10 @@ public abstract class Element {
 	
 	@Override
 	public String toString() {
-		//if (inDOM()) 
-		return "["+CLI.orange+getClass().getSimpleName()+CLI.reset+": "+CLI.blue+"pos"+CLI.reset+": "+getPosition()+" "+CLI.blue+"float"+CLI.reset+": "+getFloat()+" "+CLI.blue+"dom"+CLI.reset+": "+inDOM()+" "+CLI.blue+"r"+CLI.reset+": "+getRec()+" "+CLI.blue+"rFunc"+CLI.reset+": "+rFunc+" "+CLI.blue+"rL"+CLI.reset+": "+getRealRec()+"]";
-		//return "["+CLI.orange+getClass().getSimpleName()+CLI.reset+": "+CLI.blue+"pos"+CLI.reset+": "+getPosition()+" "+CLI.blue+"float"+CLI.reset+": "+getFloat()+" "+CLI.blue+"dom"+CLI.reset+": "+inDOM()+" "+CLI.blue+"r"+CLI.reset+": "+getRec()+" "+CLI.blue+"rFunc"+CLI.reset+": "+rFunc+"]";
+		String result = "["+CLI.orange+getClass().getSimpleName()+CLI.reset+": "+CLI.blue+"pos"+CLI.reset+": "+getPosition()+" "+CLI.blue+"float"+CLI.reset+": "+getFloat()+" "+CLI.blue+"dom"+CLI.reset+": "+inDOM()+" ";
+		if (hasTag()) result +=  CLI.blue+"tag"+CLI.reset+": "+tag.toString();
+		if (hasTagString()) result +=  CLI.blue+"tagString"+CLI.reset+": "+tagString;
+		result += CLI.blue+"r"+CLI.reset+": "+getRec()+" "+CLI.blue+"rFunc"+CLI.reset+": "+rFunc+" "+CLI.blue+"rL"+CLI.reset+": "+getRealRec()+"]";
+		return result;
 	}
 }

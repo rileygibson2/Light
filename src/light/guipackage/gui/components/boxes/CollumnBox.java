@@ -15,7 +15,19 @@ public class CollumnBox extends FlexBox {
     
     @Override
     public void addComponent(Component c) {
-        c.setCollumnRelative(true);
+        if (c.getPosition()!=Position.GlobalFixed) c.setPosition(Position.CollumnRelative);
         super.addComponent(c);
+    }
+
+    @Override
+    public void addComponentAtFront(Component c) {
+        if (c.getPosition()!=Position.GlobalFixed) c.setPosition(Position.CollumnRelative);
+        super.addComponentAtFront(c);
+    }
+
+    @Override
+    public void addComponentAtIndex(Component c, int index) {
+        if (c.getPosition()!=Position.GlobalFixed) c.setPosition(Position.CollumnRelative);
+        super.addComponentAtIndex(c, index);
     }
 }

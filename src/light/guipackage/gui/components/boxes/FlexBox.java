@@ -19,6 +19,18 @@ public class FlexBox extends SimpleBox {
     }
 
     @Override
+    public void addComponentAtFront(Component c) {
+        super.addComponentAtFront(c);
+        resize(); //Trigger resize
+    }
+
+    @Override
+    public void addComponentAtIndex(Component c, int index) {
+        super.addComponentAtIndex(c, index);
+        resize(); //Trigger resize
+    }
+
+    @Override
     public void childUpdated() {
         resize(); //Trigger resize
         super.childUpdated();

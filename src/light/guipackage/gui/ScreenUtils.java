@@ -79,7 +79,7 @@ public class ScreenUtils {
 	
 	public void drawLabel(Graphics2D g, Label l) {
 		Rectangle r = l.getRealRec();
-		Color col = new Color(l.col.getRed(), l.col.getGreen(), l.col.getBlue(), percToCol(l.getOpacity()));
+		Color col = new Color(l.textCol.getRed(), l.textCol.getGreen(), l.textCol.getBlue(), percToCol(l.getOpacity()));
 		g.setFont(l.font);
 		
 		if (l.isTextXCentered()&&l.isTextYCentered()) drawCenteredString(g, l.font, l.getText(), col, r);

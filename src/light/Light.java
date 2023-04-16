@@ -2,7 +2,6 @@ package light;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Base64.Encoder;
 
 import light.commands.Clear;
 import light.commands.Copy;
@@ -17,8 +16,9 @@ import light.encoders.Encoders;
 import light.executors.Executor;
 import light.fixtures.Fixture;
 import light.fixtures.PatchManager;
-import light.fixtures.profile.ProfileParseException;
+import light.fixtures.profile.Profile;
 import light.fixtures.profile.ProfileManager;
+import light.fixtures.profile.ProfileParseException;
 import light.general.Addressable;
 import light.general.ConsoleAddress;
 import light.guipackage.cli.CLI;
@@ -125,8 +125,8 @@ public class Light {
         //Insantiate logic components
         ProfileManager.getInstance();
         PatchManager.getInstance();
-        Programmer.getInstance();
         Encoders.getInstance();
+        Programmer.getInstance();
 
         //Make pools
         presetPools = new HashMap<PresetType, Pool<Preset>>();
@@ -158,18 +158,23 @@ public class Light {
     }
 
     private void mock() {
-        Preset p = new Preset(PresetType.COLOR.getBaseAddress().setSuffix(2), PresetType.COLOR);
-        getPresetPool(PresetType.COLOR).add(p);
+        Preset preset = new Preset(PresetType.COLOR.getBaseAddress().setSuffix(2), PresetType.COLOR);
+        getPresetPool(PresetType.COLOR).add(preset);
 
+        Profile profile = null;
         try {
-            ProfileManager.getInstance().parseProfile("profiletest.xml");
+            profile = ProfileManager.getInstance().parseProfile("profiletest.xml");
         }
         catch (ProfileParseException e) {CLI.error(e.toString());}
 
-        //Fixture f = new Fixture(new ConsoleAddress(Fixture.class, 0, 1), fP);
+        Fixture fixture = new Fixture(new ConsoleAddress(Fixture.class, 0, 1), profile);
+        PatchManager.getInstance().addFixture(fixture);
 
+        Programmer.getInstance().selectFixture(fixture);
 
-        currentView.getUDA().createZone(Encoders.class, new Rectangle(0, 5, 10, 2));
+        CLI.debug(Programmer.getInstance().getSelectedFixtures());
+
+        currentView.getUDA().createZone(Encoders.class, new Rectangle(0, 7, 10, 2));
     }
 
     public static void main(String args[]) {

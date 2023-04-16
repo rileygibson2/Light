@@ -9,7 +9,7 @@
 		<Channel index="0" attribute="SHUTTER" feature="SHUTTER" attribute_user_name="Shutter" preset="BEAM">
 			<ChannelFunction index="0" name="Shutter" min_dmx="0" max_dmx="13">
 				<ChannelMacro index="0" name="closed" from_dmx="0" to_dmx="0"/>
-				<ChannelMacro index="1" name="open" from_dmx="13" to_dmx="12"/>
+				<ChannelMacro index="1" name="open" from_dmx="13" to_dmx="13"/>
 			</ChannelFunction>
 			<ChannelFunction index="1" name="Strobe 0..100%" min_dmx="14" max_dmx="100">
 				<ChannelMacro index="0" name="min" from_dmx="14" to_dmx="14"/>
@@ -33,14 +33,14 @@
 		<Channel index="1" attribute="PAN" feature="POSITION" attribute_user_name="Pan" preset="POSITION">
 			<ChannelFunction index="0" min_dmx="0" max_dmx="255" min_value="-127" max_value="127">
 				<ChannelMacro index="0" name="min" from_dmx="0" to_dmx="0"/>
-				<ChannelMacro index="1" name="center" from_dmx="127.5" to_dmx="0"/>
+				<ChannelMacro index="1" name="center" from_dmx="127.5" to_dmx="127.5"/>
 				<ChannelMacro index="2" name="max" from_dmx="255" to_dmx="255"/>
 			</ChannelFunction>
 		</Channel>
 		<Channel index="2" attribute="TILT" feature="POSITION" attribute_user_name="Tilt" preset="POSITION">
 			<ChannelFunction index="0" min_dmx="0" max_dmx="255" min_value="-127" max_value="127">
 				<ChannelMacro index="0" name="min" from_dmx="0" to_dmx="0"/>
-				<ChannelMacro index="1" name="center" from_dmx="127.5" to_dmx="0"/>
+				<ChannelMacro index="1" name="center" from_dmx="127.5" to_dmx="127.5"/>
 				<ChannelMacro index="2" name="max" from_dmx="255" to_dmx="255"/>
 			</ChannelFunction>
 		</Channel>
