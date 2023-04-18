@@ -1,5 +1,7 @@
 package light.fixtures;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -47,14 +49,22 @@ public class PatchManager {
         return null;
     }
 
-    public Set<Fixture> getFixtures(List<ConsoleAddress> addresses) {
-        Set<Fixture> fixtures = new HashSet<>();
+    public List<Fixture> getFixtures(List<ConsoleAddress> addresses) {
+        List<Fixture> fixtures = new ArrayList<>();
         
         for (Set<Fixture> profile : patch.values()) {
             for (Fixture f : profile) {
                 if (addresses.contains(f.getAddress())) fixtures.add(f);
             }
         }
+        Collections.sort(fixtures);
+        return fixtures;
+    }
+
+    public List<Fixture> getFixtures(Profile profile) {
+        List<Fixture> fixtures = new ArrayList<>();
+        fixtures.addAll(patch.get(profile));
+        Collections.sort(fixtures);
         return fixtures;
     }
 
@@ -62,6 +72,12 @@ public class PatchManager {
         Set<Fixture> allFixtures = new HashSet<>();
         for (Set<Fixture> profile : patch.values()) allFixtures.addAll(profile);
         return allFixtures;
+    }
+
+    public Set<Profile> allProfileSet() {
+        Set<Profile> result = new HashSet<>();
+        for (Profile profile : patch.keySet()) result.add(profile);
+        return result;
     }
     
     public void fixtureProfileUpdated(Fixture f) {

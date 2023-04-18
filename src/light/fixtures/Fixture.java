@@ -11,7 +11,6 @@ import light.persistency.PersistencyWriter;
 public class Fixture extends Addressable implements PersistencyCapable {
     
     private Profile profile;
-    private String name;
     private DMXAddress dmxAddress;
 
     public Fixture(ConsoleAddress address, Profile profile) {
@@ -21,9 +20,6 @@ public class Fixture extends Addressable implements PersistencyCapable {
 
     public void setDMXAddress(DMXAddress ad) {this.dmxAddress = ad;}
     public DMXAddress getDMXAddress() {return dmxAddress;}
-
-    public void setName(String n) {name = n;}
-    public String getName() {return name;}
 
     public void setProfile(Profile profile) {
         this.profile = profile;
@@ -51,7 +47,7 @@ public class Fixture extends Addressable implements PersistencyCapable {
 
     @Override
     public String toString() {
-        return "\n[Fixture: name="+name+", dmx="+dmxAddress+", profile="+profile.toString()+"]";
+        return "\n[Fixture: name="+getLabel()+", dmx="+dmxAddress+", profile="+profile.toString()+"]";
     }
 
     @Override
@@ -59,7 +55,7 @@ public class Fixture extends Addressable implements PersistencyCapable {
         PersistencyWriter pW = new PersistencyWriter();
 
         //Name and dmx address
-        pW.put(getName().getBytes());
+        pW.put(getLabel().getBytes());
         pW.put(dmxAddress.getBytes());
 
         //Attributes

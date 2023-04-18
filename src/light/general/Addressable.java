@@ -1,6 +1,6 @@
 package light.general;
 
-public abstract class Addressable {
+public abstract class Addressable implements Comparable<Addressable> {
     
     private ConsoleAddress address;
     private String label;
@@ -19,4 +19,9 @@ public abstract class Addressable {
     public String getLabel() {return label;}
 
     public void setLabel(String label) {this.label = label;}
+
+    @Override
+    public int compareTo(Addressable o) {
+        return this.address.compareTo(o.getAddress());
+    }
 }

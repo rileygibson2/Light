@@ -27,7 +27,6 @@ public class SimpleBox extends Component {
 	public SimpleBox(UnitRectangle r) {
 		super(r);
 		draw = false;
-		col = new Color(0, 0, 0);
 		filled = false;
 		rounded = false;
 		arcSize = 10;
@@ -56,6 +55,7 @@ public class SimpleBox extends Component {
 		filled = true;
 		col = c;
 	}
+	public boolean hasColor() {return col!=null;}
 	
 	public void setFilled(boolean f) {filled = f;}
 	public boolean isFilled() {return filled;}

@@ -47,7 +47,7 @@ public class Modulate implements Command {
     @Override
     public void execute() {
         //Resolve target addresses into fixtures
-        Set<Fixture> fixtures = PatchManager.getInstance().getFixtures(targetFixtures);
+        List<Fixture> fixtures = PatchManager.getInstance().getFixtures(targetFixtures);
         Programmer prog = Programmer.getInstance();
         prog.clearSelectedFixtures();
         

@@ -56,7 +56,7 @@ public class ProfileChannel {
 
     public ProfileChannelFunction getFunctionForValue(double value) {
         for (ProfileChannelFunction function : functions) {
-            if (function.inValueRange(value)) return function;
+            if (function.valueValidForRange(value)) return function;
         }
         return null;
     }
@@ -116,6 +116,10 @@ public class ProfileChannel {
 
     public void setHighlightDMX(double d) {this.highlightDMX = d;}
     public double getHighlightDMX() {return highlightDMX;}
+
+    public boolean valueValidForRange(double value) {
+        return value>=minValue&&value<=maxValue;
+    }
 
     public boolean validate() {
         if (parent==null||index==-1||feature==null||attribute==null) return false;

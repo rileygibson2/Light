@@ -78,7 +78,7 @@ public class ProfileChannelFunction {
     public void setMaxDMX(double d) {this.maxDMX = d;}
     public double getMaxDMX() {return maxDMX;}
 
-    public boolean inValueRange(double value) {
+    public boolean valueValidForRange(double value) {
         return value>=minValue&&value<=maxValue;
     }
 

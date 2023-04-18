@@ -6,8 +6,8 @@ import java.util.Map;
 import java.util.Set;
 
 import light.fixtures.Attribute;
-import light.fixtures.Feature;
 import light.fixtures.Fixture;
+import light.fixtures.profile.ProfileChannel;
 import light.persistency.PersistencyCapable;
 import light.persistency.PersistencyWriter;
 
@@ -27,8 +27,8 @@ public class DataStore implements PersistencyCapable {
      * @param overwritePriority - if set then the given value will overwrite the stores value. Otherwsie the data stores value will persist 
      */
     public void set(Fixture fixture, Attribute attribute, Double value, boolean overwritePriority) {
-        if (fixture==null||attribute==null||!fixture.getProfile().hasAttribute(attribute)||value<0||value>255) return;
-        value = validate(value);
+        if (fixture==null||attribute==null||!fixture.getProfile().hasAttribute(attribute)) return;
+        value = validate(fixture, attribute, value);
 
         //If not overwrite then return if store already contains value 
         if (!overwritePriority&&contains(fixture, attribute)) return;
@@ -59,23 +59,21 @@ public class DataStore implements PersistencyCapable {
 
         //Validate values TODO: make more elegant
         for (Map.Entry<Attribute, Double> v : attributes.entrySet()) {
-            attributes.put(v.getKey(), validate(v.getValue()));
+            attributes.put(v.getKey(), validate(fixture, v.getKey(), v.getValue()));
         }
 
         //Assign values to this fixture's mapping
         store.put(fixture, attributes);
     }
 
-    public double validate(double d) {
-        if (d<0) return 0;
-        if (d>100) return 100;
-        return d;
-    }
+    public double validate(Fixture fixture, Attribute attribute, double value) {
+        ProfileChannel channel = fixture.getProfile().getChannelWithAttribute(attribute);
 
-    public boolean contains(Fixture fixture, Attribute attribute) {
-        return fixture!=null&&attribute!=null
-            &&store.containsKey(fixture)&&store.get(fixture)!=null
-            &&store.get(fixture).containsKey(attribute);
+        if (!channel.valueValidForRange(value)) {
+            if (value>channel.getMaxValue()) return channel.getMaxValue();
+            else return channel.getMinValue();
+        }
+        return value;
     }
     
     public void remove(Fixture fixture) {
@@ -97,11 +95,17 @@ public class DataStore implements PersistencyCapable {
 
     public Map<Attribute, Double> getFixtureValues(Fixture fixture) {return store.get(fixture);}
 
-    public boolean hasFixture(Fixture fixture) {return store.containsKey(fixture);}
+    public Double get(Fixture fixture, Attribute attribute) {
+        if (fixture==null||attribute==null||!store.containsKey(fixture)||!store.get(fixture).containsKey(attribute)) return -1d;
+        return store.get(fixture).get(attribute);
+    }
 
-    public boolean hasFixtureAndAttribute(Fixture fixture, Attribute attribute) {
-        if (store.containsKey(fixture)&&store.get(fixture)!=null) return store.get(fixture).containsKey(attribute);
-        return false;
+    public boolean contains(Fixture fixture) {return fixture!=null&&store.containsKey(fixture);}
+
+    public boolean contains(Fixture fixture, Attribute attribute) {
+        return fixture!=null&&attribute!=null
+            &&store.containsKey(fixture)&&store.get(fixture)!=null
+            &&store.get(fixture).containsKey(attribute);
     }
 
     /**

@@ -196,6 +196,7 @@ public abstract class Element {
 	
 	public Element getParent() {return parent;}
 	public void setParent(Element e) {parent = e;}
+	public boolean hasParent() {return parent!=null;}
 	
 	public void setDOMEntryAction(Runnable r) {domEntryAction = r;}
 	public boolean inDOM() {return inDOM;}
@@ -273,6 +274,8 @@ public abstract class Element {
 	}
 	
 	private void addComponent(Component c, int index) {
+		if (components.contains(c)) return;
+		
 		c.setParent(this);
 		componentsLock.lock();
 		components.add(index, c);
@@ -486,6 +489,8 @@ public abstract class Element {
 				//Special case for flex box - should consider max width not actual width as should still be allowed to resize
 				if (getParent() instanceof FlexBox) parentW = translateToUnit(getParent().getMaxWidth(), getParent(), getX().u, this);
 				
+				if (parentW==null) return; //TODO bodge fix but will be aight because positioning happens so often
+
 				UnitValue width = translateToUnit(getFuncWidth(), this, getX().u, this);
 				if (x+width.v>parentW.v+2) {
 					//Position at left of element but down a 'row'
@@ -736,8 +741,11 @@ public abstract class Element {
 		if (oldUV.u.isReal()&&newUnit.isRelative()) {
 			//Need to translate real unit to be a relative value for this element
 			Rectangle newScopeR;
-			if (newScope.getParent()==null) newScopeR = newScope.getRealRec();
-			else newScopeR = oldScope.getParent().getRealRec();
+			if (!newScope.hasParent()) newScopeR = newScope.getRealRec();
+			else {
+				if (!oldScope.hasParent()) return null;
+				newScopeR = oldScope.getParent().getRealRec();
+			}
 			
 			if (newUnit==Unit.pcw) {
 				if (oldUV.u==Unit.px) return new UnitValue((oldUV.v/newScopeR.width)*100, newUnit);
@@ -960,6 +968,21 @@ public abstract class Element {
 	
 	protected void doKeyPress(KeyEvent k) {}; //Doesn't need to recur due to key listener registration in IO
 	
+	/**
+	 * Searches up the parent tree from this element and checks if any parent element 
+	 * is of the specified class.
+	 */
+	public Element getParentAssignableFrom(Class<?> clazz) {
+		if (!hasParent()) return null;
+		Element e = getParent();
+
+		while (e.hasParent()) {
+			if (clazz.isAssignableFrom(e.getClass())) return e;
+			e = e.getParent();
+		}
+		return null;
+	}
+
 	@Override
 	public String toString() {
 		String result = "["+CLI.orange+getClass().getSimpleName()+CLI.reset+": "+CLI.blue+"pos"+CLI.reset+": "+getPosition()+" "+CLI.blue+"float"+CLI.reset+": "+getFloat()+" "+CLI.blue+"dom"+CLI.reset+": "+inDOM()+" ";

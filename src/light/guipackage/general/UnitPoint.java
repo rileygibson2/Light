@@ -17,12 +17,12 @@ public class UnitPoint {
         y = new UnitValue(0, u);
     }
 
-    public UnitPoint(double x, double y, double width, double height) {
+    public UnitPoint(double x, double y) {
         this.x = new UnitValue(x, Unit.pcw);
         this.y = new UnitValue(y, Unit.pch);
     }
 
-    public UnitPoint(double x, double y, double width, double height, Unit u) {
+    public UnitPoint(double x, double y, Unit u) {
         this.x = new UnitValue(x, u);
         this.y = new UnitValue(y, u);
     }
