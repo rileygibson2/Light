@@ -10,6 +10,7 @@ import light.guipackage.general.UnitRectangle;
 import light.guipackage.general.UnitValue;
 import light.guipackage.general.UnitValue.Unit;
 import light.guipackage.gui.GUI;
+import light.guipackage.gui.Styles;
 import light.guipackage.gui.components.Component;
 import light.guipackage.gui.components.boxes.CollumnBox;
 import light.guipackage.gui.components.boxes.FlexBox;
@@ -44,7 +45,7 @@ public class TempWindow extends CollumnBox {
 		topBar = new SimpleBox(new UnitRectangle(0, Unit.px, 0, Unit.px, 100, Unit.pcw, 5, Unit.vh));
 		addComponent(topBar);
 		
-		Label title = new Label(new UnitRectangle(0, Unit.px, 0, Unit.px, 20, Unit.vw, 100, Unit.pch), label, new Font(GUI.baseFont, Font.BOLD, 18), new Color(230, 230, 230));
+		Label title = new Label(new UnitRectangle(0, Unit.px, 0, Unit.px, 20, Unit.vw, 100, Unit.pch), label, new Font(Styles.baseFont, Font.BOLD, 18), new Color(230, 230, 230));
 		title.setFill(Fill.Horizontal);
 		title.setColor(new Color(0, 0, 180));
 		title.setBorder(1, new Color(10, 100, 255));
@@ -56,7 +57,7 @@ public class TempWindow extends CollumnBox {
 		Image exit = new Image(new UnitRectangle(0, Unit.vw, 0, Unit.vh, 5, Unit.vw, 100, Unit.pch), "exit.png");
 		exit.setPosition(Position.Relative);
 		exit.setFloat(Float.Right);
-		exit.setColor(GUI.bg);
+		exit.setColor(Styles.bg);
 		exit.setBorder(1, new Color(80, 80, 80));
 		exit.setRounded(10);
 		topBar.addComponent(exit);
@@ -64,8 +65,8 @@ public class TempWindow extends CollumnBox {
 		//Tab bar
 		tabBar = new FlexBox(new UnitPoint());
 		tabBar.setMinWidth(new UnitValue(100, Unit.pcw));
-		tabBar.setColor(GUI.focus);
-		SimpleBox tBB = new SimpleBox(new UnitRectangle(0, 96.7, 100, 5, Unit.pcw, Unit.pch), GUI.focusOrange);
+		tabBar.setColor(Styles.focus);
+		SimpleBox tBB = new SimpleBox(new UnitRectangle(0, 96.7, 100, 5, Unit.pcw, Unit.pch), Styles.focusOrange);
 		//tabBar.addComponent(tBB);
 		addComponent(tabBar);
 		
@@ -77,11 +78,11 @@ public class TempWindow extends CollumnBox {
 	}
 	
 	public void addTab(String name) {
-		Label tab = new Label(new UnitRectangle(0, 0, 80, 30, Unit.px), name, new Font(GUI.baseFont, Font.BOLD, 11), new Color(230, 230, 230));
+		Label tab = new Label(new UnitRectangle(0, 0, 80, 30, Unit.px), name, new Font(Styles.baseFont, Font.BOLD, 11), new Color(230, 230, 230));
 		tab.setPosition(Position.Relative);
-		tab.setColor(GUI.fg);
+		tab.setColor(Styles.fg);
 		tab.setRounded(new int[]{1, 4});
-		tab.setBorder(GUI.focusOrange);
+		tab.setBorder(Styles.focusOrange);
 		tab.setTextCentered(true);
 		tabBar.addComponent(tab);
 
@@ -110,9 +111,9 @@ public class TempWindow extends CollumnBox {
 		
 		//Style tab bar
 		if (activeTab!=-1) {
-			((SimpleBox) tabBar.getComponents().get(activeTab)).setBorder(GUI.focusOrange);
+			((SimpleBox) tabBar.getComponents().get(activeTab)).setBorder(Styles.focusOrange);
 		}
-		((SimpleBox) tabBar.getComponents().get(i)).setBorder(new int[]{1, 3, 4}, GUI.focusOrange);
+		((SimpleBox) tabBar.getComponents().get(i)).setBorder(new int[]{1, 3, 4}, Styles.focusOrange);
 		activeTab = i;
 	}
 

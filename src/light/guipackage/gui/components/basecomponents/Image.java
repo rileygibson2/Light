@@ -8,17 +8,19 @@ import light.guipackage.gui.components.boxes.SimpleBox;
 
 public class Image extends SimpleBox {
 
-	public String src;
+	private String src;
 	
 	public Image(UnitRectangle r, String src) {
 		super(r);
 		this.src = src;
 	}
 
+	public void setSource(String src) {this.src = src;}
+	public String getSource() {return src;}
+
 	@Override
 	public void draw(Graphics2D g) {
 		super.draw(g);
 		GUI.getScreenUtils().drawImage(g, this);
 	}
-
 }

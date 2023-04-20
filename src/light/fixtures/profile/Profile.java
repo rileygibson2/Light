@@ -7,6 +7,7 @@ import java.util.Set;
 
 import light.fixtures.Attribute;
 import light.fixtures.Feature;
+import light.fixtures.FeatureGroup;
 import light.fixtures.FixtureType;
 import light.persistency.PersistencyCapable;
 
@@ -39,9 +40,13 @@ public class Profile implements PersistencyCapable {
     private String manufacturerName;
 
     private Set<ProfileChannel> channels;
+
+    //Wheels
+    private Set<ProfileWheel> wheels;
     
     public Profile() {
         channels = new HashSet<ProfileChannel>();
+        wheels = new HashSet<ProfileWheel>();
     }
     
     public void setName(String name) {this.name = name;}
@@ -86,6 +91,14 @@ public class Profile implements PersistencyCapable {
         return attributes;
     }
 
+    public boolean hasAttributeOfFeatureGroup(FeatureGroup group) {
+        if (group==null) return false;
+        for (ProfileChannel c : channels) {
+            if (c.getFeature().getFeatureGroup()==group) return true;
+        }
+        return false;
+    }
+
     public ProfileChannel getChannelWithAttribute(Attribute attribute) {
         if (channels==null) return null;
         for (ProfileChannel c : channels) {
@@ -98,10 +111,55 @@ public class Profile implements PersistencyCapable {
     
     public void addChannel(ProfileChannel c) {
         channels.add(c);
-        c.setParent(this);
+        c.setProfile(this);
     }
 
     public boolean hasChannel(ProfileChannel c) {return channels.contains(c);}
+
+    public void addWheel(ProfileWheel wheel) {
+        wheels.add(wheel);
+        wheel.setProfile(this);
+    }
+
+    public double valueToDMX(Attribute attribute, double value) {
+        ProfileChannel channel = getChannelWithAttribute(attribute);
+        if (channel==null) return -1;
+        ProfileChannelFunction function = channel.getFunctionForValue(value);
+        if (function==null) return -1;
+        return function.valueToDMX(value);
+    }
+
+    public double valueAsPercOfRange(Attribute attribute, double value) {
+        ProfileChannel channel = getChannelWithAttribute(attribute);
+        if (channel==null) return -1;
+        ProfileChannelFunction function = channel.getFunctionForValue(value);
+        if (function==null) return -1;
+        return function.valueAsPercOfRange(value);
+    }
+
+    public boolean hasWheel(int wheelIndex) {
+        for (ProfileWheel wheel: wheels) if (wheel.getIndex()==wheelIndex) return true;
+        return false;
+    }
+
+    public boolean hasWheelAndSlot(int wheelIndex, int slotIndex) {
+        for (ProfileWheel wheel: wheels) {
+            if (wheel.getIndex()==wheelIndex&&wheel.hasSlot(slotIndex)) return true;
+        }
+        return false;
+    }
+
+    public ProfileWheel getWheel(int wheelIndex) {
+        for (ProfileWheel wheel: wheels) if (wheel.getIndex()==wheelIndex) return wheel;
+        return null;
+    }
+
+    public ProfileWheelSlot getSlot(int wheelIndex, int slotIndex) {
+        for (ProfileWheel wheel: wheels) {
+            if (wheel.getIndex()==wheelIndex) return wheel.getSlot(slotIndex);
+        }
+        return null;
+    }
 
     /**
      * Validates this profile and all it's subcomponents are valid - i.e they contain all the
@@ -114,13 +172,15 @@ public class Profile implements PersistencyCapable {
      */
     public boolean validate() {
         if (type==null||name==null||modeName==null||manufacturerName==null) return false;
-        for (ProfileChannel channel : channels) if (!channel.validate()) return false;
+        for (ProfileChannel channel : channels) if (!channel.validate(this)) return false;
+        for (ProfileWheel wheel : wheels) if (!wheel.validate(this)) return false;
         return true;
     }
 
     public String toFullString() {
         String result = "\n["+manufacturerName+" "+name+": mode="+modeName+", type="+type+"]";
         for (ProfileChannel channel : channels) result += "\n\t"+channel.toProfileString("\t");
+        for (ProfileWheel wheel : wheels) result += "\n\t"+wheel.toProfileString("\t");
         return result;
     }
 

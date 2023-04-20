@@ -54,19 +54,19 @@ public enum Attribute {
     SHAPER_4A(Feature.SHAPER, "4A"),
     SHAPER_4B(Feature.SHAPER, "4B");
     
-    private Feature parent;
+    private Feature feature;
     private String userName;
     
-    private Attribute(Feature parent, String userName) {
-        this.parent = parent;
+    private Attribute(Feature feature, String userName) {
+        this.feature = feature;
         this.userName = userName;
     }
     
-    public Feature getParent() {return this.parent;}
+    public Feature getFeature() {return this.feature;}
 
     public String getUserName() {return this.userName;}
 
-    public boolean verify(Feature verify) {return verify==parent;}
+    public boolean verify(Feature verify) {return verify==feature;}
 
     public static Attribute getAttribute(String text) {
         for (Attribute attribute : Attribute.values()) {

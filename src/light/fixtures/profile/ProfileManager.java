@@ -27,23 +27,23 @@ import light.stores.Preset.PresetType;
 public class ProfileManager {
     
     private static ProfileManager singleton;
-
+    
     private Set<Profile> defaultProfiles;
     private Set<Profile> userLoadedProfiles;
-
+    
     private ProfileManager() {
         defaultProfiles = new HashSet<Profile>();
         userLoadedProfiles = new HashSet<Profile>();
         loadDefaultProfiles();
     }
-
+    
     public static ProfileManager getInstance() {
         if (singleton==null) singleton = new ProfileManager();
         return singleton;
     }
-
+    
     private void loadDefaultProfiles() {
-
+        
     }
     
     public Profile parseProfile(String filePath) throws ProfileParseException {
@@ -51,7 +51,7 @@ public class ProfileManager {
         if (profile!=null) userLoadedProfiles.add(profile);
         return profile;
     }
-
+    
     public Set<Profile> getProfilesWithName(String name) {
         Set<Profile> result = new HashSet<>();
         for (Profile profile : userLoadedProfiles) {
@@ -59,7 +59,7 @@ public class ProfileManager {
         }
         return result;
     }
-
+    
     public Set<Profile> getProfilesWithManufacturer(String manufacturerName) {
         Set<Profile> result = new HashSet<>();
         for (Profile profile : userLoadedProfiles) {
@@ -67,7 +67,7 @@ public class ProfileManager {
         }
         return result;
     }
-
+    
     private Profile parse(String filePath) throws ProfileParseException {
         CLI.debug("Parsing file "+filePath+" for fixture profile...");
         Profile profile = new Profile();
@@ -159,6 +159,9 @@ public class ProfileManager {
                     attr = attrs.getNamedItem("max_value");
                     if (attr!=null) function.setMaxValue(parseDouble(attr.getTextContent()));
                     
+                    attr = attrs.getNamedItem("wheel");
+                    if (attr!=null) function.setWheelIndex(parseInt(attr.getTextContent()));
+                    
                     channel.addFunction(function);
                     
                     //Macros
@@ -186,23 +189,65 @@ public class ProfileManager {
                         attr = attrs.getNamedItem("to_dmx");
                         if (attr!=null) macro.setToDMX(parseDouble(attr.getTextContent()));
                         
+                        attr = attrs.getNamedItem("slot");
+                        if (attr!=null) macro.setSlotIndex(parseInt(attr.getTextContent()));
+                        
                         function.addMacro(macro);
                     }
                 }
             }
             
-            CLI.debug(profile.toString());
+            //Wheels
+            nodes = doc.getElementsByTagName("Wheel");
+            attr = null;
+            ProfileWheel wheel = null;
             
+            for (int i=0; i<nodes.getLength(); i++) {
+                //Wheel
+                node = nodes.item(i);
+                NamedNodeMap attrs = node.getAttributes();
+                if (attrs.getLength()==0) continue;
+                
+                wheel = new ProfileWheel();
+                attr = attrs.getNamedItem("index");
+                if (attr!=null) wheel.setIndex(parseInt(attr.getTextContent()));
+                profile.addWheel(wheel);
+                
+                //Slots
+                NodeList slotNodes = node.getChildNodes();
+                Node slotNode;
+                ProfileWheelSlot slot;
+                
+                for (int z=0; z<slotNodes.getLength(); z++) {
+                    slotNode = slotNodes.item(z);
+                    if (!slotNode.getNodeName().equals("Slot")) continue;
+                    
+                    attrs = slotNode.getAttributes();
+                    if (attrs.getLength()==0) continue;
+                    slot = new ProfileWheelSlot();
+                    
+                    attr = attrs.getNamedItem("index");
+                    if (attr!=null) slot.setIndex(parseInt(attr.getTextContent()));
+                    
+                    attr = attrs.getNamedItem("media_name");
+                    if (attr!=null) slot.setMediaName(attr.getTextContent());
+                    
+                    attr = attrs.getNamedItem("media_filename");
+                    if (attr!=null) slot.setMediaFileName(attr.getTextContent());
+                    
+                    wheel.addSlot(slot);
+                }
+            }
         } catch (Exception e) {
-            CLI.error("PostError:\n"+profile.toString());
+            CLI.error("Profile state at error:\n"+profile.toString());
             throw new ProfileParseException(e.getMessage());
         }
-
+        
         if (!profile.validate()) throw new ProfileParseException("Profile did not pass validation");
-        else CLI.debug("Profile passed validation");
+        else CLI.debug("Profile "+profile.toString()+" passed validation");
         return profile;
     }
-
+    
     public void printXML(String filePath) {
         try {
             // Create a URL object and open a connection to it

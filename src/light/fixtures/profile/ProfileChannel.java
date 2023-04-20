@@ -2,18 +2,15 @@ package light.fixtures.profile;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
-import java.util.Set;
 
 import light.fixtures.Attribute;
 import light.fixtures.Feature;
 import light.stores.Preset.PresetType;
 
-public class ProfileChannel {
-    
+public class ProfileChannel extends ProfileElement {
+
     private Profile parent;
-    private int index;
 
     private Feature feature;
     private Attribute attribute;
@@ -29,56 +26,44 @@ public class ProfileChannel {
     private List<ProfileChannelFunction> functions;
 
     public ProfileChannel() {
-        index = -1;
+        super();
         functions = new ArrayList<ProfileChannelFunction>();
         minValue = 0;
         maxValue = 100;
     }
 
-    public void setParent(Profile parent) {this.parent = parent;}
-    public Profile getParent() {return parent;}
-
-    public void setIndex(int index) {this.index = index;}
-    public int getIndex() {return index;}
+    public void setProfile(Profile parent) {this.parent = parent;}
+    public Profile getProfile() {return parent;}
     
     public void addFunction(ProfileChannelFunction f) {
         functions.add(f);
-        f.setParent(this);
-        sortFunctions();
+        f.setChannel(this);
+        Collections.sort(functions);
     }
 
     public boolean hasFunction(ProfileChannelFunction f) {return functions.contains(f);}
 
     public List<ProfileChannelFunction> getFunctions() {
-        sortFunctions();
+        Collections.sort(functions);
         return functions;
     }
 
     public ProfileChannelFunction getFunctionForValue(double value) {
         for (ProfileChannelFunction function : functions) {
-            if (function.valueValidForRange(value)) return function;
+            if (function.valueInRange(value)) return function;
         }
         return null;
     }
 
     public ProfileChannelFunction getFunctionForDMX(double dmx) {
         for (ProfileChannelFunction function : functions) {
-            if (function.inDMXRange(dmx)) return function;
+            if (function.dmxInRange(dmx)) return function;
         }
         return null;
     }
 
-    private void sortFunctions() {
-        Collections.sort(functions, new Comparator<ProfileChannelFunction>() {
-            @Override
-            public int compare(ProfileChannelFunction o1, ProfileChannelFunction o2) {
-                return (int) (o1.getIndex()-o2.getIndex());
-            }
-        });
-    }
-
     public List<ProfileChannelMacro> getAllMacros() {
-        sortFunctions();
+        Collections.sort(functions);
         List<ProfileChannelMacro> macros = new ArrayList<>();
         for (ProfileChannelFunction function : functions) {
             macros.addAll(function.getMacros());
@@ -121,9 +106,9 @@ public class ProfileChannel {
         return value>=minValue&&value<=maxValue;
     }
 
-    public boolean validate() {
+    public boolean validate(Profile profile) {
         if (parent==null||index==-1||feature==null||attribute==null) return false;
-        for (ProfileChannelFunction function : functions) if (!function.validate()) return false;
+        for (ProfileChannelFunction function : functions) if (!function.validate(profile)) return false;
         return true;
     }
 

@@ -15,7 +15,7 @@ import light.guipackage.general.UnitPoint;
 import light.guipackage.general.UnitRectangle;
 import light.guipackage.general.UnitValue;
 import light.guipackage.general.UnitValue.Unit;
-import light.guipackage.gui.GUI;
+import light.guipackage.gui.Styles;
 import light.guipackage.gui.components.Component;
 import light.guipackage.gui.components.basecomponents.Label;
 import light.guipackage.gui.components.basecomponents.TempWindow;
@@ -131,10 +131,10 @@ public class UDAGUI extends Component implements UDAGUIInterface {
                 cB.setPosition(Position.Relative);
                 i = 0;
             }
-            Label l = new Label(new UnitRectangle(0, 10, 100, 50, Unit.px), nametag.getKey(), new Font(GUI.baseFont, Font.BOLD, 11), new Color(230, 230, 230));
-            l.setColor(GUI.bg);
+            Label l = new Label(new UnitRectangle(0, 10, 100, 50, Unit.px), nametag.getKey(), new Font(Styles.baseFont, Font.BOLD, 11), new Color(230, 230, 230));
+            l.setColor(Styles.bg);
             l.setRounded(true);
-            l.setBorder(GUI.focusOrange);
+            l.setBorder(Styles.focusOrange);
             l.setTextCentered(true);
             l.setTag(nametag.getValue());
             

@@ -2,18 +2,27 @@ package light.guipackage.gui.components.complexcomponents;
 
 import java.awt.Color;
 import java.awt.Font;
+import java.util.Map;
 
 import light.Programmer;
 import light.fixtures.Attribute;
+import light.fixtures.FeatureGroup;
 import light.fixtures.Fixture;
 import light.fixtures.FixtureType;
 import light.fixtures.PatchManager;
 import light.fixtures.profile.Profile;
+import light.fixtures.profile.ProfileChannel;
+import light.fixtures.profile.ProfileChannelFunction;
+import light.fixtures.profile.ProfileChannelMacro;
+import light.fixtures.profile.ProfileWheelSlot;
+import light.general.DataStore;
+import light.general.Utils;
+import light.guipackage.cli.CLI;
 import light.guipackage.general.UnitPoint;
 import light.guipackage.general.UnitRectangle;
 import light.guipackage.general.UnitValue;
 import light.guipackage.general.UnitValue.Unit;
-import light.guipackage.gui.GUI;
+import light.guipackage.gui.Styles;
 import light.guipackage.gui.components.basecomponents.Image;
 import light.guipackage.gui.components.basecomponents.Label;
 import light.guipackage.gui.components.boxes.CollumnBox;
@@ -44,14 +53,14 @@ public class FixtureWindowGUI extends SimpleBox implements FixtureWindowGUIInter
         title.setBorder(1, new Color(10, 100, 255));
         title.setRounded(10);
         topBar.addComponent(title);
-        Label titleLabel =  new Label(new UnitRectangle(3, Unit.pcw, 0, Unit.px, 97, Unit.pcw, 100, Unit.pch), "Fixture Window", new Font(GUI.baseFont, Font.BOLD, 18), new Color(230, 230, 230));
+        Label titleLabel =  new Label(new UnitRectangle(3, Unit.pcw, 0, Unit.px, 97, Unit.pcw, 100, Unit.pch), "Fixture Window", new Font(Styles.baseFont, Font.BOLD, 18), new Color(230, 230, 230));
         titleLabel.setTextYCentered(true);
         title.addComponent(titleLabel);
         
         Image exit = new Image(new UnitRectangle(0, Unit.vw, 0, Unit.vh, 5, Unit.vw, 100, Unit.pch), "exit.png");
         exit.setPosition(Position.Relative);
         exit.setFloat(Float.Right);
-        exit.setColor(GUI.bg);
+        exit.setColor(Styles.bg);
         exit.setBorder(1, new Color(80, 80, 80));
         exit.setRounded(10);
         topBar.addComponent(exit);
@@ -65,7 +74,7 @@ public class FixtureWindowGUI extends SimpleBox implements FixtureWindowGUIInter
         addComponent(fixtureBox);
         
         for (Profile profile : PatchManager.getInstance().allProfileSet()) {
-            Label profileLabel =  new Label(new UnitRectangle(0, Unit.px, 2, Unit.vh, 100, Unit.pcw, 3, Unit.vh), profile.getName()+" "+profile.getModeName(), new Font(GUI.baseFont, Font.BOLD, 14), new Color(230, 230, 230));
+            Label profileLabel =  new Label(new UnitRectangle(0, Unit.px, 2, Unit.vh, 100, Unit.pcw, 3, Unit.vh), profile.getName()+" "+profile.getModeName(), new Font(Styles.baseFont, Font.BOLD, 14), new Color(230, 230, 230));
             profileLabel.setBorder(new int[] {2}, new Color(250, 250, 250));
             profileLabel.setTextYCentered(true);
             fixtureBox.addComponent(profileLabel);
@@ -89,7 +98,7 @@ public class FixtureWindowGUI extends SimpleBox implements FixtureWindowGUIInter
                 fBox.addComponent(box);
                 
                 //ID label
-                Label l =  new Label(new UnitRectangle(0, Unit.px, 0, Unit.vh, 100, Unit.pcw, 20, Unit.pch), f.getAddress().getSuffix()+"", new Font(GUI.baseFont, Font.BOLD, 11), new Color(10, 10, 10));
+                Label l =  new Label(new UnitRectangle(0, Unit.px, 0, Unit.vh, 100, Unit.pcw, 20, Unit.pch), f.getAddress().getSuffix()+"", new Font(Styles.baseFont, Font.BOLD, 11), new Color(10, 10, 10));
                 l.setTextCentered(true);
                 box.addComponent(l);
                 
@@ -101,13 +110,15 @@ public class FixtureWindowGUI extends SimpleBox implements FixtureWindowGUIInter
                 //Get relevant data
                 Programmer prog = Programmer.getInstance();
                 
-                Color col = Color.RED;
+                //Color value
+                Color col = getDisplayColor(f);
                 
+                //Intensity value
                 double dim = 0;
-                    if (f.getProfile().hasAttribute(Attribute.DIM)) {
-                        if (prog.contains(f, Attribute.DIM)) dim = prog.get(f, Attribute.DIM);
-                        else dim = f.getProfile().getChannelWithAttribute(Attribute.DIM).getMinValue();
-                    }
+                if (f.getProfile().hasAttribute(Attribute.DIM)) {
+                    if (prog.contains(f, Attribute.DIM)) dim = prog.get(f, Attribute.DIM);
+                    else dim = f.getProfile().getChannelWithAttribute(Attribute.DIM).getMinValue();
+                }
                 
                 if (profile.getFixtureType()==FixtureType.SPOT) { //Spot profiles
                     SimpleBox circle = new SimpleBox(new UnitRectangle(20, Unit.pcw, 5, Unit.pch, 60, Unit.pcw, 60, Unit.pcw));
@@ -121,9 +132,18 @@ public class FixtureWindowGUI extends SimpleBox implements FixtureWindowGUIInter
                         circle.setColor(new Color(10, 10, 10));
                         circle.setBorder(col);
                     }
-                    
+
+                    //Gobo image
+                    String fileName = getGoboFileName(f);
+                    CLI.debug("file Name: "+fileName);
+
+                    Image gobo = new Image(new UnitRectangle(20, Unit.pcw, 5, Unit.pch, 60, Unit.pcw, 60, Unit.pcw), null);
+                    gobo.setColor(Color.BLUE);
+                    if (fileName!=null) gobo.setSource(fileName);
+                    bottom.addComponent(gobo);
+
                     //Intensity label
-                    l =  new Label(new UnitRectangle(0, Unit.px, 70, Unit.pch,  100, Unit.pcw, 10, Unit.pch), (int) Math.floor(dim)+"%", new Font(GUI.baseFont, Font.BOLD, 10), new Color(0, 0, 0));
+                    l =  new Label(new UnitRectangle(0, Unit.px, 70, Unit.pch,  100, Unit.pcw, 10, Unit.pch), (int) Math.floor(dim)+"%", new Font(Styles.baseFont, Font.BOLD, 10), new Color(0, 0, 0));
                     l.setPosition(Position.Relative);
                     l.setTextColor(new Color(249, 255, 30));
                     l.setTextCentered(true);
@@ -141,8 +161,8 @@ public class FixtureWindowGUI extends SimpleBox implements FixtureWindowGUIInter
                         if (prog.contains(f, Attribute.TILT)) tilt = prog.get(f, Attribute.TILT);
                         else tilt = f.getProfile().getChannelWithAttribute(Attribute.TILT).getMinValue();
                     }
-
-                    l =  new Label(new UnitRectangle(0, Unit.px, 7, Unit.pch,  100, Unit.pcw, 10, Unit.pch), (int) Math.floor(pan)+" "+(int) Math.floor(tilt), new Font(GUI.baseFont, Font.BOLD, 10), new Color(0, 0, 0));
+                    
+                    l =  new Label(new UnitRectangle(0, Unit.px, 7, Unit.pch,  100, Unit.pcw, 10, Unit.pch), (int) Math.floor(pan)+" "+(int) Math.floor(tilt), new Font(Styles.baseFont, Font.BOLD, 10), new Color(0, 0, 0));
                     l.setPosition(Position.Relative);
                     l.setTextColor(new Color(249, 255, 30));
                     l.setTextCentered(true);
@@ -157,7 +177,7 @@ public class FixtureWindowGUI extends SimpleBox implements FixtureWindowGUIInter
                     square.setOpacity(dim);
                     bottom.addComponent(square);
                     
-                    l =  new Label(new UnitRectangle(0, Unit.px, 1, Unit.pch,  100, Unit.pcw, 29, Unit.pch), (int) Math.floor(dim)+"%", new Font(GUI.baseFont, Font.BOLD, 12), new Color(0, 0, 0));
+                    l =  new Label(new UnitRectangle(0, Unit.px, 1, Unit.pch,  100, Unit.pcw, 29, Unit.pch), (int) Math.floor(dim)+"%", new Font(Styles.baseFont, Font.BOLD, 12), new Color(0, 0, 0));
                     l.setPosition(Position.Relative);
                     l.setTextColor(new Color(249, 255, 30));
                     l.setTextCentered(true);
@@ -176,10 +196,58 @@ public class FixtureWindowGUI extends SimpleBox implements FixtureWindowGUIInter
                 SimpleBox inner = new SimpleBox(new UnitRectangle(20, Unit.pcw, 98.5-iB, Unit.pch, 62, Unit.pcw, iB, Unit.pch));
                 inner.setColor(new Color(255, 200, 7));
                 bar.addComponent(inner);
-                
-                
             }
         }
+    }
+    
+    public Color getDisplayColor(Fixture fixture) {
+        if (fixture==null) return null;
+        double rd = 0, gn = 0, bl = 0;
+        
+        if (fixture.getProfile().hasAttributeOfFeatureGroup(FeatureGroup.COLOR)) {
+            for (Map.Entry<Attribute, Double> value : Programmer.getInstance().getFixtureValuesMatchingGroup(fixture, FeatureGroup.COLOR).entrySet()) {
+                //Get display color for attribute
+                Color toBlend = null;
+                switch (value.getKey()) {
+                    case COLORRGB1: toBlend = Styles.displayRed; break;
+                    case COLORRGB2: toBlend = Styles.displayGreen; break;
+                    case COLORRGB3: toBlend = Styles.displayBlue; break;
+                    case COLORRGB4: toBlend = Styles.displayAmber; break;
+                    default: break;
+                }
+                if (toBlend==null) continue;
+                
+                //Get percentage of display color to blend in and blend
+                double perc = fixture.getProfile().valueAsPercOfRange(value.getKey(), value.getValue());
+                rd = rd+(perc*toBlend.getRed());
+                gn = gn+(perc*toBlend.getGreen());
+                bl = bl+(perc*toBlend.getBlue());
+            }
+        }
+        else { //Fixture has no color attributes so white is default color
+            rd = 255; gn = 255; bl = 255;
+        }
+        return new Color(Utils.castToDMX(rd), Utils.castToDMX(gn), Utils.castToDMX(bl));
+    }
+
+    public String getGoboFileName(Fixture fixture) {
+        if (fixture==null||!fixture.getProfile().hasAttribute(Attribute.GOBO1_INDEX)) return null;
+        
+        double value = Programmer.getInstance().get(fixture, Attribute.GOBO1_INDEX);
+        if (value==DataStore.NONE) return null;
+
+        //Get slot mapping
+        ProfileChannel channel = fixture.getProfile().getChannelWithAttribute(Attribute.GOBO1_INDEX);
+        if (channel==null) return null;
+        ProfileChannelFunction function = channel.getFunctionForValue(value);
+        if (function==null) return null;
+        ProfileChannelMacro macro = function.getMacroForValue(value);
+        if (macro==null||!macro.hasSlotIndex()) return null;
+
+        ProfileWheelSlot slot = macro.getSlotMapping();
+        if (slot.hasMediaFileName()) return slot.getMediaFileName();
+
+        return null;
     }
     
     @Override

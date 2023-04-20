@@ -3,6 +3,7 @@
 /target
 /units
 /accounts
+**/assets/gobos/
 .classpath
 .project
 .settings

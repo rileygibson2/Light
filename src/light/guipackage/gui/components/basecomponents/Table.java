@@ -7,13 +7,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.swing.text.html.HTML.Tag;
-
 import light.guipackage.general.UnitPoint;
 import light.guipackage.general.UnitRectangle;
 import light.guipackage.general.UnitValue;
 import light.guipackage.general.UnitValue.Unit;
-import light.guipackage.gui.GUI;
+import light.guipackage.gui.Styles;
 import light.guipackage.gui.components.Component;
 import light.guipackage.gui.components.InputComponent;
 import light.guipackage.gui.components.boxes.CollumnBox;
@@ -40,10 +38,10 @@ public class Table extends FlexBox {
         addComponent(c);
 
         //Add title label
-        SimpleBox b = new SimpleBox(new UnitRectangle(0, Unit.px, 0, Unit.px, 100, Unit.pcw, 5, Unit.vh), GUI.fg);
+        SimpleBox b = new SimpleBox(new UnitRectangle(0, Unit.px, 0, Unit.px, 100, Unit.pcw, 5, Unit.vh), Styles.fg);
         b.setBorder(new Color(100, 100, 100));
         c.addComponent(b);
-        Label l = new Label(new UnitRectangle(10, 10, 80, 80, Unit.pcw, Unit.pch), title, new Font("Geneva", Font.PLAIN, 10), GUI.textMain);
+        Label l = new Label(new UnitRectangle(10, 10, 80, 80, Unit.pcw, Unit.pch), title, new Font("Geneva", Font.PLAIN, 10), Styles.textMain);
         l.setTextCentered(true);
         l.fitFont();
         b.addComponent(l);
@@ -57,9 +55,9 @@ public class Table extends FlexBox {
            
             //Create element
             if (t.type==Label.class) {
-                SimpleBox b = new SimpleBox(new UnitRectangle(0, Unit.px, 0, Unit.px, 100, Unit.pcw, 5, Unit.vh), GUI.focus2);
-                b.setBorder(GUI.focus);
-                Label l = new Label(new UnitRectangle(10, 10, 80, 80, Unit.pcw, Unit.pch), "hello", new Font("Geneva", Font.PLAIN, 10), GUI.textMain);
+                SimpleBox b = new SimpleBox(new UnitRectangle(0, Unit.px, 0, Unit.px, 100, Unit.pcw, 5, Unit.vh), Styles.focus2);
+                b.setBorder(Styles.focus);
+                Label l = new Label(new UnitRectangle(10, 10, 80, 80, Unit.pcw, Unit.pch), "hello", new Font("Geneva", Font.PLAIN, 10), Styles.textMain);
                 l.setTextCentered(true);
                 l.fitFont();
                 b.addComponent(l);
@@ -67,12 +65,12 @@ public class Table extends FlexBox {
             }
             if (t.type==CheckBoxInput.class) {
                 CheckBoxInput cB = new CheckBoxInput(new UnitRectangle(0, Unit.px, 0, Unit.px, 100, Unit.pcw, 5, Unit.vh));
-                cB.setBorder(GUI.focus);
+                cB.setBorder(Styles.focus);
                 c = cB;
             }
             if (t.type==TextInput.class) {
                 TextInput tB = new TextInput(new UnitRectangle(0, Unit.px, 0, Unit.px, 100, Unit.pcw, 5, Unit.vh));
-                tB.setBorder(GUI.focus);
+                tB.setBorder(Styles.focus);
                 c = tB;
             }
 

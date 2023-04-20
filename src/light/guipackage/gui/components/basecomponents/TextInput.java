@@ -11,10 +11,9 @@ import light.guipackage.general.Getter;
 import light.guipackage.general.Point;
 import light.guipackage.general.Submitter;
 import light.guipackage.general.UnitRectangle;
-import light.guipackage.gui.GUI;
 import light.guipackage.gui.IO;
+import light.guipackage.gui.Styles;
 import light.guipackage.gui.components.InputComponent;
-import light.guipackage.gui.components.boxes.SimpleBox;
 import light.guipackage.threads.AnimationFactory;
 import light.guipackage.threads.AnimationFactory.Animations;
 
@@ -33,12 +32,12 @@ public class TextInput extends InputComponent<String> {
 		if (getValue()==null) setValue("");
 		cursor = "";
 		
-		setColor(GUI.focus);
+		setColor(Styles.focus);
 		setRounded(true);
 		
-		textLabel = new Label(new UnitRectangle(8, 55, 0, 0), getValue(), new Font(GUI.baseFont, Font.ITALIC, 15), new Color(200, 200, 200));
+		textLabel = new Label(new UnitRectangle(8, 55, 0, 0), getValue(), new Font(Styles.baseFont, Font.ITALIC, 15), new Color(200, 200, 200));
 		addComponent(textLabel);
-		descriptionLabel = new Label(new UnitRectangle(8, 55, 0, 0), getValue(), new Font(GUI.baseFont, Font.ITALIC, 15), new Color(140, 140, 140));
+		descriptionLabel = new Label(new UnitRectangle(8, 55, 0, 0), getValue(), new Font(Styles.baseFont, Font.ITALIC, 15), new Color(140, 140, 140));
 		descriptionLabel.setVisible(false);
 		addComponent(descriptionLabel);
 

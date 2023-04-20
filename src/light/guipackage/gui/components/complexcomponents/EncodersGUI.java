@@ -8,13 +8,12 @@ import light.encoders.Encoders;
 import light.encoders.Encoders.Encoder;
 import light.encoders.Encoders.EncoderDefaultCalculatorMacros;
 import light.fixtures.FeatureGroup;
-import light.fixtures.profile.ProfileChannel;
 import light.guipackage.cli.CLI;
 import light.guipackage.general.UnitPoint;
 import light.guipackage.general.UnitRectangle;
 import light.guipackage.general.UnitValue;
 import light.guipackage.general.UnitValue.Unit;
-import light.guipackage.gui.GUI;
+import light.guipackage.gui.Styles;
 import light.guipackage.gui.components.Component;
 import light.guipackage.gui.components.basecomponents.Label;
 import light.guipackage.gui.components.basecomponents.TempWindow;
@@ -44,7 +43,7 @@ public class EncodersGUI extends Component implements EncodersGUIInterface {
         topBar.setPosition(Position.Relative);
         addComponent(topBar);
         
-        Label title = new Label(new UnitRectangle(0, Unit.px, 0, Unit.px, 100, Unit.pcw, 100, Unit.pch), "Encoder Bar", new Font(GUI.baseFont, Font.BOLD, 14), new Color(230, 230, 230));
+        Label title = new Label(new UnitRectangle(0, Unit.px, 0, Unit.px, 100, Unit.pcw, 100, Unit.pch), "Encoder Bar", new Font(Styles.baseFont, Font.BOLD, 14), new Color(230, 230, 230));
         title.setColor(new Color(0, 0, 180));
         title.setBorder(1, new Color(10, 100, 255));
         title.setRounded(10);
@@ -71,7 +70,7 @@ public class EncodersGUI extends Component implements EncodersGUIInterface {
             featureBox.setRounded(true);
             featureBar.addComponent(featureBox);
             
-            Label fLabel = new Label(new UnitRectangle(0, Unit.px, 0, Unit.px, 100, Unit.pcw, 100, Unit.pch), feature.toString(), new Font(GUI.baseFont, Font.BOLD, 11), GUI.textDull);
+            Label fLabel = new Label(new UnitRectangle(0, Unit.px, 0, Unit.px, 100, Unit.pcw, 100, Unit.pch), feature.toString(), new Font(Styles.baseFont, Font.BOLD, 11), Styles.textDull);
             fLabel.setTextCentered(true);
             featureBox.addComponent(fLabel);
             
@@ -97,12 +96,12 @@ public class EncodersGUI extends Component implements EncodersGUIInterface {
             encoder.setClickAction(() -> openCalculator(e));
             encoderBar.addComponent(encoder);
             
-            Label top = new Label(new UnitRectangle(0, Unit.px, 0, Unit.px, 100, Unit.pcw, 50, Unit.pch), "", new Font(GUI.baseFont, Font.BOLD, 14), new Color(230, 230, 230));
+            Label top = new Label(new UnitRectangle(0, Unit.px, 0, Unit.px, 100, Unit.pcw, 50, Unit.pch), "", new Font(Styles.baseFont, Font.BOLD, 14), new Color(230, 230, 230));
             top.setText(Encoders.getInstance().getEncoderTitle(e));
             top.setTextCentered(true);
             encoder.addComponent(top);
             
-            Label bottom = new Label(new UnitRectangle(0, Unit.px, 50, Unit.pch, 100, Unit.pcw, 50, Unit.pch), "", new Font(GUI.baseFont, Font.BOLD, 14), new Color(230, 230, 230));
+            Label bottom = new Label(new UnitRectangle(0, Unit.px, 50, Unit.pch, 100, Unit.pcw, 50, Unit.pch), "", new Font(Styles.baseFont, Font.BOLD, 14), new Color(230, 230, 230));
             bottom.setColor(new Color(45, 45, 45));
             bottom.setRounded(new int[] {2, 3});
             bottom.setText(Encoders.getInstance().getEncoderValueText(e));
@@ -125,7 +124,7 @@ public class EncodersGUI extends Component implements EncodersGUIInterface {
         addComponent(tB);
         
         //Input bar
-        Label input = new Label(new UnitRectangle(0, Unit.px, 2, Unit.px, 100, Unit.pcw, 5, Unit.vh), " input", new Font(GUI.baseFont, Font.BOLD, 14), new Color(230, 230, 230));
+        Label input = new Label(new UnitRectangle(0, Unit.px, 2, Unit.px, 100, Unit.pcw, 5, Unit.vh), " input", new Font(Styles.baseFont, Font.BOLD, 14), new Color(230, 230, 230));
         //input.setPosition(Position.Relative);
         input.setColor(new Color(0, 60, 0));
         input.setRounded(true);
@@ -155,7 +154,7 @@ public class EncodersGUI extends Component implements EncodersGUIInterface {
                 double w = 3.5;
                 if (button==HardButton.PLEASE) w = 7;
                 
-                Label b = new Label(new UnitRectangle(0, Unit.px, 0, Unit.px, w, Unit.vw, 3.5, Unit.vw), button.getText(), new Font(GUI.baseFont, Font.BOLD, 12), new Color(230, 230, 230));
+                Label b = new Label(new UnitRectangle(0, Unit.px, 0, Unit.px, w, Unit.vw, 3.5, Unit.vw), button.getText(), new Font(Styles.baseFont, Font.BOLD, 12), new Color(230, 230, 230));
                 b.setPosition(Position.Relative);
                 b.setColor(new Color(20, 20, 20));
                 b.setRounded(true);
@@ -173,7 +172,7 @@ public class EncodersGUI extends Component implements EncodersGUIInterface {
         
         //Default macros
         for (EncoderDefaultCalculatorMacros macro : EncoderDefaultCalculatorMacros.values()) {
-            Label b = new Label(new UnitRectangle(1, Unit.px, 0, Unit.px, 6, Unit.vw, 5, Unit.vh), macro.toString(), new Font(GUI.baseFont, Font.BOLD, 12), new Color(230, 230, 230));
+            Label b = new Label(new UnitRectangle(1, Unit.px, 0, Unit.px, 6, Unit.vw, 5, Unit.vh), macro.toString(), new Font(Styles.baseFont, Font.BOLD, 12), new Color(230, 230, 230));
             b.setPosition(Position.Relative);
             b.setColor(new Color(41, 0, 0));
             b.setRounded(true);
@@ -187,7 +186,7 @@ public class EncodersGUI extends Component implements EncodersGUIInterface {
 
         //Encoder controller defined macros
         for (Map.Entry<String, Double> macro : Encoders.getInstance().getEncoderCalculatorMacros(encoder).entrySet()) {
-            Label b = new Label(new UnitRectangle(1, Unit.px, 0, Unit.px, 6, Unit.vw, 5, Unit.vh), macro.getKey(), new Font(GUI.baseFont, Font.BOLD, 12), new Color(230, 230, 230));
+            Label b = new Label(new UnitRectangle(1, Unit.px, 0, Unit.px, 6, Unit.vw, 5, Unit.vh), macro.getKey(), new Font(Styles.baseFont, Font.BOLD, 12), new Color(230, 230, 230));
             b.setPosition(Position.Relative);
             b.setColor(new Color(20, 20, 20));
             b.setRounded(true);

@@ -44,5 +44,16 @@
 				<ChannelMacro index="2" name="max" from_dmx="255" to_dmx="255"/>
 			</ChannelFunction>
 		</Channel>
+		<Channel index="2" attribute="GOBO1_INDEX" feature="GOBO1" attribute_user_name="Index" preset="GOBO">
+			<ChannelFunction index="0" min_dmx="0" max_dmx="255" min_value="0" max_value="100" wheel="0">
+				<ChannelMacro index="0" name="dots" from_dmx="20" to_dmx="50" slot="1"/>
+			</ChannelFunction>
+		</Channel>
 	</Module>
+	<Wheels>
+		<Wheel index="0">
+			<Slot index="0" media_name="open"/>
+			<Slot index="1" media_name="dots in space" media_filename="gobos/Martin/Martin@030913005.png"/>
+		</Wheel>
+	</Wheels>
 </Profile>

@@ -11,7 +11,7 @@ import light.guipackage.general.GUIUtils;
 import light.guipackage.general.Point;
 import light.guipackage.general.Submitter;
 import light.guipackage.general.UnitRectangle;
-import light.guipackage.gui.GUI;
+import light.guipackage.gui.Styles;
 import light.guipackage.gui.components.Component;
 import light.guipackage.gui.components.basecomponents.Image;
 import light.guipackage.gui.components.basecomponents.Label;
@@ -56,7 +56,7 @@ public class PoolCellGUI extends Component {
         //Box
         mainBox = new SimpleBox(new UnitRectangle(1, 1, 98, 98));
         mainBox.setRounded(20);
-        //mainBox.setBorder(1, GUI.fg);
+        //mainBox.setBorder(1, Styles.fg);
         mainBox.setBorder(1, GUIUtils.modulateColor(getTypeColor(), 0.5));
         addComponent(mainBox);
         
@@ -66,12 +66,12 @@ public class PoolCellGUI extends Component {
             mainBox.setBorderColor(getTypeColor());
             //Image, address and title
             mainBox.addComponent(new Image(new UnitRectangle(20, 5, 60, 40), "icon.png"));
-            Label l = new Label(new UnitRectangle(0, 62, 100, 22), address.getPrefix()+"", new Font("Geneva", Font.BOLD, 20), GUI.textMain);
+            Label l = new Label(new UnitRectangle(0, 62, 100, 22), address.getPrefix()+"", new Font("Geneva", Font.BOLD, 20), Styles.textMain);
             l.setTextXCentered(true);
             l.fitFont();
             mainBox.addComponent(l);
             String text = getTypeText();
-            l = new Label(new UnitRectangle(0, 80, 100, 22), text, new Font("Geneva", Font.BOLD, 20), GUI.textMain);
+            l = new Label(new UnitRectangle(0, 80, 100, 22), text, new Font("Geneva", Font.BOLD, 20), Styles.textMain);
             l.setTextXCentered(true);
             l.fitFont();
             mainBox.addComponent(l);
@@ -80,14 +80,14 @@ public class PoolCellGUI extends Component {
         }
         
         //All non title cells have id label
-        idLabel = new Label(new UnitRectangle(10, 5, 10, 15), address.getSuffix()+"", new Font("Geneva", Font.PLAIN, 20), GUI.textDull);
+        idLabel = new Label(new UnitRectangle(10, 5, 10, 15), address.getSuffix()+"", new Font("Geneva", Font.PLAIN, 20), Styles.textDull);
         idLabel.setTextYCentered(true);
         idLabel.fitFont();
         
         if (poolGUI.getPool().contains(address)) { //Filled cell
             mainBox.setColor(new Color(10, 10, 10));
             mainBox.setBorderColor(getTypeColor());
-            idLabel.setTextColor(GUI.textMain);
+            idLabel.setTextColor(Styles.textMain);
             
             //Bottom gray and dividor
             SimpleBox bottom = new SimpleBox(new UnitRectangle(0, 50, 100, 50), new Color(80, 80, 80));
@@ -96,7 +96,7 @@ public class PoolCellGUI extends Component {
             mainBox.addComponent(new SimpleBox(new UnitRectangle(0, 49, 100, 2), new Color(150, 150, 150)));
             
             //Name
-            Label name = new Label(new UnitRectangle(0, 25, 100, 50), "aaa", new Font("Geneva", Font.PLAIN, 20), GUI.textMain);
+            Label name = new Label(new UnitRectangle(0, 25, 100, 50), "aaa", new Font("Geneva", Font.PLAIN, 20), Styles.textMain);
             name.setTextCentered(true);
             name.fitFont();
             name.setText(poolGUI.getPool().get(address).getLabel());

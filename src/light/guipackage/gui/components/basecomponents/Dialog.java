@@ -11,6 +11,7 @@ import light.guipackage.general.UnitRectangle;
 import light.guipackage.general.UnitValue;
 import light.guipackage.general.UnitValue.Unit;
 import light.guipackage.gui.GUI;
+import light.guipackage.gui.Styles;
 import light.guipackage.gui.components.Component;
 import light.guipackage.gui.components.boxes.SimpleBox;
 
@@ -30,24 +31,24 @@ public class Dialog extends Component {
 		//setAbsolute(true);
 
 		//Main box
-		mainBox = new SimpleBox(new UnitRectangle(0, 0, 100, 100), GUI.fg);
+		mainBox = new SimpleBox(new UnitRectangle(0, 0, 100, 100), Styles.fg);
 		mainBox.setRounded(true);
 		mainBox.increasePriority();
 		addComponent(mainBox);
 
 		//Top bar
-		SimpleBox tB = new SimpleBox(new UnitRectangle(getX(), getY(), getWidth(), new UnitValue(12.5, Unit.pch)), GUI.focus);
+		SimpleBox tB = new SimpleBox(new UnitRectangle(getX(), getY(), getWidth(), new UnitValue(12.5, Unit.pch)), Styles.focus);
 		//tB.setAbsolute(true);
 		tB.setRounded(new int[]{1, 4});
 		mainBox.addComponent(tB);
 
 		//Top label
-		Label l = new Label(new UnitRectangle(50, 50, 0 , 0), label, new Font(GUI.baseFont, Font.BOLD, 16), new Color(230, 230, 230));
+		Label l = new Label(new UnitRectangle(50, 50, 0 , 0), label, new Font(Styles.baseFont, Font.BOLD, 16), new Color(230, 230, 230));
 		l.setTextCentered(true);
 		tB.addComponent(l);
 
 		//Exit button
-		//close = new Button(new Rectangle(getX()+getWidth()*0.70, getY()+getHeight()*0.75, 5, 10), GUI.focus);
+		//close = new Button(new Rectangle(getX()+getWidth()*0.70, getY()+getHeight()*0.75, 5, 10), Styles.focus);
 		//close.setAbsolute(true);
 		close.setClickAction(() -> close(false));
 		close.addComponent(new Image(new UnitRectangle(10, 10, 80, 80), "exit.png"));
@@ -73,16 +74,16 @@ public class Dialog extends Component {
 	
 	public void addTab(String name, Runnable clickAction) {
 		//Tabs
-		Font f = new Font(GUI.baseFont, Font.BOLD, 14);
+		Font f = new Font(Styles.baseFont, Font.BOLD, 14);
 		double w = GUI.getScreenUtils().getStringWidthAsPerc(f, name)+10;
 		double h = GUI.getScreenUtils().getStringHeightAsPerc(f, name)+5;
 		double x = 0;
 		if (!tabs.isEmpty()) x = tabs.get(tabs.size()-1).getX().v+tabs.get(tabs.size()-1).getWidth().v;
 		
-		SimpleBox tab = new SimpleBox(new UnitRectangle(x, 16-h, w, h), GUI.fg);
+		SimpleBox tab = new SimpleBox(new UnitRectangle(x, 16-h, w, h), Styles.fg);
 		tab.setClickAction(() -> {
-			for (SimpleBox t : tabs) t.setColor(GUI.focus2);
-			tab.setColor(GUI.fg);
+			for (SimpleBox t : tabs) t.setColor(Styles.focus2);
+			tab.setColor(Styles.fg);
 			clickAction.run();
 		});
 		tab.setRounded(new int[] {1, 4});

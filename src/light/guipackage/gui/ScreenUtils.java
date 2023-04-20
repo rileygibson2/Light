@@ -74,7 +74,7 @@ public class ScreenUtils {
 	}
 	
 	public void drawBase(Graphics2D g) {
-		fillRect(g, GUI.bg, new Rectangle(0, 0, screen.width, screen.height));
+		fillRect(g, Styles.bg, new Rectangle(0, 0, screen.width, screen.height));
 	}
 	
 	public void drawLabel(Graphics2D g, Label l) {
@@ -89,12 +89,13 @@ public class ScreenUtils {
 	}
 	
 	public void drawImage(Graphics2D g, Image i) {
+		if (i.getSource()==null) return;
 		Rectangle r = i.getRealRec();
 		
 		BufferedImage img = null;
-		try {img = ImageIO.read(Utils.getURL("assets/"+i.src));}
+		try {img = ImageIO.read(Utils.getURL("assets/"+i.getSource()));}
 		catch (IOException | IllegalArgumentException e) {
-			CLI.error("ImageIO failed for assets/"+i.src);
+			CLI.error("ImageIO failed for assets/"+i.getSource());
 			return;
 		}
 		if (i.getOpacity()<100) g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, (float) (i.getOpacity()/100)));
@@ -148,7 +149,7 @@ public class ScreenUtils {
 	public void drawShadow(Graphics2D g, Component c) {
 		Rectangle r = c.getRealRec(c.getShadowRec());
 		Color start = new Color(70, 70, 70, 255);
-		Color end = new Color(GUI.bg.getRed(), GUI.bg.getGreen(), GUI.bg.getBlue(), 0);
+		Color end = new Color(Styles.bg.getRed(), Styles.bg.getGreen(), Styles.bg.getBlue(), 0);
 		
 		double size = 1;
 		Rectangle r1 = new Rectangle(r.x-(r.width*(size/2)), r.y-(r.height*(size/2)), r.width*(size+1), r.height*(size+1));

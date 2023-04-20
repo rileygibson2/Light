@@ -52,22 +52,8 @@ public class GUI extends JPanel {
 	private List<MessageBox> messages;
 	
 	DOM dom;
-	
-	//Styles
-	public final static Color bg = new Color(15, 15, 15);
-	public final static Color fg = new Color(50, 50, 50);
-	public final static Color focus = new Color(70, 70, 70);
-	public final static Color focus2 = new Color(90, 90, 90);
-	
-	public final static Color focusOrange = new Color(245, 185, 66);
-	
-	public final static Color textMain = new Color(220, 220, 220);
-	public final static Color textDull = new Color(100, 100, 100);
-	
+
 	private boolean antiAlias;
-	
-	public final static String baseFont = "Geneva";
-	public final static String logoFont = "seuzone";
 	
 	private GUI() {
 		io = IO.getInstance();

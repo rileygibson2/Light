@@ -18,13 +18,19 @@
 				<ChannelMacro index="2" name="max" from_dmx="255" to_dmx="255"/>
 			</ChannelFunction>
 		</Channel>
-		<Channel index="2" attribute="COLORRGB2" feature="COLORRGB" attribute_user_name="Red" preset="COLOR">
+		<Channel index="2" attribute="COLORRGB2" feature="COLORRGB" attribute_user_name="Green" preset="COLOR">
 			<ChannelFunction index="0" min_dmx="0" max_dmx="255">
 				<ChannelMacro index="0" name="min" from_dmx="0" to_dmx="0"/>
 				<ChannelMacro index="2" name="max" from_dmx="255" to_dmx="255"/>
 			</ChannelFunction>
 		</Channel>
-		<Channel index="3" attribute="COLORRGB3" feature="COLORRGB" attribute_user_name="Red" preset="COLOR">
+		<Channel index="3" attribute="COLORRGB3" feature="COLORRGB" attribute_user_name="Blue" preset="COLOR">
+			<ChannelFunction index="0" min_dmx="0" max_dmx="255">
+				<ChannelMacro index="0" name="min" from_dmx="0" to_dmx="0"/>
+				<ChannelMacro index="2" name="max" from_dmx="255" to_dmx="255"/>
+			</ChannelFunction>
+		</Channel>
+		<Channel index="4" attribute="COLORRGB4" feature="COLORRGB" attribute_user_name="Amber" preset="COLOR">
 			<ChannelFunction index="0" min_dmx="0" max_dmx="255">
 				<ChannelMacro index="0" name="min" from_dmx="0" to_dmx="0"/>
 				<ChannelMacro index="2" name="max" from_dmx="255" to_dmx="255"/>

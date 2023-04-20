@@ -19,7 +19,7 @@ public class SimpleBox extends Component {
 	private int[] borderSides;
 
 	private boolean rounded;
-	public int arcSize; //Rounded corner sizes
+	private int arcSize; //Rounded corner sizes
 	private int[] roundedCorners;
 
 	private boolean draw;

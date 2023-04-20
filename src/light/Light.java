@@ -172,19 +172,30 @@ public class Light {
         }
         catch (ProfileParseException e) {CLI.error(e.toString());}
         
-        Fixture fixture = null;
-        for (int i=0; i<5; i++) {
-            fixture = new Fixture(new ConsoleAddress(Fixture.class, 0, i+1), pro1);
-            PatchManager.getInstance().addFixture(fixture);
+        Fixture fixture1 = null;
+        Fixture fixture2 = null;
+        int i=0;
+        for (; i<5; i++) {
+            fixture1 = new Fixture(new ConsoleAddress(Fixture.class, 0, i+1), pro1);
+            PatchManager.getInstance().addFixture(fixture1);
         }
-        for (int i=0; i<3; i++) {
-            fixture = new Fixture(new ConsoleAddress(Fixture.class, 0, i+1), pro2);
-            PatchManager.getInstance().addFixture(fixture);
+        for (; i<9; i++) {
+            fixture2 = new Fixture(new ConsoleAddress(Fixture.class, 0, i+1), pro2);
+            PatchManager.getInstance().addFixture(fixture2);
         }
         
         Programmer prog = Programmer.getInstance();
-        prog.selectFixture(fixture);
-        prog.set(fixture, Attribute.DIM, 80d, false);
+        prog.selectFixture(fixture2);
+
+        prog.set(fixture2, Attribute.DIM, 100d, false);
+        //prog.set(fixture, Attribute.COLORRGB1, 100d, false);
+        //prog.set(fixture, Attribute.COLORRGB2, 100d, false);
+        prog.set(fixture2, Attribute.COLORRGB3, 100d, false);
+        prog.set(fixture2, Attribute.COLORRGB4, 70d, false);
+
+        prog.set(fixture1, Attribute.GOBO1_INDEX, 9d, false);
+
+
         
         
         currentView.getUDA().createZone(Encoders.class, new Rectangle(0, 7, 10, 2));

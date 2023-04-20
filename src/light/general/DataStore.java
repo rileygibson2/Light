@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Set;
 
 import light.fixtures.Attribute;
+import light.fixtures.FeatureGroup;
 import light.fixtures.Fixture;
 import light.fixtures.profile.ProfileChannel;
 import light.persistency.PersistencyCapable;
@@ -13,6 +14,8 @@ import light.persistency.PersistencyWriter;
 
 public class DataStore implements PersistencyCapable {
     
+    public final static double NONE = -1d;
+
     protected Map<Fixture, Map<Attribute, Double>> store;
     
     public DataStore() {
@@ -27,7 +30,7 @@ public class DataStore implements PersistencyCapable {
      * @param overwritePriority - if set then the given value will overwrite the stores value. Otherwsie the data stores value will persist 
      */
     public void set(Fixture fixture, Attribute attribute, Double value, boolean overwritePriority) {
-        if (fixture==null||attribute==null||!fixture.getProfile().hasAttribute(attribute)) return;
+        if (fixture==null||attribute==null||!fixture.hasAttribute(attribute)) return;
         value = validate(fixture, attribute, value);
 
         //If not overwrite then return if store already contains value 
@@ -91,13 +94,24 @@ public class DataStore implements PersistencyCapable {
 
     public void clear() {store.clear();}
 
+    public Double get(Fixture fixture, Attribute attribute) {
+        if (fixture==null||attribute==null||!store.containsKey(fixture)||!store.get(fixture).containsKey(attribute)) return NONE;
+        return store.get(fixture).get(attribute);
+    }
+
     public Set<Fixture> getFixtureSet() {return store.keySet();}
 
     public Map<Attribute, Double> getFixtureValues(Fixture fixture) {return store.get(fixture);}
 
-    public Double get(Fixture fixture, Attribute attribute) {
-        if (fixture==null||attribute==null||!store.containsKey(fixture)||!store.get(fixture).containsKey(attribute)) return -1d;
-        return store.get(fixture).get(attribute);
+    public Map<Attribute, Double> getFixtureValuesMatchingGroup(Fixture fixture, FeatureGroup group) {
+        Map<Attribute, Double> result = new HashMap<>();
+        Map<Attribute, Double> values = store.get(fixture);
+        if (values==null) return result;
+
+        for (Map.Entry<Attribute, Double> value : values.entrySet()) {
+            if (value.getKey().getFeature().getFeatureGroup()==group) result.put(value.getKey(), value.getValue());
+        }
+        return result;
     }
 
     public boolean contains(Fixture fixture) {return fixture!=null&&store.containsKey(fixture);}

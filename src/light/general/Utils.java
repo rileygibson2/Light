@@ -19,6 +19,10 @@ public class Utils {
 
 	public static boolean validateDMX(double dmx) {return dmx>=0&&dmx<=255;}
 
+	public static int castToDMX(double dmx) {
+		return (int) (dmx<0 ? 0 : (dmx>255 ? 255 : dmx));
+	}
+
 	public static byte[] combineByteArrays(byte[]... args) {
 		int l = 0;
 		for (byte[] b : args) l += b.length;

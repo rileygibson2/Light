@@ -10,6 +10,7 @@ import light.guipackage.general.Point;
 import light.guipackage.general.UnitRectangle;
 import light.guipackage.general.UnitValue;
 import light.guipackage.gui.GUI;
+import light.guipackage.gui.Styles;
 import light.guipackage.gui.components.Component;
 import light.guipackage.gui.components.boxes.SimpleBox;
 import light.guipackage.threads.AnimationFactory;
@@ -20,7 +21,7 @@ public class MessageBox extends Component {
 	public static Color error = new Color(220, 100, 100);
 	public static Color ok = new Color(100, 200, 100);
 	//public static Color info = new Color(80, 80, 80);
-	public static Color info = GUI.focus;
+	public static Color info = Styles.focus;
 	public static Color update = new Color(100, 100, 200);
 	
 	private SimpleBox mainBox;
@@ -44,7 +45,7 @@ public class MessageBox extends Component {
 		mainBox.increasePriority();
 		addComponent(mainBox);
 		
-		label = new Label(new UnitRectangle(49, 50, 0, 0), text, new Font(GUI.baseFont, Font.BOLD, 12), new Color(255, 255, 255));
+		label = new Label(new UnitRectangle(49, 50, 0, 0), text, new Font(Styles.baseFont, Font.BOLD, 12), new Color(255, 255, 255));
 		label.setTextCentered(true);
 		mainBox.addComponent(label);
 		
