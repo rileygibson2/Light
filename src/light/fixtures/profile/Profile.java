@@ -1,6 +1,7 @@
 package light.fixtures.profile;
 
-import java.util.Collection;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -9,6 +10,7 @@ import light.fixtures.Attribute;
 import light.fixtures.Feature;
 import light.fixtures.FeatureGroup;
 import light.fixtures.FixtureType;
+import light.guipackage.cli.CLI;
 import light.persistency.PersistencyCapable;
 
 /**
@@ -106,6 +108,17 @@ public class Profile implements PersistencyCapable {
         }
         return null;
     }
+
+    public List<ProfileChannel> getChannelsWithFeatureGroup(FeatureGroup group) {
+        if (channels==null) return null;
+        List<ProfileChannel> result = new ArrayList<>();
+
+        for (ProfileChannel c : channels) {
+            if (c.getAttribute().getFeature().getFeatureGroup()==group) result.add(c);
+        }
+        Collections.sort(result);
+        return result;
+    }
     
     public Set<ProfileChannel> getChannels() {return channels;}
     
@@ -161,6 +174,11 @@ public class Profile implements PersistencyCapable {
         return null;
     }
 
+    public ProfileWheelSlot getSlot(ProfileChannelMacro macro) {
+        if (macro==null||!macro.hasSlotIndex()||!macro.getFunction().hasWheelIndex()) return null;
+        return getSlot(macro.getFunction().getWheelIndex(), macro.getSlotIndex());
+    }
+
     /**
      * Validates this profile and all it's subcomponents are valid - i.e they contain all the
      * required nessacary data to function properly as a Profile. Due to the lazy loading of data
@@ -172,8 +190,8 @@ public class Profile implements PersistencyCapable {
      */
     public boolean validate() {
         if (type==null||name==null||modeName==null||manufacturerName==null) return false;
-        for (ProfileChannel channel : channels) if (!channel.validate(this)) return false;
-        for (ProfileWheel wheel : wheels) if (!wheel.validate(this)) return false;
+        for (ProfileChannel channel : channels) if (!channel.validate()) return false;
+        for (ProfileWheel wheel : wheels) if (!wheel.validate()) return false;
         return true;
     }
 

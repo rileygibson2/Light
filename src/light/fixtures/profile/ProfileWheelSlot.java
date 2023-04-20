@@ -21,8 +21,8 @@ public class ProfileWheelSlot extends ProfileElement {
     public boolean hasMediaFileName() {return mediaFileName!=null;}
     public String getMediaFileName() {return mediaFileName;}
 
-    public boolean validate(Profile profile) {
-        return parent==null&&index!=-1;
+    public boolean validate() {
+        return profile!=null||parent!=null&&index!=-1;
     }
 
     public String toProfileString(String indent) {

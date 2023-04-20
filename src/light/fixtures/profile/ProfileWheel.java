@@ -6,8 +6,6 @@ import java.util.List;
 
 public class ProfileWheel extends ProfileElement {
     
-    private Profile parent;
-
     private List<ProfileWheelSlot> slots;
 
     public ProfileWheel() {
@@ -15,13 +13,12 @@ public class ProfileWheel extends ProfileElement {
         slots = new ArrayList<ProfileWheelSlot>();
     }
 
-    public void setProfile(Profile parent) {this.parent = parent;}
-    public Profile getProfile() {return parent;}
-
     public int getNumSlots() {return slots.size();}
 
     public void addSlot(ProfileWheelSlot slot) {
         slots.add(slot);
+        slot.setWheel(this);
+        slot.setProfile(profile);
         Collections.sort(slots);
     }
 
@@ -40,9 +37,9 @@ public class ProfileWheel extends ProfileElement {
         return null;
     }
 
-    public boolean validate(Profile profile) {
-        if (parent==null||index==-1) return false;
-        for (ProfileWheelSlot slot : slots) if (!slot.validate(profile)) return false;
+    public boolean validate() {
+        if (profile==null||index==-1) return false;
+        for (ProfileWheelSlot slot : slots) if (!slot.validate()) return false;
         return true;
     }
 

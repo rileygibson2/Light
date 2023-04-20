@@ -50,8 +50,8 @@ public class ProfileChannelMacro extends ProfileElement {
         return dmx>=fromDMX&&dmx<=toDMX;
     }
     
-    public boolean validate(Profile profile) {
-        if (parent==null||!Utils.validateDMX(fromDMX)||!Utils.validateDMX(toDMX)||fromDMX>toDMX
+    public boolean validate() {
+        if (profile==null||parent==null||!Utils.validateDMX(fromDMX)||!Utils.validateDMX(toDMX)||fromDMX>toDMX
         ||fromDMX<parent.getMinDMX()||fromDMX>parent.getMaxDMX()
         ||toDMX<parent.getMinDMX()||toDMX>parent.getMaxDMX()) return false;
         if (hasSlotIndex()&&!profile.hasWheelAndSlot(parent.getWheelIndex(), slotIndex)) return false;

@@ -120,6 +120,8 @@ public class Light {
         if (address.equals(pool.getAddress())) return pool;
         return pool.get(address);
     }
+
+    public View getCurrentView() {return currentView;}
     
     private void setup() {
         GUI.initialise(this, null); //Passing null forces full screen
@@ -155,8 +157,6 @@ public class Light {
         
         //Setup view
         currentView = new View(new UDA());
-        
-        mock();
     }
     
     private void mock() {
@@ -185,7 +185,7 @@ public class Light {
         }
         
         Programmer prog = Programmer.getInstance();
-        prog.selectFixture(fixture2);
+        prog.selectFixture(fixture1);
 
         prog.set(fixture2, Attribute.DIM, 100d, false);
         //prog.set(fixture, Attribute.COLORRGB1, 100d, false);
@@ -193,16 +193,17 @@ public class Light {
         prog.set(fixture2, Attribute.COLORRGB3, 100d, false);
         prog.set(fixture2, Attribute.COLORRGB4, 70d, false);
 
-        prog.set(fixture1, Attribute.GOBO1_INDEX, 9d, false);
-
-
-        
+        prog.set(fixture1, Attribute.DIM, 100d, false);
+        prog.set(fixture1, Attribute.COLORRGB1, 100d, false);
+        prog.set(fixture1, Attribute.COLORRGB3, 100d, false);
+        prog.set(fixture1, Attribute.GOBO1_INDEX, 20d, false);
         
         currentView.getUDA().createZone(Encoders.class, new Rectangle(0, 7, 10, 2));
         currentView.getUDA().createZone(FixtureWindow.class, new Rectangle(0, 0, 11, 7));
     }
     
     public static void main(String args[]) {
-        Light.getInstance();
+        Light light = Light.getInstance();
+        light.mock();
     }
 }

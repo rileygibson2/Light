@@ -24,29 +24,51 @@
 				<ChannelMacro index="1" name="max Rnd" from_dmx="255" to_dmx="255"/>
 			</ChannelFunction>
 		</Channel>
-		<Channel index="0" attribute="DIM" feature="DIMMER" attribute_user_name="Dim" preset="DIMMER">
+		<Channel index="1" attribute="DIM" feature="DIMMER" attribute_user_name="Dim" preset="DIMMER">
 			<ChannelFunction index="0" name="Dim" min_dmx="0" max_dmx="255">
 				<ChannelMacro index="0" name="closed" from_dmx="0" to_dmx="0"/>
 				<ChannelMacro index="1" name="open" from_dmx="255" to_dmx="255"/>
 			</ChannelFunction>
 		</Channel>
-		<Channel index="1" attribute="PAN" feature="POSITION" attribute_user_name="Pan" preset="POSITION">
+		<Channel index="2" attribute="COLORRGB1" feature="COLORRGB" attribute_user_name="Red" preset="COLOR">
+			<ChannelFunction index="0" min_dmx="0" max_dmx="255">
+				<ChannelMacro index="0" name="min" from_dmx="0" to_dmx="0"/>
+				<ChannelMacro index="2" name="max" from_dmx="255" to_dmx="255"/>
+			</ChannelFunction>
+		</Channel>
+		<Channel index="3" attribute="COLORRGB2" feature="COLORRGB" attribute_user_name="Green" preset="COLOR">
+			<ChannelFunction index="0" min_dmx="0" max_dmx="255">
+				<ChannelMacro index="0" name="min" from_dmx="0" to_dmx="0"/>
+				<ChannelMacro index="2" name="max" from_dmx="255" to_dmx="255"/>
+			</ChannelFunction>
+		</Channel>
+		<Channel index="4" attribute="COLORRGB3" feature="COLORRGB" attribute_user_name="Blue" preset="COLOR">
+			<ChannelFunction index="0" min_dmx="0" max_dmx="255">
+				<ChannelMacro index="0" name="min" from_dmx="0" to_dmx="0"/>
+				<ChannelMacro index="2" name="max" from_dmx="255" to_dmx="255"/>
+			</ChannelFunction>
+		</Channel>
+		<Channel index="5" attribute="PAN" feature="POSITION" attribute_user_name="Pan" preset="POSITION">
 			<ChannelFunction index="0" min_dmx="0" max_dmx="255" min_value="-127" max_value="127">
 				<ChannelMacro index="0" name="min" from_dmx="0" to_dmx="0"/>
 				<ChannelMacro index="1" name="center" from_dmx="127.5" to_dmx="127.5"/>
 				<ChannelMacro index="2" name="max" from_dmx="255" to_dmx="255"/>
 			</ChannelFunction>
 		</Channel>
-		<Channel index="2" attribute="TILT" feature="POSITION" attribute_user_name="Tilt" preset="POSITION">
+		<Channel index="6" attribute="TILT" feature="POSITION" attribute_user_name="Tilt" preset="POSITION">
 			<ChannelFunction index="0" min_dmx="0" max_dmx="255" min_value="-127" max_value="127">
 				<ChannelMacro index="0" name="min" from_dmx="0" to_dmx="0"/>
 				<ChannelMacro index="1" name="center" from_dmx="127.5" to_dmx="127.5"/>
 				<ChannelMacro index="2" name="max" from_dmx="255" to_dmx="255"/>
 			</ChannelFunction>
 		</Channel>
-		<Channel index="2" attribute="GOBO1_INDEX" feature="GOBO1" attribute_user_name="Index" preset="GOBO">
+		<Channel index="7" attribute="GOBO1_INDEX" feature="GOBO1" attribute_user_name="Index" preset="GOBO">
 			<ChannelFunction index="0" min_dmx="0" max_dmx="255" min_value="0" max_value="100" wheel="0">
-				<ChannelMacro index="0" name="dots" from_dmx="20" to_dmx="50" slot="1"/>
+				<ChannelMacro index="0" name="open" from_dmx="0" to_dmx="20" slot="0"/>
+				<ChannelMacro index="0" name="dots" from_dmx="21" to_dmx="50" slot="1"/>
+				<ChannelMacro index="0" name="happy" from_dmx="51" to_dmx="70" slot="2"/>
+				<ChannelMacro index="0" name="brick it" from_dmx="71" to_dmx="90" slot="3"/>
+				<ChannelMacro index="0" name="big bones" from_dmx="91" to_dmx="100" slot="4"/>
 			</ChannelFunction>
 		</Channel>
 	</Module>
@@ -54,6 +76,9 @@
 		<Wheel index="0">
 			<Slot index="0" media_name="open"/>
 			<Slot index="1" media_name="dots in space" media_filename="gobos/Martin/Martin@030913005.png"/>
+			<Slot index="2" media_name="happy" media_filename="gobos/Martin/Martin@030913006.png"/>
+			<Slot index="3" media_name="brick it" media_filename="gobos/Martin/Martin@030913008.png"/>
+			<Slot index="4" media_name="big bones" media_filename="gobos/Martin/Martin@030913009.png"/>
 		</Wheel>
 	</Wheels>
 </Profile>

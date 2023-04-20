@@ -14,7 +14,7 @@ import light.persistency.PersistencyWriter;
 
 public class DataStore implements PersistencyCapable {
     
-    public final static double NONE = -1d;
+    public final static double NONE = -12345d;
 
     protected Map<Fixture, Map<Attribute, Double>> store;
     

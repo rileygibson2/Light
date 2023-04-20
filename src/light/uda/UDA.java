@@ -1,17 +1,15 @@
 package light.uda;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
 
 import light.Light;
 import light.encoders.Encoders;
 import light.general.ConsoleAddress;
 import light.guipackage.cli.CLI;
-import light.guipackage.general.Pair;
 import light.guipackage.general.Point;
 import light.guipackage.general.Rectangle;
 import light.guipackage.gui.GUI;
-import light.uda.guiinterfaces.EncoderGUIInterface;
 import light.uda.guiinterfaces.GUIInterface;
 import light.uda.guiinterfaces.UDAGUIInterface;
 
@@ -19,11 +17,11 @@ public class UDA {
     
     UDAGUIInterface gui;
     public Point size;
-    public Set<Pair<UDACapable, Rectangle>> zones;
+    public Map<UDACapable, Rectangle> zones;
     
     public UDA() {
         size = new Point(15, 0);
-        zones = new HashSet<Pair<UDACapable, Rectangle>>();
+        zones = new HashMap<UDACapable, Rectangle>();
         
         gui = (UDAGUIInterface) GUI.getInstance().addToGUI(this);
         size = gui.getSize();
@@ -38,30 +36,35 @@ public class UDA {
         if (tag==Encoders.class) o = Encoders.getInstance();
 
         if (o!=null) {
-            zones.add(new Pair<>(o, zoneRec));
+            zones.put(o, zoneRec);
             GUIInterface gui = GUI.getInstance().addToGUI(o);
-
-            //Special assignments
-            if (tag==Encoders.class) Encoders.getInstance().setGUI(gui);
+            o.setGUI(gui);
         }
     }
 
     public Rectangle getCells(UDACapable zone) {
-        for (Pair<UDACapable, Rectangle> z : zones) if (z.a==zone) return z.b;
+        for (Map.Entry<UDACapable, Rectangle> z : zones.entrySet()) if (z.getKey()==zone) return z.getValue();
+        return null;
+    }
+
+    public UDACapable getUDAElementForClass(Class<? extends UDACapable> clazz) {
+        for (UDACapable element : zones.keySet()) {
+            if (element.getClass().equals(clazz)) return element;
+        }
         return null;
     }
     
     public void doClick(int x, int y) {
         // Check other zones to find edge of new zone - bias this towards a zone spanning left to right
         Point edge = size.clone();
-        for (Pair<? extends Object, Rectangle> zone : zones) {
-            if (zone.b.y>=y&&zone.b.x>=x&&zone.b.x<edge.x) edge.x = zone.b.x;
+        for (Map.Entry<UDACapable, Rectangle> z : zones.entrySet()) {
+            if (z.getValue().y>=y&&z.getValue().x>=x&&z.getValue().x<edge.x) edge.x = z.getValue().x;
         }
         //Width has been found so check if anything below to get height
-        for (Pair<? extends Object, Rectangle> zone : zones) {
-            if (((zone.b.x>=x&&zone.b.x<=x+edge.x)||(zone.b.x<=x&&zone.b.x+zone.b.width>=x))&&
-            zone.b.y>y&&zone.b.y<edge.y) {
-                edge.y = zone.b.y;
+        for (Map.Entry<UDACapable, Rectangle> z : zones.entrySet()) {
+            if (((z.getValue().x>=x&&z.getValue().x<=x+edge.x)||(z.getValue().x<=x&&z.getValue().x+z.getValue().width>=x))&&
+            z.getValue().y>y&&z.getValue().y<edge.y) {
+                edge.y = z.getValue().y;
             }
         }
         

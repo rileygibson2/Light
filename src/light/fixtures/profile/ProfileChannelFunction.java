@@ -38,6 +38,7 @@ public class ProfileChannelFunction extends ProfileElement {
     public void addMacro(ProfileChannelMacro m) {
         macros.add(m);
         m.setFunction(this);
+        m.setProfile(profile);
         Collections.sort(macros);
     }
 
@@ -116,10 +117,10 @@ public class ProfileChannelFunction extends ProfileElement {
         return !valueInRange(value) ? 0 : (value-minValue)/(maxValue-minValue);
     }
 
-    public boolean validate(Profile profile) {
-        if (parent==null||index==-1||!Utils.validateDMX(minDMX)||!Utils.validateDMX(maxDMX)
+    public boolean validate() {
+        if (profile==null||parent==null||index==-1||!Utils.validateDMX(minDMX)||!Utils.validateDMX(maxDMX)
             ||minDMX>maxDMX) return false;
-        for (ProfileChannelMacro macro : macros) if (!macro.validate(profile)) return false;
+        for (ProfileChannelMacro macro : macros) if (!macro.validate()) return false;
         if (hasWheelIndex()&&!profile.hasWheel(wheelIndex)) return false;
         return true;
     }

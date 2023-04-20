@@ -2,27 +2,25 @@ package light.encoders;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
+import light.guipackage.general.Pair;
 import light.uda.UDACapable;
+import light.uda.guiinterfaces.EncodersGUIInterface;
 import light.uda.guiinterfaces.GUIInterface;
 
 public class Encoders implements UDACapable {
     
     private static Encoders singleton;
 
-    private GUIInterface gui;
-
     public enum Encoder {
         A, B, C, D;
     }
 
-    private Map<Encoder, Double> encoderValues;
-    private Set<Encoder> activeEncoders;
+    private EncodersGUIInterface gui;
+
+    private int page;
 
     EncoderCapable currentController;
     Deque<EncoderCapable> waitingControllers; //Used to store controllers that had control but lost it
@@ -35,14 +33,8 @@ public class Encoders implements UDACapable {
     }
 
     private Encoders() {
-        encoderValues = new HashMap<Encoder, Double>();
-        encoderValues.put(Encoder.A, 0d);
-        encoderValues.put(Encoder.B, 0d);
-        encoderValues.put(Encoder.C, 0d);
-        encoderValues.put(Encoder.D, 0d);
-
-        activeEncoders = new HashSet<Encoder>();
         waitingControllers = new ArrayDeque<EncoderCapable>();
+        page = -1;
     }
 
     public static Encoders getInstance() {
@@ -50,7 +42,11 @@ public class Encoders implements UDACapable {
         return singleton;
     }
 
-    public void setGUI(GUIInterface gui) {this.gui = gui;}
+    @Override
+    public void setGUI(GUIInterface gui) {
+        if (!(gui instanceof EncodersGUIInterface)) return;
+        this.gui = (EncodersGUIInterface) gui;
+    }
 
     public void aquireEncoders(EncoderCapable controller) {
         if (currentController!=null) { //Add to holding stack
@@ -70,87 +66,82 @@ public class Encoders implements UDACapable {
 
     public EncoderCapable getController() {return currentController;}
 
-    public void clearValues() {
-        encoderValues.clear();
-        activeEncoders.clear();
-        gui.update();
-    }
-
     public void clearAll() {
         currentController = null;
         waitingControllers.clear();
-        encoderValues.clear();
-        activeEncoders.clear();
         gui.update();
     }
 
     public void set(Encoder encoder, double value) {
-        if (currentController==null||!activeEncoders.contains(encoder)) return;
-        encoderValues.put(encoder, value);
-        currentController.encoderUpdated(encoder);
+        if (currentController==null||!currentController.getEncoderActivation(encoder)) return;
+        currentController.encoderChanged(encoder, value);
+        if (gui!=null) gui.updateEncoders();
     }
 
     public double getEncoderValue(Encoder encoder) {
-        return encoderValues.get(encoder);
+        return !getEncoderActivation(encoder) ? -1 : currentController.getEncoderValue(encoder);
     }
 
     public String getEncoderTitle(Encoder encoder) {
-        if (encoder==null||currentController==null) return null;
-        return currentController.getEncoderTitle(encoder);
+        return !getEncoderActivation(encoder) ? "" : currentController.getEncoderTitle(encoder);
     }
 
     public String getEncoderCalculatorTitle(Encoder encoder) {
-        if (encoder==null||currentController==null) return null;
-        return currentController.getEncoderCalculatorTitle(encoder);
+        if (encoder==null||currentController==null||!currentController.getEncoderActivation(encoder)) return "";
+        return !getEncoderActivation(encoder) ? "" : currentController.getEncoderCalculatorTitle(encoder);
     }
 
     public String getEncoderValueText(Encoder encoder) {
-        if (encoder==null||currentController==null) return null;
-        return currentController.getEncoderValueText(encoder);
+        return !getEncoderActivation(encoder) ? "" : currentController.getEncoderValueText(encoder);
     }
 
-    public Map<String, Double> getEncoderCalculatorMacros(Encoder encoder) {
-        if (encoder==null||currentController==null) return null;
-        return currentController.getEncoderCalculatorMacros(encoder);
+    public Map<String, Pair<Double, String>> getEncoderCalculatorMacros(Encoder encoder) {
+        return !getEncoderActivation(encoder) ? null : currentController.getEncoderCalculatorMacros(encoder);
     }
 
-    public void activate(Encoder encoder) {
-        if (currentController!=null) activeEncoders.add(encoder);
+    public boolean getEncoderActivation(Encoder encoder) {
+        return (encoder==null||currentController==null) ? false : currentController.getEncoderActivation(encoder);
     }
 
-    public void deactivate(Encoder encoder) {
-        if (currentController!=null) activeEncoders.remove(encoder);
+    public List<String> getAllPageNames() {
+        if (currentController==null) return null;
+        return currentController.getAllEncoderPageNames();
     }
 
-    public void setActivation(Encoder encoder, boolean activation) {
-        if (currentController==null) return;
-        if (activation) activate(encoder);
-        else deactivate(encoder);
+    public int getCurrentPage() {
+        if (currentController==null) return -1;
+        return page;
     }
 
-    public void activateAll() {
-        if (currentController==null) return;
-        activeEncoders.add(Encoder.A);
-        activeEncoders.add(Encoder.B);
-        activeEncoders.add(Encoder.C);
-        activeEncoders.add(Encoder.D);
+    public void setPage(int page, Object caller) {
+        //Ensure caller has permission to change page
+        if (!(caller.equals(currentController)||caller instanceof EncodersGUIInterface)) return;
+        if (page<0||page>=currentController.getNumEncoderPages()) return;
+        this.page = page;
+
+        if (gui!=null) {
+            gui.updatePages();
+            gui.updateEncoders();
+        }
     }
 
-    public void deactivateAll() {
-        if (currentController!=null) activeEncoders.clear();
-        gui.update();
+    public int getEncoderIndex(Encoder encoder) {
+        if (encoder==null) return -1;
+        int i = 0;
+        for (Encoder e : Encoder.values()) {
+            if (e==encoder) return i;
+            i++;
+        }
+        return -1;
     }
 
     /**
-     * Called by an element when it wants the encoder's to recheck and update their values
+     * Prompts Encoders to recheck all data and update gui
      */
     public void update() {
-        if (currentController!=null) {
-            for (Encoder e : Encoder.values()) {
-                setActivation(e, currentController.checkEncoderActivation(e));
-                set(e, currentController.checkEncoderValue(e));
-            }
+        if (gui!=null) {
+            gui.updatePages();
+            gui.updateEncoders();
         }
-        if (gui!=null) gui.update();
     }
 }

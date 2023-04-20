@@ -9,12 +9,15 @@ import light.encoders.Encoders.Encoder;
 import light.encoders.Encoders.EncoderDefaultCalculatorMacros;
 import light.fixtures.FeatureGroup;
 import light.guipackage.cli.CLI;
+import light.guipackage.general.Pair;
 import light.guipackage.general.UnitPoint;
 import light.guipackage.general.UnitRectangle;
 import light.guipackage.general.UnitValue;
 import light.guipackage.general.UnitValue.Unit;
+import light.guipackage.gui.GUI;
 import light.guipackage.gui.Styles;
 import light.guipackage.gui.components.Component;
+import light.guipackage.gui.components.basecomponents.Image;
 import light.guipackage.gui.components.basecomponents.Label;
 import light.guipackage.gui.components.basecomponents.TempWindow;
 import light.guipackage.gui.components.boxes.FlexBox;
@@ -27,6 +30,8 @@ import light.uda.guiinterfaces.EncodersGUIInterface;
 public class EncodersGUI extends Component implements EncodersGUIInterface {
     
     private SimpleBox mainBox;
+    private SimpleBox pageBar;
+    private SimpleBox encoderBar;
     private TempWindow openCalculator;
     
     public EncodersGUI(UnitRectangle r) {
@@ -52,41 +57,55 @@ public class EncodersGUI extends Component implements EncodersGUIInterface {
         topBar.addComponent(title);
         
         mainBox.addComponent(topBar);
-        
-        //Feature bars
-        SimpleBox featureBar = new SimpleBox(new UnitRectangle(0, Unit.px, 1, Unit.px, 100, Unit.pcw, 30, Unit.pch));
-        featureBar.setPosition(Position.Relative);
-        mainBox.addComponent(featureBar);
+
+        buildPages();
+        buildEncoders();
+    }
+    
+    private void buildPages() {
+        pageBar = new SimpleBox(new UnitRectangle(0, Unit.px, 1, Unit.px, 100, Unit.pcw, 30, Unit.pch));
+        pageBar.setPosition(Position.Relative);
+        mainBox.addComponent(pageBar);
         double w = (99d-(1*(FeatureGroup.values().length-1)))/FeatureGroup.values().length;
         
         int i = 0;
-        for (FeatureGroup feature : FeatureGroup.values()) {
+        for (String pageTitle : Encoders.getInstance().getAllPageNames()) {
             int gap = 1;
             if (i==0) gap = 0;
-            SimpleBox featureBox = new SimpleBox(new UnitRectangle(gap, Unit.pcw, 0, Unit.px, w, Unit.pcw, 100, Unit.pch));
-            featureBox.setPosition(Position.Relative);
-            featureBox.setColor(new Color(20, 20, 20));
-            featureBox.setBorder(new Color(180, 180, 180));
-            featureBox.setRounded(true);
-            featureBar.addComponent(featureBox);
+            boolean active = Encoders.getInstance().getCurrentPage()==i;
             
-            Label fLabel = new Label(new UnitRectangle(0, Unit.px, 0, Unit.px, 100, Unit.pcw, 100, Unit.pch), feature.toString(), new Font(Styles.baseFont, Font.BOLD, 11), Styles.textDull);
-            fLabel.setTextCentered(true);
-            featureBox.addComponent(fLabel);
+            Label pageBox = new Label(new UnitRectangle(gap, Unit.pcw, 0, Unit.px, w, Unit.pcw, 100, Unit.pch), pageTitle, new Font(Styles.baseFont, Font.BOLD, 11), Styles.textDull);
+            pageBox.setPosition(Position.Relative);
+            if (active) {
+                pageBox.setColor(new Color(40, 40, 40));
+                pageBox.setTextColor(Styles.textMain);
+            }
+            else {
+                pageBox.setColor(new Color(20, 20, 20));
+            }
+            pageBox.setTextCentered(true);
+            pageBox.setBorder(new Color(180, 180, 180));
+            pageBox.setRounded(true);
+            pageBox.setTag(i);
+            pageBox.setClickAction(() -> Encoders.getInstance().setPage((int) pageBox.getTag(), this));
+            pageBar.addComponent(pageBox);
             
             SimpleBox activeBox = new SimpleBox(new UnitRectangle(85, Unit.pcw, 0, Unit.px, 8, Unit.pcw, 8, Unit.pcw));
-            activeBox.setColor(new Color(150, 150, 150));
-            featureBox.addComponent(activeBox);
+            if (active) activeBox.setColor(new Color(255, 0, 0));
+            else activeBox.setColor(new Color(150, 150, 150));
+            pageBox.addComponent(activeBox);
             i++;
         }
-        
+    }
+    
+    private void buildEncoders() {
         //Encoder bars
-        SimpleBox encoderBar = new SimpleBox(new UnitRectangle(0, Unit.px, 2, Unit.px, 100, Unit.pcw, 52, Unit.pch));
+        encoderBar = new SimpleBox(new UnitRectangle(0, Unit.px, 2, Unit.px, 100, Unit.pcw, 52, Unit.pch));
         encoderBar.setPosition(Position.Relative);
         mainBox.addComponent(encoderBar);
         
-        i = 0;
-        w = 100/Encoder.values().length;
+        int i = 0;
+        int w = 100/Encoder.values().length;
         for (Encoder e : Encoder.values()) {
             SimpleBox encoder = new SimpleBox(new UnitRectangle(0, Unit.px, 0, Unit.px, w, Unit.pcw, 100, Unit.pch));
             encoder.setPosition(Position.Relative);
@@ -109,19 +128,16 @@ public class EncodersGUI extends Component implements EncodersGUIInterface {
             encoder.addComponent(bottom);
             i++;
         } 
-        
-        //openCalculator();
     }
     
     private void openCalculator(Encoder encoder) {
-        if (openCalculator!=null) return;
-        
-        //Get relevant structure
+        if (openCalculator!=null||!Encoders.getInstance().getEncoderActivation(encoder)) return;
         
         TempWindow tB = new TempWindow("Value for "+Encoders.getInstance().getEncoderCalculatorTitle(encoder));
         tB.addSmother(80);
         tB.getContentBox().setMaxWidth(new UnitValue(80, Unit.vw));
-        addComponent(tB);
+        tB.setCloseAction(() -> {openCalculator = null;});
+        GUI.getInstance().getCurrentRoot().addComponent(tB);
         
         //Input bar
         Label input = new Label(new UnitRectangle(0, Unit.px, 2, Unit.px, 100, Unit.pcw, 5, Unit.vh), " input", new Font(Styles.baseFont, Font.BOLD, 14), new Color(230, 230, 230));
@@ -183,9 +199,9 @@ public class EncodersGUI extends Component implements EncodersGUIInterface {
             });
             macroBox.addComponent(b);
         }
-
+        
         //Encoder controller defined macros
-        for (Map.Entry<String, Double> macro : Encoders.getInstance().getEncoderCalculatorMacros(encoder).entrySet()) {
+        for (Map.Entry<String, Pair<Double, String>> macro : Encoders.getInstance().getEncoderCalculatorMacros(encoder).entrySet()) {
             Label b = new Label(new UnitRectangle(1, Unit.px, 0, Unit.px, 6, Unit.vw, 5, Unit.vh), macro.getKey(), new Font(Styles.baseFont, Font.BOLD, 12), new Color(230, 230, 230));
             b.setPosition(Position.Relative);
             b.setColor(new Color(20, 20, 20));
@@ -196,14 +212,28 @@ public class EncodersGUI extends Component implements EncodersGUIInterface {
                 CLI.debug("Macro clicked: "+macro.getKey()+", "+macro.getValue());
             });
             macroBox.addComponent(b);
+
+            if (macro.getValue().b!=null) {
+                Image img = new Image(new UnitRectangle(2, Unit.pcw, 5, Unit.pch, 60, Unit.pcw, 90, Unit.pch), macro.getValue().b);
+                b.addComponent(img);
+            }
         }
         
         openCalculator = tB;
     }
     
     @Override
-    public void update() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'update'");
+    public void update() {}
+
+    @Override
+    public void updatePages() {
+        mainBox.removeComponent(pageBar);
+        buildPages();
+    }
+
+    @Override
+    public void updateEncoders() {
+        mainBox.removeComponent(encoderBar);
+        buildEncoders();
     }
 }

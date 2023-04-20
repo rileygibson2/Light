@@ -12,6 +12,7 @@ import light.general.ConsoleAddress;
 import light.persistency.PersistencyCapable;
 import light.persistency.PersistencyWriter;
 import light.uda.UDACapable;
+import light.uda.guiinterfaces.GUIInterface;
 
 public class Pool<T extends Addressable & PersistencyCapable> extends Addressable implements PersistencyCapable, UDACapable {
 
@@ -80,4 +81,7 @@ public class Pool<T extends Addressable & PersistencyCapable> extends Addressabl
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'generateFromBytes'");
     }
+
+    @Override
+    public void setGUI(GUIInterface gui) {}
 }

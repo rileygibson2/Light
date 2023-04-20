@@ -6,11 +6,10 @@ import java.util.List;
 
 import light.fixtures.Attribute;
 import light.fixtures.Feature;
+import light.guipackage.cli.CLI;
 import light.stores.Preset.PresetType;
 
 public class ProfileChannel extends ProfileElement {
-
-    private Profile parent;
 
     private Feature feature;
     private Attribute attribute;
@@ -31,13 +30,11 @@ public class ProfileChannel extends ProfileElement {
         minValue = 0;
         maxValue = 100;
     }
-
-    public void setProfile(Profile parent) {this.parent = parent;}
-    public Profile getProfile() {return parent;}
     
     public void addFunction(ProfileChannelFunction f) {
         functions.add(f);
         f.setChannel(this);
+        f.setProfile(profile);
         Collections.sort(functions);
     }
 
@@ -106,9 +103,9 @@ public class ProfileChannel extends ProfileElement {
         return value>=minValue&&value<=maxValue;
     }
 
-    public boolean validate(Profile profile) {
-        if (parent==null||index==-1||feature==null||attribute==null) return false;
-        for (ProfileChannelFunction function : functions) if (!function.validate(profile)) return false;
+    public boolean validate() {
+        if (profile==null||index==-1||feature==null||attribute==null) return false;
+        for (ProfileChannelFunction function : functions) if (!function.validate()) return false;
         return true;
     }
 

@@ -19,7 +19,9 @@ import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import javax.imageio.ImageIO;
@@ -41,12 +43,20 @@ public class ScreenUtils {
 	
 	private Rectangle screen;
 	
+	private Map<Image, BufferedImage> imageCache;
+	
 	public ScreenUtils(Rectangle screen) {
 		this.screen = screen;
+		this.imageCache = new HashMap<Image, BufferedImage>();
 		loadFonts();
 	}
 	
 	public void updateScreen(Rectangle screen) {this.screen = screen;}
+	
+	public void clearImageCache() {
+		imageCache.clear();
+		CLI.debug("Cleared image cache");
+	}
 	
 	public void loadFonts() {
 		try {
@@ -93,10 +103,20 @@ public class ScreenUtils {
 		Rectangle r = i.getRealRec();
 		
 		BufferedImage img = null;
-		try {img = ImageIO.read(Utils.getURL("assets/"+i.getSource()));}
-		catch (IOException | IllegalArgumentException e) {
-			CLI.error("ImageIO failed for assets/"+i.getSource());
-			return;
+		
+		//Check image cache first
+		if (!i.getIgnoreCache()&&imageCache.containsKey(i)&&imageCache.get(i)!=null) img = imageCache.get(i);
+		else {
+			try {
+				img = ImageIO.read(Utils.getURL("assets/"+i.getSource()));
+				if (i.getMakeImageTransparent()) img = makeImageTransparent(img);
+				imageCache.put(i, img);
+				i.setIgnoreCache(false);
+			}
+			catch (IOException | IllegalArgumentException e) {
+				CLI.error("ImageIO failed for assets/"+i.getSource());
+				return;
+			}
 		}
 		if (i.getOpacity()<100) g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, (float) (i.getOpacity()/100)));
 		
@@ -116,10 +136,35 @@ public class ScreenUtils {
 		g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1f));
 	}
 	
+	public BufferedImage makeImageTransparent(BufferedImage img) {
+		
+		int width = img.getWidth();
+		int height = img.getHeight();
+		
+		// Create a new BufferedImage with ARGB color model
+		BufferedImage transparentImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+		
+		// Define the black color
+		int blackColor = Color.BLACK.getRGB();
+		
+		
+		for (int x = 0; x < width; x++) {
+			for (int y = 0; y < height; y++) {
+                // Calculate the brightness of the pixel
+                Color color = new Color(img.getRGB(x, y), true);
+                float brightness = Color.RGBtoHSB(color.getRed(), color.getGreen(), color.getBlue(), null)[2];
+
+                // Set the alpha based on the brightness
+                transparentImage.setRGB(x, y, ((255-Math.round(brightness * 255)) << 24) | (0 << 16) | (0 << 8) | 0);
+			}
+		}
+		return transparentImage;
+	}
+	
 	public void drawSimpleBox(Graphics2D g, SimpleBox b) {
 		Rectangle r = b.getRealRec();
 		Color col = b.getColor();
-
+		
 		if (col!=null&&col.getAlpha()==0) return; //Duck tape fix as this method does net respect the boxe's alpha channel
 		if (col==null) col = Color.BLACK;
 		col = new Color(col.getRed(), col.getGreen(), col.getBlue(), percToCol(b.getOpacity()));
@@ -157,13 +202,13 @@ public class ScreenUtils {
 		fillRect(g, r1);
 	}
 	
-	public void drawRect(Graphics2D g, Color c, Rectangle r, double strokeW) {
+	private void drawRect(Graphics2D g, Color c, Rectangle r, double strokeW) {
 		g.setStroke(new BasicStroke((float) strokeW));
 		g.setColor(c);
 		g.drawRect((int) r.x, (int) r.y, (int) r.width, (int) r.height);
 	}
 	
-	public void knockoutBorderSides(Graphics2D g, SimpleBox b, Rectangle r) {
+	private void knockoutBorderSides(Graphics2D g, SimpleBox b, Rectangle r) {
 		if (b.getBorderSides().length==0) return;
 		
 		Color col = null;
@@ -179,7 +224,7 @@ public class ScreenUtils {
 		*/
 		if (!b.hasColor()) {
 			SimpleBox par = (SimpleBox) (b.getParentAssignableFrom(SimpleBox.class));
-
+			
 			while (par!=null) {
 				if (par.hasColor()) {
 					col = par.getColor();
@@ -189,7 +234,7 @@ public class ScreenUtils {
 				}
 				par = (SimpleBox) (par.getParentAssignableFrom(SimpleBox.class));
 			}
-
+			
 			//Last resort
 			if (col==null) g.setColor(Color.BLACK);
 		}
@@ -213,17 +258,17 @@ public class ScreenUtils {
 		g.fillRect((int) r.x, (int) r.y, (int) r.width, (int) r.height);
 	}
 	
-	public void fillRect(Graphics2D g, Rectangle r) {
+	private void fillRect(Graphics2D g, Rectangle r) {
 		g.fillRect((int) r.x, (int) r.y, (int) r.width, (int) r.height);
 	}
 	
-	public void drawRoundRect(Graphics2D g, Color c, Rectangle r, double strokeW, int arcSize) {
+	private void drawRoundRect(Graphics2D g, Color c, Rectangle r, double strokeW, int arcSize) {
 		g.setStroke(new BasicStroke((float) strokeW));
 		g.setColor(c);
 		g.drawRoundRect((int) r.x, (int) r.y, (int) r.width, (int) r.height, arcSize, arcSize);
 	}
 	
-	public void drawRoundRect(Graphics2D g, Color c, Color knockoutCol, Rectangle r, double strokeW, int[] corners, int arcSize) {
+	private void drawRoundRect(Graphics2D g, Color c, Color knockoutCol, Rectangle r, double strokeW, int[] corners, int arcSize) {
 		g.setStroke(new BasicStroke((float) strokeW));
 		g.setColor(c);
 		g.drawRoundRect((int) r.x, (int) r.y, (int) r.width, (int) r.height, arcSize, arcSize);
@@ -270,7 +315,7 @@ public class ScreenUtils {
 		g.fillRoundRect((int) r.x, (int) r.y, (int) r.width, (int) r.height, arcSize, arcSize);
 	}
 	
-	public void fillRoundRect(Graphics2D g, Color c, Rectangle r, int[] corners, int arcSize) {
+	private void fillRoundRect(Graphics2D g, Color c, Rectangle r, int[] corners, int arcSize) {
 		g.setColor(c);
 		g.fillRoundRect((int) r.x, (int) r.y, (int) r.width, (int) r.height, arcSize, arcSize);
 		
@@ -287,13 +332,13 @@ public class ScreenUtils {
 		if (!cor.contains(4)) g.fillRect((int) (r.x+r.width*0.8), (int) (r.y), (int) (r.width*0.2), (int) (r.height*0.2));
 	}
 	
-	public void drawOval(Graphics2D g, Color c, Rectangle r, double strokeW) {
+	private void drawOval(Graphics2D g, Color c, Rectangle r, double strokeW) {
 		g.setStroke(new BasicStroke((float) strokeW));
 		g.setColor(c);
 		g.drawOval((int) r.x, (int) r.y, (int) r.width, (int) r.height);
 	}
 	
-	public void fillOval(Graphics2D g, Color c, Rectangle r) {
+	private void fillOval(Graphics2D g, Color c, Rectangle r) {
 		g.setColor(c);
 		g.fillOval((int) r.x, (int) r.y, (int) r.width, (int) r.height);
 	}
@@ -312,7 +357,7 @@ public class ScreenUtils {
 		g.drawString(s, x, y);
 	}
 	
-	public void drawXCenteredString(Graphics2D g, Font f, String s, Color c, Rectangle r) {
+	private void drawXCenteredString(Graphics2D g, Font f, String s, Color c, Rectangle r) {
 		FontMetrics metrics = g.getFontMetrics(f);
 		int x = (int) (r.x+(r.width-metrics.stringWidth(s))/2);
 		int y = (int) (r.y+(-metrics.getHeight()/2))+metrics.getAscent();
@@ -321,7 +366,7 @@ public class ScreenUtils {
 		g.drawString(s, x, y);
 	}
 	
-	public void drawYCenteredString(Graphics2D g, Font f, String s, Color c, Rectangle r) {
+	private void drawYCenteredString(Graphics2D g, Font f, String s, Color c, Rectangle r) {
 		FontMetrics metrics = g.getFontMetrics(f);
 		int y = (int) (r.y+((r.height-metrics.getHeight())/2)+metrics.getAscent());
 		g.setFont(f);
@@ -397,19 +442,19 @@ public class ScreenUtils {
 		return new Font(f.getName(), f.getStyle(), maxFontSize);
 	}
 	
-	public void setGradientLinear(Graphics2D g, Color start, Color end, Rectangle gR) {
+	private void setGradientLinear(Graphics2D g, Color start, Color end, Rectangle gR) {
 		GradientPaint gr = new GradientPaint((int) gR.x, (int) gR.y, start, (int) gR.width, (int) gR.height, end);
 		g.setPaint(gr);
 	}
 	
-	public void setGradientRadial(Graphics2D g, Color start, Color end, float[] fracts, Rectangle gR) {
+	private void setGradientRadial(Graphics2D g, Color start, Color end, float[] fracts, Rectangle gR) {
 		Rectangle2D r = new Rectangle2D.Double((int) gR.x, (int) gR.y, (int) gR.width, (int) gR.height);
 		Color[] cols = {start, end};
 		RadialGradientPaint gr = new RadialGradientPaint(r, fracts, cols, CycleMethod.NO_CYCLE);
 		g.setPaint(gr);
 	}
 	
-	public Color getGrad(Color start, Color end, double i, double total) {
+	private Color getGrad(Color start, Color end, double i, double total) {
 		int r, g, b, a;
 		r = (int) (start.getRed()+(((end.getRed()-start.getRed())/total)*i));
 		g = (int) (start.getGreen()+(((end.getGreen()-start.getGreen())/total)*i));
@@ -423,7 +468,7 @@ public class ScreenUtils {
 		return new Color(r, g, b, a);
 	}
 	
-	public int percToCol(double p) {
+	private int percToCol(double p) {
 		int c = (int) ((p/100)*255);
 		if (c>255) c = 255;
 		if (c<0) c = 0;

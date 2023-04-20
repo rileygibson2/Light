@@ -60,6 +60,7 @@ public class TempWindow extends CollumnBox {
 		exit.setColor(Styles.bg);
 		exit.setBorder(1, new Color(80, 80, 80));
 		exit.setRounded(10);
+		exit.setClickAction(() -> close(false));
 		topBar.addComponent(exit);
 		
 		//Tab bar
