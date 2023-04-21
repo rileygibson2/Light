@@ -19,5 +19,5 @@ public interface OutputCapable {
      * in time.
      * @return Whether or not the element should be currently registered
      */
-    public boolean registrationCheck();
+    public boolean outputRegistrationCheck();
 }

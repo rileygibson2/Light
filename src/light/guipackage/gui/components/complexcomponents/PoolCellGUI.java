@@ -3,8 +3,8 @@ package light.guipackage.gui.components.complexcomponents;
 import java.awt.Color;
 import java.awt.Font;
 
-import light.commands.commandline.CommandLine;
-import light.commands.commandline.CommandProxy;
+import light.commands.commandcontrol.CommandLine;
+import light.commands.commandcontrol.CommandProxy;
 import light.executors.Executor;
 import light.general.ConsoleAddress;
 import light.guipackage.general.GUIUtils;
@@ -144,7 +144,7 @@ public class PoolCellGUI extends Component {
     public void removeDragIcon() {mainBox.removeComponent(dragIcon);}
     
     public void click(Point p) {
-        CommandLine.getInstance().addToCommand(new CommandProxy(address));
+        CommandLine.getInstance().getCommandController().addToCommand(new CommandProxy(address));
     }
     
 }

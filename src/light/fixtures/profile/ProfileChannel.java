@@ -6,6 +6,7 @@ import java.util.List;
 
 import light.fixtures.Attribute;
 import light.fixtures.Feature;
+import light.general.Utils;
 import light.guipackage.cli.CLI;
 import light.stores.Preset.PresetType;
 
@@ -18,8 +19,9 @@ public class ProfileChannel extends ProfileElement {
     //User values
     private double minValue;
     private double maxValue;
+    private double defaultValue;
 
-    private double highlightDMX;
+    private double highlightValue;
     private PresetType presetType;
     
     private List<ProfileChannelFunction> functions;
@@ -29,6 +31,7 @@ public class ProfileChannel extends ProfileElement {
         functions = new ArrayList<ProfileChannelFunction>();
         minValue = 0;
         maxValue = 100;
+        defaultValue = 0;
     }
     
     public void addFunction(ProfileChannelFunction f) {
@@ -96,11 +99,30 @@ public class ProfileChannel extends ProfileElement {
     public void setMaxValue(double v) {this.maxValue = v;}
     public double getMaxValue() {return maxValue;}
 
-    public void setHighlightDMX(double d) {this.highlightDMX = d;}
-    public double getHighlightDMX() {return highlightDMX;}
+    public void setDefaultValue(double v) {this.defaultValue = v;}
+    public double getDefaultValue() {return this.defaultValue;}
 
-    public boolean valueValidForRange(double value) {
+    public void setHighlightValue(double d) {this.highlightValue = d;}
+    public double getHighlightValue() {return highlightValue;}
+
+    public boolean valueInRange(double value) {
         return value>=minValue&&value<=maxValue;
+    }
+
+    public double dmxToValue(double dmx) {
+        if (!Utils.validateDMX(dmx)) return -1;
+        for (ProfileChannelFunction function : functions) {
+            if (function.dmxInRange(dmx)) return function.dmxToValue(dmx);
+        }
+        return -1;
+    }
+
+    public int valueToDMX(double value) {
+        if (!valueInRange(value)) return -1;
+        for (ProfileChannelFunction function : functions) {
+            if (function.valueInRange(value)) return function.valueToDMX(value);
+        }
+        return -1;
     }
 
     public boolean validate() {
@@ -110,7 +132,7 @@ public class ProfileChannel extends ProfileElement {
     }
 
     public String toProfileString(String indent) {
-        String result = "[Channel: feature="+feature+", attribute="+attribute+", preset="+presetType+"]";
+        String result = "[Channel: feature="+feature+", attribute="+attribute+", preset="+presetType+" min_value="+minValue+" maxValue="+maxValue+"]";
         indent += "\t";
 
         for (ProfileChannelFunction function : functions) result += "\n"+indent+function.toProfileString(indent);

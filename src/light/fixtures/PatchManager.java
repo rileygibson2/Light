@@ -2,8 +2,9 @@ package light.fixtures;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -18,7 +19,7 @@ public class PatchManager {
     private Map<Profile, Set<Fixture>> patch;
     
     private PatchManager() {
-        patch = new HashMap<Profile, Set<Fixture>>();
+        patch = new LinkedHashMap<Profile, Set<Fixture>>();
     }
     
     public static PatchManager getInstance() {
@@ -69,13 +70,13 @@ public class PatchManager {
     }
 
     public Set<Fixture> allFixtureSet() {
-        Set<Fixture> allFixtures = new HashSet<>();
+        Set<Fixture> allFixtures = new LinkedHashSet<>();
         for (Set<Fixture> profile : patch.values()) allFixtures.addAll(profile);
         return allFixtures;
     }
 
     public Set<Profile> allProfileSet() {
-        Set<Profile> result = new HashSet<>();
+        Set<Profile> result = new LinkedHashSet<>();
         for (Profile profile : patch.keySet()) result.add(profile);
         return result;
     }

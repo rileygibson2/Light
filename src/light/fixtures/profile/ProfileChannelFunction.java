@@ -5,7 +5,6 @@ import java.util.Collections;
 import java.util.List;
 
 import light.general.Utils;
-import light.guipackage.cli.CLI;
 
 public class ProfileChannelFunction extends ProfileElement {
     
@@ -26,13 +25,18 @@ public class ProfileChannelFunction extends ProfileElement {
         super();
         minDMX = -1;
         maxDMX = -1;
-        minValue = 0;
-        maxValue = 100;
+        minValue = Double.MIN_VALUE;
+        maxValue = Double.MAX_VALUE;
         wheelIndex = -1;
         macros = new ArrayList<ProfileChannelMacro>();
     }
 
-    public void setChannel(ProfileChannel parent) {this.parent = parent;}
+    public void setChannel(ProfileChannel parent) {
+        this.parent = parent;
+        //Set value bounds off of parents if not already defined
+        if (minValue==Double.MIN_VALUE) setMinValue(parent.getMinValue());
+        if (maxValue==Double.MAX_VALUE) setMaxValue(parent.getMaxValue());
+    }
     public ProfileChannel getChannel() {return parent;}
     
     public void addMacro(ProfileChannelMacro m) {
@@ -101,10 +105,10 @@ public class ProfileChannelFunction extends ProfileElement {
         return minValue+(dmx/255)*(maxValue-minValue);
     }
 
-    public double valueToDMX(double value) {
-        if (!valueInRange(value)) return Double.MAX_VALUE;
+    public int valueToDMX(double value) {
+        if (!valueInRange(value)) return Integer.MAX_VALUE;
         double perc = (value-minValue)/(maxValue-minValue);
-        double dmx = minDMX+perc*(maxDMX-minDMX);
+        int dmx = (int) (minDMX+perc*(maxDMX-minDMX));
         return Utils.validateDMX(dmx) ? dmx : -1;
     }
 
@@ -126,7 +130,7 @@ public class ProfileChannelFunction extends ProfileElement {
     }
 
     public String toProfileString(String indent) {
-        String result = "[Function: name="+name+", min_dmx="+minDMX+", max_dmx="+maxDMX+" wheel="+wheelIndex+"]";
+        String result = "[Function: name="+name+", min_dmx="+minDMX+", max_dmx="+maxDMX+" min_value="+minValue+" maxValue="+maxValue+" wheel="+wheelIndex+"]";
         indent += "\t";
         for (ProfileChannelMacro macro : macros) result += "\n"+indent+macro.toProfileString(indent);
         return result;

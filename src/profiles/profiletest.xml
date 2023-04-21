@@ -26,8 +26,8 @@
 		</Channel>
 		<Channel index="1" attribute="DIM" feature="DIMMER" attribute_user_name="Dim" preset="DIMMER">
 			<ChannelFunction index="0" name="Dim" min_dmx="0" max_dmx="255">
-				<ChannelMacro index="0" name="closed" from_dmx="0" to_dmx="0"/>
-				<ChannelMacro index="1" name="open" from_dmx="255" to_dmx="255"/>
+				<ChannelMacro index="0" name="off" from_dmx="0" to_dmx="0"/>
+				<ChannelMacro index="1" name="full" from_dmx="255" to_dmx="255"/>
 			</ChannelFunction>
 		</Channel>
 		<Channel index="2" attribute="COLORRGB1" feature="COLORRGB" attribute_user_name="Red" preset="COLOR">
@@ -48,15 +48,17 @@
 				<ChannelMacro index="2" name="max" from_dmx="255" to_dmx="255"/>
 			</ChannelFunction>
 		</Channel>
-		<Channel index="5" attribute="PAN" feature="POSITION" attribute_user_name="Pan" preset="POSITION">
-			<ChannelFunction index="0" min_dmx="0" max_dmx="255" min_value="-127" max_value="127">
+		<Channel index="5" attribute="PAN" feature="POSITION" attribute_user_name="Pan" preset="POSITION"
+			min_value="-127" max_value="127" default_value="0">
+			<ChannelFunction index="0" min_dmx="0" max_dmx="255">
 				<ChannelMacro index="0" name="min" from_dmx="0" to_dmx="0"/>
 				<ChannelMacro index="1" name="center" from_dmx="127.5" to_dmx="127.5"/>
 				<ChannelMacro index="2" name="max" from_dmx="255" to_dmx="255"/>
 			</ChannelFunction>
 		</Channel>
-		<Channel index="6" attribute="TILT" feature="POSITION" attribute_user_name="Tilt" preset="POSITION">
-			<ChannelFunction index="0" min_dmx="0" max_dmx="255" min_value="-127" max_value="127">
+		<Channel index="6" attribute="TILT" feature="POSITION" attribute_user_name="Tilt" preset="POSITION"
+			min_value="-127" max_value="127" default_value="0">
+			<ChannelFunction index="0" min_dmx="0" max_dmx="255">
 				<ChannelMacro index="0" name="min" from_dmx="0" to_dmx="0"/>
 				<ChannelMacro index="1" name="center" from_dmx="127.5" to_dmx="127.5"/>
 				<ChannelMacro index="2" name="max" from_dmx="255" to_dmx="255"/>

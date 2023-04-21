@@ -53,7 +53,7 @@ public class Effect extends AbstractStore implements ExecutorCapable, Persistenc
     }
 
     @Override
-    public boolean registrationCheck() {
+    public boolean outputRegistrationCheck() {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'registrationCheck'");
     }

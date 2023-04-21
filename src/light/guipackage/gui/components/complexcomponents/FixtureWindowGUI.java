@@ -30,6 +30,7 @@ import light.guipackage.gui.components.basecomponents.Label;
 import light.guipackage.gui.components.boxes.CollumnBox;
 import light.guipackage.gui.components.boxes.FlexBox;
 import light.guipackage.gui.components.boxes.SimpleBox;
+import light.output.Output;
 import light.uda.FixtureWindow;
 import light.uda.guiinterfaces.FixtureWindowGUIInterface;
 
@@ -116,7 +117,7 @@ public class FixtureWindowGUI extends SimpleBox implements FixtureWindowGUIInter
     }
     
     private void populateFixtureBox(Fixture f, SimpleBox box) {
-        Programmer prog = Programmer.getInstance();
+        DataStore outputStore = Output.getInstance().generateOutputStore();
         
         //ID label
         Label l =  new Label(new UnitRectangle(0, Unit.px, 0, Unit.vh, 100, Unit.pcw, 20, Unit.pch), f.getAddress().getSuffix()+"", new Font(Styles.baseFont, Font.BOLD, 11), new Color(10, 10, 10));
@@ -131,10 +132,7 @@ public class FixtureWindowGUI extends SimpleBox implements FixtureWindowGUIInter
         //Get relevant data
         Color col = getDisplayColor(f);
         double dim = 0;
-        if (f.getProfile().hasAttribute(Attribute.DIM)) {
-            if (prog.contains(f, Attribute.DIM)) dim = prog.get(f, Attribute.DIM);
-            else dim = f.getProfile().getChannelWithAttribute(Attribute.DIM).getMinValue();
-        }
+        if (f.getProfile().hasAttribute(Attribute.DIM)) dim = outputStore.get(f, Attribute.DIM);
         
         if (f.getProfile().getFixtureType()==FixtureType.SPOT) { //Spot profiles
             SimpleBox circle = new SimpleBox(new UnitRectangle(20, Unit.pcw, 5, Unit.pch, 60, Unit.pcw, 60, Unit.pcw));
@@ -168,16 +166,10 @@ public class FixtureWindowGUI extends SimpleBox implements FixtureWindowGUIInter
             
             //Position label
             double pan = 0;
-            if (f.getProfile().hasAttribute(Attribute.PAN)) {
-                if (prog.contains(f, Attribute.PAN)) pan = prog.get(f, Attribute.PAN);
-                else pan = f.getProfile().getChannelWithAttribute(Attribute.PAN).getMinValue();
-            }
+            if (f.getProfile().hasAttribute(Attribute.PAN)) pan = outputStore.get(f, Attribute.PAN);
             
             double tilt = 0;
-            if (f.getProfile().hasAttribute(Attribute.TILT)) {
-                if (prog.contains(f, Attribute.TILT)) tilt = prog.get(f, Attribute.TILT);
-                else tilt = f.getProfile().getChannelWithAttribute(Attribute.TILT).getMinValue();
-            }
+            if (f.getProfile().hasAttribute(Attribute.TILT)) tilt = outputStore.get(f, Attribute.TILT);
             
             l =  new Label(new UnitRectangle(0, Unit.px, 7, Unit.pch,  100, Unit.pcw, 10, Unit.pch), (int) Math.floor(pan)+" "+(int) Math.floor(tilt), new Font(Styles.baseFont, Font.BOLD, 10), new Color(0, 0, 0));
             l.setPosition(Position.Relative);
@@ -220,7 +212,7 @@ public class FixtureWindowGUI extends SimpleBox implements FixtureWindowGUIInter
         double rd = 0, gn = 0, bl = 0;
         
         if (fixture.getProfile().hasAttributeOfFeatureGroup(FeatureGroup.COLOR)) {
-            for (Map.Entry<Attribute, Double> value : Programmer.getInstance().getFixtureValuesMatchingGroup(fixture, FeatureGroup.COLOR).entrySet()) {
+            for (Map.Entry<Attribute, Double> value : Output.getInstance().generateOutputStore().getFixtureValuesMatchingGroup(fixture, FeatureGroup.COLOR).entrySet()) {
                 //Get display color for attribute
                 Color toBlend = null;
                 switch (value.getKey()) {
@@ -248,7 +240,7 @@ public class FixtureWindowGUI extends SimpleBox implements FixtureWindowGUIInter
     public String getGoboFileName(Fixture fixture) {
         if (fixture==null||!fixture.getProfile().hasAttribute(Attribute.GOBO1_INDEX)) return null;
         
-        double value = Programmer.getInstance().get(fixture, Attribute.GOBO1_INDEX);
+        double value = Output.getInstance().generateOutputStore().get(fixture, Attribute.GOBO1_INDEX);
         if (value==DataStore.NONE) return null;
         
         //Get slot mapping

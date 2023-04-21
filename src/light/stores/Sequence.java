@@ -87,7 +87,7 @@ public class Sequence extends AbstractStore implements ExecutorCapable, Persiste
     }
     
     @Override
-    public boolean registrationCheck() {
+    public boolean outputRegistrationCheck() {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'registrationCheck'");
     }

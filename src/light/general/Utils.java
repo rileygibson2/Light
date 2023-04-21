@@ -5,6 +5,7 @@ import java.net.URL;
 import java.nio.ByteBuffer;
 
 import light.executors.Executor.ExecType;
+import light.guipackage.cli.CLI;
 import light.executors.ExecutorCapable;
 
 public class Utils {
@@ -21,6 +22,12 @@ public class Utils {
 
 	public static int castToDMX(double dmx) {
 		return (int) (dmx<0 ? 0 : (dmx>255 ? 255 : dmx));
+	}
+
+	public static String capitaliseFirst(String s) {
+		if (s.length()==0) return s;
+		if (s.length()==1) return s.toUpperCase();
+		return s.substring(0, 1).toUpperCase()+s.substring(1, s.length()).toLowerCase();
 	}
 
 	public static byte[] combineByteArrays(byte[]... args) {

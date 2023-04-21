@@ -1,4 +1,4 @@
-package light.commands.commandline;
+package light.commands.commandcontrol;
 
 public class CommandFormatException extends Exception {
 

@@ -9,6 +9,7 @@ import light.fixtures.Attribute;
 import light.fixtures.FeatureGroup;
 import light.fixtures.Fixture;
 import light.fixtures.profile.ProfileChannel;
+import light.guipackage.cli.CLI;
 import light.persistency.PersistencyCapable;
 import light.persistency.PersistencyWriter;
 
@@ -71,8 +72,7 @@ public class DataStore implements PersistencyCapable {
 
     public double validate(Fixture fixture, Attribute attribute, double value) {
         ProfileChannel channel = fixture.getProfile().getChannelWithAttribute(attribute);
-
-        if (!channel.valueValidForRange(value)) {
+        if (!channel.valueInRange(value)) {
             if (value>channel.getMaxValue()) return channel.getMaxValue();
             else return channel.getMinValue();
         }

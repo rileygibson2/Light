@@ -14,7 +14,7 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 import light.Pool;
-import light.commands.commandline.CommandLine;
+import light.commands.commandcontrol.CommandLine;
 import light.encoders.Encoders;
 import light.guipackage.cli.CLI;
 import light.guipackage.dom.DOM;

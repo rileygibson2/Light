@@ -11,7 +11,7 @@ import light.commands.Label;
 import light.commands.Modulate;
 import light.commands.Move;
 import light.commands.Store;
-import light.commands.commandline.CommandLine;
+import light.commands.commandcontrol.CommandLine;
 import light.encoders.Encoders;
 import light.executors.Executor;
 import light.fixtures.Attribute;
@@ -25,6 +25,7 @@ import light.general.ConsoleAddress;
 import light.guipackage.cli.CLI;
 import light.guipackage.general.Rectangle;
 import light.guipackage.gui.GUI;
+import light.guipackage.gui.IO;
 import light.stores.AbstractStore;
 import light.stores.Group;
 import light.stores.Preset;
@@ -157,6 +158,7 @@ public class Light {
         
         //Setup view
         currentView = new View(new UDA());
+        IO.getInstance().requestPaint();
     }
     
     private void mock() {
@@ -193,7 +195,7 @@ public class Light {
         prog.set(fixture2, Attribute.COLORRGB3, 100d, false);
         prog.set(fixture2, Attribute.COLORRGB4, 70d, false);
 
-        prog.set(fixture1, Attribute.DIM, 100d, false);
+        prog.set(fixture1, Attribute.DIM, 30d, false);
         prog.set(fixture1, Attribute.COLORRGB1, 100d, false);
         prog.set(fixture1, Attribute.COLORRGB3, 100d, false);
         prog.set(fixture1, Attribute.GOBO1_INDEX, 20d, false);

@@ -1,5 +1,7 @@
 package light.fixtures;
 
+import java.util.Set;
+
 import light.fixtures.profile.Profile;
 import light.fixtures.profile.ProfileChannel;
 import light.general.Addressable;

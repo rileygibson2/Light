@@ -1,7 +1,7 @@
 package light.stores;
 
-import light.commands.commandline.CommandLine;
-import light.commands.commandline.CommandProxy;
+import light.commands.commandcontrol.CommandLine;
+import light.commands.commandcontrol.CommandProxy;
 import light.general.Addressable;
 import light.general.ConsoleAddress;
 import light.general.DataStore;
@@ -24,7 +24,7 @@ public abstract class AbstractStore extends Addressable {
      */
     public void select() {
         //Load into command line
-        CommandLine.getInstance().addToCommand(new CommandProxy(getAddress()));
+        CommandLine.getInstance().getCommandController().addToCommand(new CommandProxy(getAddress()));
     }
 
     /**

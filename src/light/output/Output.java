@@ -10,6 +10,8 @@ import java.util.Map;
 import light.Programmer;
 import light.fixtures.Attribute;
 import light.fixtures.Fixture;
+import light.fixtures.PatchManager;
+import light.fixtures.profile.ProfileChannel;
 import light.general.DMXAddress;
 import light.general.DataStore;
 import light.guipackage.general.Pair;
@@ -42,32 +44,46 @@ public class Output {
         outputters.remove(outputter);
         Collections.sort(outputters, new OutputCapableComparator());
     }
-
+    
     public boolean isRegistered(OutputCapable toCheck) {return outputters.contains(toCheck);}
     
     public void deregisterAll() {outputters.clear();}
     
-    public void generateOutput() {
+    public DataStore generateOutputStore() {
         DataStore result = new DataStore();
         for (OutputCapable outputter : outputters) {
             result.combine(outputter.getOutput(), true);
         }
+        
+        //Check for fixtures not present
+        for (Fixture fixture : PatchManager.getInstance().allFixtureSet()) {
+            for (Attribute attribute : fixture.getProfile().getAttributeSet()) {
+                if (!result.contains(fixture, attribute)) {
+                    //Need to add default value so output for all fixtures on all channels is represented in this store
+                    result.set(fixture, attribute, fixture.getProfile().getChannelWithAttribute(attribute).getDefaultValue(), false);
+                }
+            }
+        }
+        return result;
     }
     
-    public void generateDMX(DataStore data) {
-        Map<DMXAddress, List<Pair<DMXAddress, Integer>>> dmx = new LinkedHashMap<>();
+    private void generateDMX() {
+        DataStore data = generateOutputStore();
+        
+        Map<DMXAddress, List<Pair<DMXAddress, Integer>>> dmx = new LinkedHashMap<>(); //Universe map
         
         for (Fixture f : data.getFixtureSet()) {
             for (Map.Entry<Attribute, Double> v : data.getFixtureValues(f).entrySet()) {
                 DMXAddress d = f.getAddressForAttribute(v.getKey());
+                ProfileChannel channel = f.getProfile().getChannelWithAttribute(v.getKey());
                 
                 //Add to dmx at correct dmx address
                 if (dmx.containsKey(d.getBaseUniverseAddress())) { //Universe exists in dmx
-                    dmx.get(d.getBaseUniverseAddress()).add(new Pair<DMXAddress, Integer> (d, percToDMX(v.getValue())));
+                    dmx.get(d.getBaseUniverseAddress()).add(new Pair<DMXAddress, Integer> (d, channel.valueToDMX(v.getValue())));
                 }
-                else { //Universe does not exist in dmx
+                else { //Universe does not exist in dmx, need to create
                     List<Pair<DMXAddress, Integer>> u = new ArrayList<>();
-                    u.add(new Pair<DMXAddress, Integer> (d, percToDMX(v.getValue())));
+                    u.add(new Pair<DMXAddress, Integer> (d, channel.valueToDMX(v.getValue())));
                     dmx.put(d.getBaseUniverseAddress(), u);
                 }
             }
@@ -83,8 +99,6 @@ public class Output {
             });
         }
     }
-
-    public static int percToDMX(double p) {return (int) ((p/100)*255);}
 }
 
 class OutputCapableComparator implements Comparator<OutputCapable> {

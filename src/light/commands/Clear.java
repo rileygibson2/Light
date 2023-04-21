@@ -1,7 +1,7 @@
 package light.commands;
 
 import light.Programmer;
-import light.commands.commandline.CommandLine;
+import light.commands.commandcontrol.CommandLine;
 
 public class Clear implements Command {
 
@@ -9,7 +9,7 @@ public class Clear implements Command {
 
     @Override
     public void execute() {
-        if (!CommandLine.getInstance().isClear()) CommandLine.getInstance().clear();
+        if (!CommandLine.getInstance().getCommandController().isEmpty()) CommandLine.getInstance().getCommandController().clear();
         else Programmer.getInstance().clear();
     }
 }

@@ -4,10 +4,15 @@ import java.awt.Color;
 import java.awt.Font;
 import java.util.Map;
 
+import light.commands.commandcontrol.CommandController;
+import light.commands.commandcontrol.CommandFormatException;
+import light.commands.commandcontrol.CommandProxy;
+import light.commands.commandcontrol.CommandProxy.Operator;
 import light.encoders.Encoders;
 import light.encoders.Encoders.Encoder;
 import light.encoders.Encoders.EncoderDefaultCalculatorMacros;
 import light.fixtures.FeatureGroup;
+import light.general.Utils;
 import light.guipackage.cli.CLI;
 import light.guipackage.general.Pair;
 import light.guipackage.general.UnitPoint;
@@ -32,7 +37,10 @@ public class EncodersGUI extends Component implements EncodersGUIInterface {
     private SimpleBox mainBox;
     private SimpleBox pageBar;
     private SimpleBox encoderBar;
+    
+    //Calculator stuff
     private TempWindow openCalculator;
+    private CommandController calculatorCommand;
     
     public EncodersGUI(UnitRectangle r) {
         super(r);
@@ -57,7 +65,7 @@ public class EncodersGUI extends Component implements EncodersGUIInterface {
         topBar.addComponent(title);
         
         mainBox.addComponent(topBar);
-
+        
         buildPages();
         buildEncoders();
     }
@@ -74,7 +82,7 @@ public class EncodersGUI extends Component implements EncodersGUIInterface {
             if (i==0) gap = 0;
             boolean active = Encoders.getInstance().getCurrentPage()==i;
             
-            Label pageBox = new Label(new UnitRectangle(gap, Unit.pcw, 0, Unit.px, w, Unit.pcw, 100, Unit.pch), pageTitle, new Font(Styles.baseFont, Font.BOLD, 11), Styles.textDull);
+            Label pageBox = new Label(new UnitRectangle(gap, Unit.pcw, 0, Unit.px, w, Unit.pcw, 100, Unit.pch), Utils.capitaliseFirst(pageTitle), new Font(Styles.baseFont, Font.BOLD, 11), Styles.textDull);
             pageBox.setPosition(Position.Relative);
             if (active) {
                 pageBox.setColor(new Color(40, 40, 40));
@@ -136,17 +144,21 @@ public class EncodersGUI extends Component implements EncodersGUIInterface {
         TempWindow tB = new TempWindow("Value for "+Encoders.getInstance().getEncoderCalculatorTitle(encoder));
         tB.addSmother(80);
         tB.getContentBox().setMaxWidth(new UnitValue(80, Unit.vw));
-        tB.setCloseAction(() -> {openCalculator = null;});
+        tB.setCloseAction(() -> closeCalulator());
         GUI.getInstance().getCurrentRoot().addComponent(tB);
         
         //Input bar
-        Label input = new Label(new UnitRectangle(0, Unit.px, 2, Unit.px, 100, Unit.pcw, 5, Unit.vh), " input", new Font(Styles.baseFont, Font.BOLD, 14), new Color(230, 230, 230));
+        Label input = new Label(new UnitRectangle(0, Unit.px, 2, Unit.px, 100, Unit.pcw, 5, Unit.vh), "", new Font(Styles.baseFont, Font.BOLD, 14), new Color(230, 230, 230));
         //input.setPosition(Position.Relative);
         input.setColor(new Color(0, 60, 0));
         input.setRounded(true);
         input.setBorder(new Color(255, 200, 0));
         input.setTextYCentered(true);
         tB.addContent(input);
+        
+        //Command
+        calculatorCommand = new CommandController();
+        calculatorCommand.setCommandUpdatedAction(() -> {input.setText(calculatorCommand.getCommandAsString());});
         
         //Button banks
         Bank[] banks = new Bank[] {Bank.Number, Bank.Operator, Bank.Function};
@@ -176,6 +188,40 @@ public class EncodersGUI extends Component implements EncodersGUIInterface {
                 b.setRounded(true);
                 b.setBorder(new Color(255, 200, 0));
                 b.setTextCentered(true);
+                b.setClickAction(() -> {
+                    switch (button) {
+                        case NUM0: calculatorCommand.updateWorkingText("0"); break;
+                        case NUM1: calculatorCommand.updateWorkingText("1"); break;
+                        case NUM2: calculatorCommand.updateWorkingText("2"); break;
+                        case NUM3: calculatorCommand.updateWorkingText("3"); break;
+                        case NUM4: calculatorCommand.updateWorkingText("4"); break;
+                        case NUM5: calculatorCommand.updateWorkingText("5"); break;
+                        case NUM6: calculatorCommand.updateWorkingText("6"); break;
+                        case NUM7: calculatorCommand.updateWorkingText("7"); break;
+                        case NUM8: calculatorCommand.updateWorkingText("8"); break;
+                        case NUM9: calculatorCommand.updateWorkingText("9"); break;
+                        case PLUS: 
+                        calculatorCommand.parseWorkingText();
+                        calculatorCommand.addToCommand(new CommandProxy(Operator.PLUS));
+                        break;
+                        case PLEASE:
+                        calculatorCommand.parseWorkingText();
+                        Double d = null;
+                        try {d = calculatorCommand.resolveForDouble();}
+                        catch (CommandFormatException e) {
+                            CLI.error("calculator command did not resolve - "+e.getMessage());
+                            calculatorCommand.clear();
+                        }
+                        CLI.debug("command result double: "+d);
+                        
+                        //TODO: error handle by changing text red or wiping text/wiping text and displaying error message in command bar until next entered input
+                        if (d!=null) {
+                            Encoders.getInstance().set(encoder, d);
+                            openCalculator.close(false);
+                        }
+                        break;   
+                    }
+                });
                 bankBox.addComponent(b);
             }
         }
@@ -208,11 +254,9 @@ public class EncodersGUI extends Component implements EncodersGUIInterface {
             b.setRounded(true);
             b.setBorder(new Color(255, 200, 0));
             b.setTextCentered(true);
-            b.setClickAction(() -> {
-                CLI.debug("Macro clicked: "+macro.getKey()+", "+macro.getValue());
-            });
+            b.setClickAction(() -> calculatorCommand.addToCommand(new CommandProxy(macro.getValue().a)));
             macroBox.addComponent(b);
-
+            
             if (macro.getValue().b!=null) {
                 Image img = new Image(new UnitRectangle(2, Unit.pcw, 5, Unit.pch, 60, Unit.pcw, 90, Unit.pch), macro.getValue().b);
                 b.addComponent(img);
@@ -222,15 +266,20 @@ public class EncodersGUI extends Component implements EncodersGUIInterface {
         openCalculator = tB;
     }
     
+    public void closeCalulator() {
+        openCalculator = null;
+        calculatorCommand = null;
+    }
+    
     @Override
     public void update() {}
-
+    
     @Override
     public void updatePages() {
         mainBox.removeComponent(pageBar);
         buildPages();
     }
-
+    
     @Override
     public void updateEncoders() {
         mainBox.removeComponent(encoderBar);

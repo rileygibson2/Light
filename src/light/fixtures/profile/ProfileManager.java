@@ -126,6 +126,15 @@ public class ProfileManager {
                 attr = attrs.getNamedItem("attribute_user_name");
                 if (attr!=null) channel.setAttributeUserName(attr.getTextContent());
                 
+                attr = attrs.getNamedItem("min_value"); 
+                if (attr!=null) channel.setMinValue(parseDouble(attr.getTextContent()));
+                
+                attr = attrs.getNamedItem("max_value");
+                if (attr!=null) channel.setMaxValue(parseDouble(attr.getTextContent()));
+
+                attr = attrs.getNamedItem("default_value");
+                if (attr!=null) channel.setDefaultValue(parseDouble(attr.getTextContent()));
+                
                 profile.addChannel(channel);
                 
                 //Functions
@@ -153,7 +162,7 @@ public class ProfileManager {
                     attr = attrs.getNamedItem("max_dmx");
                     if (attr!=null) function.setMaxDMX(parseDouble(attr.getTextContent()));
                     
-                    attr = attrs.getNamedItem("min_value");
+                    attr = attrs.getNamedItem("min_value"); 
                     if (attr!=null) function.setMinValue(parseDouble(attr.getTextContent()));
                     
                     attr = attrs.getNamedItem("max_value");

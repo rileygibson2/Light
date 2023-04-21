@@ -21,10 +21,12 @@ import light.fixtures.profile.ProfileWheelSlot;
 import light.general.ConsoleAddress;
 import light.general.DataStore;
 import light.guipackage.general.Pair;
+import light.output.Output;
+import light.output.OutputCapable;
 import light.stores.effects.Effect;
 import light.uda.FixtureWindow;
 
-public class Programmer extends DataStore implements EncoderCapable {
+public class Programmer extends DataStore implements OutputCapable, EncoderCapable {
     
     private static Programmer singleton;
     
@@ -35,6 +37,7 @@ public class Programmer extends DataStore implements EncoderCapable {
         super();
         selectedFixtures = new ArrayList<Fixture>();
         activeEffects = new HashSet<Effect>();
+        Output.getInstance().register(this);
         Encoders.getInstance().aquireEncoders(this);
         Encoders.getInstance().setPage(0, this);
     }
@@ -121,8 +124,9 @@ public class Programmer extends DataStore implements EncoderCapable {
     
     @Override
     public void encoderChanged(Encoder encoder, double value) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'encoderChanged'");
+        ProfileChannel channel = getChannelForEncoder(encoder);
+        if (channel==null) return;
+        set(selectedFixtures.get(0), channel.getAttribute(), value, true);
     }
     
     @Override
@@ -134,7 +138,7 @@ public class Programmer extends DataStore implements EncoderCapable {
         
         //Programmer doesn't contain value but encoder is valid so need to find min (off) value
         //TODO need some sort of gui color differential to show a zeroed value not present in programmer vs zero present in store
-        return channel.getMinValue();
+        return channel.getDefaultValue();
     }
     
     @Override
@@ -178,7 +182,7 @@ public class Programmer extends DataStore implements EncoderCapable {
                 ProfileWheelSlot slot = macro.getFunction().getProfile().getSlot(macro);
                 if (slot!=null) fileName = slot.getMediaFileName();
             }
-            results.put(macro.getName(), new Pair<Double, String>(macro.getMidDMX(), fileName));
+            results.put(macro.getName(), new Pair<Double, String>(macro.getFunction().dmxToValue(macro.getMidDMX()), fileName));
         }
         return results;
     }
@@ -194,4 +198,12 @@ public class Programmer extends DataStore implements EncoderCapable {
     public int getNumEncoderPages() {
         return FeatureGroup.values().length;
     }
+
+    @Override
+    public DataStore getOutput() {
+        return this;
+    }
+
+    @Override
+    public boolean outputRegistrationCheck() {return true;}
 }
