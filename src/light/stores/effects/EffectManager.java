@@ -12,7 +12,7 @@ public class EffectManager {
         Effect effect = new Effect(address);
         
         Programmer prog = Programmer.getInstance();
-        for (Fixture f : prog.getSelectedFixtures()) {
+        for (Fixture f : prog.getSelected()) {
             effect.addFixture(f);
 
             //Activate effect line for all attributes this fixture has a value for in programmer

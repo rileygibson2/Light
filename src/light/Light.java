@@ -181,13 +181,13 @@ public class Light {
             fixture1 = new Fixture(new ConsoleAddress(Fixture.class, 0, i+1), pro1);
             PatchManager.getInstance().addFixture(fixture1);
         }
-        for (; i<9; i++) {
+        for (; i<100; i++) {
             fixture2 = new Fixture(new ConsoleAddress(Fixture.class, 0, i+1), pro2);
             PatchManager.getInstance().addFixture(fixture2);
         }
         
         Programmer prog = Programmer.getInstance();
-        prog.selectFixture(fixture1);
+        prog.select(fixture1);
 
         prog.set(fixture2, Attribute.DIM, 100d, false);
         //prog.set(fixture, Attribute.COLORRGB1, 100d, false);

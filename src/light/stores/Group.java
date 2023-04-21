@@ -27,7 +27,7 @@ public class Group extends AbstractStore implements PersistencyCapable {
 
     @Override
     public void load() {
-        Programmer.getInstance().selectFixtures(fixtures);
+        Programmer.getInstance().select(fixtures);
     }
 
     @Override

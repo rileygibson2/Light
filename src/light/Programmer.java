@@ -47,38 +47,45 @@ public class Programmer extends DataStore implements OutputCapable, EncoderCapab
         return singleton;
     }
     
-    public void selectFixture(Fixture fixture) {
+    public void select(Fixture fixture) {
         if (fixture!=null) selectedFixtures.add(fixture);
+        updateFixtureGUI(fixture);
     }
     
-    public void selectFixtures(Collection<Fixture> fixtures) {
+    public void select(Collection<Fixture> fixtures) {
         if (fixtures!=null) selectedFixtures.addAll(fixtures);
         updateFixturesGUI(fixtures);
     }
     
-    public void selectFixture(ConsoleAddress address) {
+    public void select(ConsoleAddress address) {
         if (address==null||!address.matchesScope(Fixture.class)) return;
         Fixture fixture = PatchManager.getInstance().getFixture(address);
         if (fixture!=null)  selectedFixtures.add(fixture);
         updateFixturesGUI(selectedFixtures);
     }
     
-    public void deselectFixture(Fixture f) {
+    public void deselect(Fixture f) {
         selectedFixtures.remove(f);
         if (selectedFixtures.isEmpty()) Encoders.getInstance().update();
         updateFixtureGUI(f);
     }
     
-    public void deselectFixtures(List<Fixture> f) {
+    public void deselect(List<Fixture> f) {
         selectedFixtures.removeAll(f);
         if (selectedFixtures.isEmpty()) Encoders.getInstance().update();
+        updateFixturesGUI(f);
     }
     
-    public List<Fixture> getSelectedFixtures() {return selectedFixtures;}
+    public List<Fixture> getSelected() {return selectedFixtures;}
+
+    public boolean hasSelectedFixtures() {return !selectedFixtures.isEmpty();}
+
+    public boolean isSelected(Fixture fixture) {return selectedFixtures.contains(fixture);}
     
-    public void clearSelectedFixtures() {
+    public void clearSelected() {
         selectedFixtures.clear();
         Encoders.getInstance().update();
+        updateFixturesGUI(PatchManager.getInstance().allFixtureSet()); //Update all fixtures in gui
     }
 
     @Override
@@ -110,7 +117,7 @@ public class Programmer extends DataStore implements OutputCapable, EncoderCapab
     
     private List<ProfileChannel> getChannelsForEncoderPage() {
         int page = Encoders.getInstance().getCurrentPage();
-        if (page==-1||page>=FeatureGroup.values().length) return null;
+        if (page==-1||page>=FeatureGroup.values().length||!hasSelectedFixtures()) return null;
         return selectedFixtures.get(0).getProfile().getChannelsWithFeatureGroup(FeatureGroup.values()[page]);  
     }
     

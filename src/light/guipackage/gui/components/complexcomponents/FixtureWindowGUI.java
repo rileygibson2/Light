@@ -4,7 +4,6 @@ import java.awt.Color;
 import java.awt.Font;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import light.Programmer;
@@ -80,11 +79,12 @@ public class FixtureWindowGUI extends SimpleBox implements FixtureWindowGUIInter
     }
     
     private void buildFixtures() {
-        Programmer prog = Programmer.getInstance();
         
         CollumnBox wrapper = new CollumnBox(new UnitPoint(3, Unit.pcw, 0, Unit.px));
         wrapper.setPosition(Position.Relative);
+        wrapper.setOverflow(Overflow.Scroll);
         wrapper.setMinWidth(new UnitValue(90, Unit.pcw));
+        wrapper.setMaxHeight(new UnitValue(100, Unit.pch));
         addComponent(wrapper);
         
         for (Profile profile : PatchManager.getInstance().allProfileSet()) {
@@ -94,6 +94,7 @@ public class FixtureWindowGUI extends SimpleBox implements FixtureWindowGUIInter
             wrapper.addComponent(profileLabel);
             
             FlexBox fBox = new FlexBox(new UnitPoint(0, Unit.px, 1, Unit.vh));
+            fBox.setMaxWidth(new UnitValue(100, Unit.pcw));
             wrapper.addComponent(fBox);
             
             boolean initial = true;
@@ -105,10 +106,13 @@ public class FixtureWindowGUI extends SimpleBox implements FixtureWindowGUIInter
                 }    
                 
                 //Main box
-                SimpleBox box = new SimpleBox(new UnitRectangle(x, Unit.vw, 0, Unit.px, 5, Unit.vw, 10, Unit.vh));
+                SimpleBox box = new SimpleBox(new UnitRectangle(x, Unit.vw, 0, Unit.vh, 5, Unit.vw, 10, Unit.vh));
                 box.setPosition(Position.Relative);
-                box.setColor(new Color(170, 170, 170));
-                box.setBorder(new Color(170, 170, 170));
+                box.setClickAction(() -> {
+                    Programmer prog = Programmer.getInstance();
+                    if (prog.isSelected(f)) prog.deselect(f);
+                    else prog.select(f); 
+                });
                 fBox.addComponent(box);
                 
                 populateFixtureBox(f, box);
@@ -118,6 +122,15 @@ public class FixtureWindowGUI extends SimpleBox implements FixtureWindowGUIInter
     
     private void populateFixtureBox(Fixture f, SimpleBox box) {
         DataStore outputStore = Output.getInstance().generateOutputStore();
+        
+        if (Programmer.getInstance().isSelected(f)) {
+            box.setColor(new Color(249, 255, 30));
+            box.setBorder(new Color(249, 255, 30));
+        }
+        else {
+            box.setColor(new Color(170, 170, 170));
+            box.setBorder(new Color(170, 170, 170));
+        }
         
         //ID label
         Label l =  new Label(new UnitRectangle(0, Unit.px, 0, Unit.vh, 100, Unit.pcw, 20, Unit.pch), f.getAddress().getSuffix()+"", new Font(Styles.baseFont, Font.BOLD, 11), new Color(10, 10, 10));

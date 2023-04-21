@@ -15,6 +15,7 @@ import light.guipackage.general.UnitPoint;
 import light.guipackage.general.UnitRectangle;
 import light.guipackage.general.UnitValue;
 import light.guipackage.general.UnitValue.Unit;
+import light.guipackage.gui.GUI;
 import light.guipackage.gui.Styles;
 import light.guipackage.gui.components.Component;
 import light.guipackage.gui.components.basecomponents.Label;
@@ -90,8 +91,10 @@ public class UDAGUI extends Component implements UDAGUIInterface {
     
     public void openZonePicker(Rectangle zoneRec) {
         if (openZonePicker!=null) return;
+
         TempWindow tB = new TempWindow("Create Zone");
-        addComponent(tB);
+        tB.setCloseAction(() -> closeZonePicker());
+        GUI.getInstance().getCurrentRoot().addComponent(tB);
         tB.addTab("Presets");
         tB.addTab("Pools");
         tB.addTab("Sheets");
@@ -151,8 +154,6 @@ public class UDAGUI extends Component implements UDAGUIInterface {
     }
     
     public void closeZonePicker() {
-        if (openZonePicker==null) return;
-        removeComponent(openZonePicker);
         openZonePicker = null;
     }
     

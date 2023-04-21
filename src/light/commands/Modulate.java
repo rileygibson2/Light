@@ -49,7 +49,7 @@ public class Modulate implements Command {
         //Resolve target addresses into fixtures
         List<Fixture> fixtures = PatchManager.getInstance().getFixtures(targetFixtures);
         Programmer prog = Programmer.getInstance();
-        prog.clearSelectedFixtures();
+        prog.clearSelected();
         
         if (source instanceof Double) { //Change intensity for target fixture/s
             for (Fixture f : fixtures) prog.set(f, Attribute.DIM, (Double) source, true);
@@ -62,6 +62,6 @@ public class Modulate implements Command {
             
             for (Fixture f : fixtures) prog.set(f, attributes, true);
         }
-        prog.selectFixtures(fixtures);
+        prog.select(fixtures);
     }
 }

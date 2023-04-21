@@ -23,7 +23,7 @@ import light.guipackage.gui.components.boxes.FlexBox;
 public abstract class Element {
 	
 	private Element parent;
-	private UnitRectangle r; //Current values set by and visible to creator
+	private UnitRectangle r; //Current values set by and visible to creator element - these stay the same regardless of positioning
 	private UnitRectangle rFunc; //Functional/actual values used by this class to implement positioning
 	
 	private UnitPoint minSize;
@@ -62,15 +62,22 @@ public abstract class Element {
 		yCentered,
 		xyCentered,
 		None;
-
+		
 		public boolean isXCentered() {return this==Center.xCentered||this==Center.xyCentered;}
 		public boolean isYCentered() {return this==Center.xCentered||this==Center.xyCentered;}
 	}
 	private Center centered;
-
+	
+	public enum Overflow {
+		Default, //Content overflows bounding element
+		Hidden, //Overflowing content is hidden TODO
+		Scroll //Overflowing content is hidden and scroll bar is added
+	}
+	private Overflow overflow;
+	
 	private Object tag;
 	public String tagString;
-
+	
 	public Element(UnitRectangle r) {
 		this.r = r;
 		this.rFunc = r.clone();
@@ -82,33 +89,34 @@ public abstract class Element {
 		floatType = Float.Left;
 		fill = Fill.None;
 		centered = Center.None;
+		overflow = Overflow.Default;
 	}
 	
 	public void setX(UnitValue p) {
 		r.x = p;
 		doPositioning();
-		if (parent!=null) parent.childUpdated();
+		if (parent!=null) parent.subtreeUpdated();
 	}
 	public void setY(UnitValue p) {
 		r.y = p;
-		if (parent!=null) parent.childUpdated();
+		if (parent!=null) parent.subtreeUpdated();
 	}
 	public void setWidth(UnitValue p) {
 		r.width = p;
 		doPositioning();
-		if (parent!=null) parent.childUpdated();
+		if (parent!=null) parent.subtreeUpdated();
 	}
 	public void setHeight(UnitValue p) {
 		r.height = p;
 		doPositioning();
-		if (parent!=null) parent.childUpdated();
+		if (parent!=null) parent.subtreeUpdated();
 	}
-
+	
 	/**
-	 * Same as setX() but does not trigger an update chain throughout rest of DOM elements - has 
-	 * no consequences
-	 * @param p
-	 */
+	* Same as setX() but does not trigger an update chain throughout rest of DOM elements - has 
+	* no consequences
+	* @param p
+	*/
 	protected void setXNQ(UnitValue p) {
 		r.x = p;
 		doPositioning();
@@ -129,33 +137,33 @@ public abstract class Element {
 	public void setMinWidth(UnitValue p) {
 		minSize.x = p;
 		doPositioning();
-		if (parent!=null) parent.childUpdated();
+		if (parent!=null) parent.subtreeUpdated();
 	}
 	public void setMinHeight(UnitValue p) {
 		minSize.y = p;
 		doPositioning();
-		if (parent!=null) parent.childUpdated();
+		if (parent!=null) parent.subtreeUpdated();
 	}
 	public void setMinSize(UnitPoint p) {
 		this.minSize = p;
 		doPositioning();
-		if (parent!=null) parent.childUpdated();
+		if (parent!=null) parent.subtreeUpdated();
 	}
 	
 	public void setMaxWidth(UnitValue p) {
 		maxSize.x = p;
 		doPositioning();
-		if (parent!=null) parent.childUpdated();
+		if (parent!=null) parent.subtreeUpdated();
 	}
 	public void setMaxHeight(UnitValue p) {
 		maxSize.y = p;
 		doPositioning();
-		if (parent!=null) parent.childUpdated();
+		if (parent!=null) parent.subtreeUpdated();
 	}
 	public void setMaxSize(UnitPoint p)  {
 		this.maxSize = p;
 		doPositioning();
-		if (parent!=null) parent.childUpdated();
+		if (parent!=null) parent.subtreeUpdated();
 	}
 	
 	public UnitValue getX() {return r.x;}
@@ -174,7 +182,7 @@ public abstract class Element {
 	public void setRec(UnitRectangle r) {
 		this.r = r;
 		doPositioning();
-		if (parent!=null) parent.childUpdated();
+		if (parent!=null) parent.subtreeUpdated();
 	}
 	public UnitRectangle getRec() {return r;}
 	public UnitRectangle getFunctionalRec() {return rFunc;}
@@ -194,6 +202,9 @@ public abstract class Element {
 	}
 	public Center getCentered() {return centered;}
 	
+	public void setOverflow(Overflow o) {this.overflow = o;}
+	public Overflow getOverflow() {return overflow;}
+	
 	public Element getParent() {return parent;}
 	public void setParent(Element e) {parent = e;}
 	public boolean hasParent() {return parent!=null;}
@@ -206,11 +217,11 @@ public abstract class Element {
 		setPosition(Position.GlobalFixed);
 	}
 	public boolean isRoot() {return isRoot;}
-
+	
 	public void setTag(Object t) {tag = t;}
 	public boolean hasTag() {return tag!=null;}
 	public Object getTag() {return tag;}
-
+	
 	public void setTagString(String t) {tagString = t;}
 	public boolean hasTagString() {return tagString!=null;}
 	public String getTagString() {return tagString;}
@@ -233,7 +244,7 @@ public abstract class Element {
 		if (!results.isEmpty()) return results;
 		return null;
 	}
-
+	
 	public Component getNthComponent(int n) {
 		if (n<0||n>=components.size()) return null;
 		componentsLock.lock();
@@ -241,34 +252,58 @@ public abstract class Element {
 		componentsLock.unlock();
 		return c;
 	}
-
+	
+	private List<Component> getSortedReversedComponents() {
+		List<Component> co = getComponents();
+		
+		Collections.sort(co, new Comparator<Component>() {
+			public int compare(Component c1, Component c2) {
+				return c1.getPriority()-c2.getPriority();
+			}
+		});
+		
+		Collections.reverse(co);
+		return co;
+	}
+	
+	private List<Component> getSortedComponents() {
+		List<Component> co = getComponents();
+		
+		Collections.sort(co, new Comparator<Component>() {
+			public int compare(Component c1, Component c2) {
+				return c1.getPriority()-c2.getPriority();
+			}
+		});
+		return co;
+	}
+	
 	public int getNumComponents() {
 		componentsLock.lock();
 		int num = components.size();
 		componentsLock.unlock();
 		return num;
 	}
-
+	
 	/**
-	 * Adds a component to this element
-	 * @param c
-	 */
+	* Adds a component to this element
+	* @param c
+	*/
 	public void addComponent(Component c) {
 		addComponent(c, getNumComponents());
 	}
-
+	
 	/**
-	 * Adds a component as the first child of this element
-	 * @param c
-	 */
+	* Adds a component as the first child of this element
+	* @param c
+	*/
 	public void addComponentAtFront(Component c) {
 		addComponent(c, 0);
 	}
-
+	
 	/**
-	 * Adds a component to this element at the specified index
-	 * @param c
-	 */
+	* Adds a component to this element at the specified index
+	* @param c
+	*/
 	public void addComponentAtIndex(Component c, int index) {
 		if (index>=0&&index<=getNumComponents()) addComponent(c, index);
 	}
@@ -282,7 +317,7 @@ public abstract class Element {
 		componentsLock.unlock();
 		
 		c.doPositioning();
-		childUpdated();
+		subtreeUpdated();
 		
 		/*
 		* Trigger DOM entry action if this is the root node adding a component
@@ -298,7 +333,7 @@ public abstract class Element {
 		componentsLock.unlock();
 		
 		c.triggerDOMExit();
-		childUpdated();
+		subtreeUpdated();
 	}
 	
 	public void removeComponents(Collection<Component> toRemove) {
@@ -308,7 +343,7 @@ public abstract class Element {
 		componentsLock.unlock();
 		
 		for (Component c : toRemove) c.triggerDOMExit();
-		childUpdated();
+		subtreeUpdated();
 	}
 	
 	public void clearComponents() {
@@ -317,32 +352,8 @@ public abstract class Element {
 		componentsLock.unlock();
 	}
 	
-	private List<Component> getSortedReversedComponents() {
-		List<Component> co = getComponents();
-
-		Collections.sort(co, new Comparator<Component>() {
-			public int compare(Component c1, Component c2) {
-				return c1.getPriority()-c2.getPriority();
-			}
-		});
-
-		Collections.reverse(co);
-		return co;
-	}
-
-	private List<Component> getSortedComponents() {
-		List<Component> co = getComponents();
-
-		Collections.sort(co, new Comparator<Component>() {
-			public int compare(Component c1, Component c2) {
-				return c1.getPriority()-c2.getPriority();
-			}
-		});
-		return co;
-	}
-	
 	/**
-	* Recursivly triggers DOM entry action for this and all children
+	* Recursivly triggers DOM entry action for this element and all children
 	*/
 	protected void triggerDOMEntry() {
 		inDOM = true;
@@ -375,17 +386,17 @@ public abstract class Element {
 	* 
 	* To get around this there are public methods which change an elements propertys with no propogation and no consequence.
 	*/
-	protected void childUpdated() {
-		if (parent!=null) parent.childUpdated(); //Propogate upwards
-		updateChildren(); //Propogate downwards
+	protected void subtreeUpdated() {
+		if (parent!=null) parent.subtreeUpdated(); //Propogate upwards
+		positionSubtree(); //Propogate downwards
 	}
 	
 	/**
 	* Trigger sibling updated hook in all children
 	*/
-	protected void updateChildren() {
+	protected void positionSubtree() {
 		doPositioning();
-		for (Component c : getComponents()) c.updateChildren();
+		for (Component c : getComponents()) c.positionSubtree();
 	}
 	
 	/**
@@ -410,30 +421,39 @@ public abstract class Element {
 		if (centered.isYCentered()) yCenterElementInParent();
 		/*
 		* An element with centered set should never be relative and should not respect it's
-		* float or fill property as center overrides both of these so safe to return here
+		* float, fill or overflow property as center overrides all of these so safe to return here
 		*/
 		if (centered!=Center.None) return;
 		
 		/*
-		* Float should be done from right end of box if position is not relative OR
+		* Float right should be done from right end of parent box if position is not relative OR
 		* if position is relative but there are no eligable elements added before this element.
 		* This is done so that relative chaining can still work. Position relative uses values
 		* of last added eligable element as a reference, and so needs the first relative element to still
 		* be normally floated right for this to work.
+		* 
+		* Left float is the default behaviour so no stuff needed for that here
 		*/
 		
 		//Do float
 		if (getFloat()==Float.Right&&getPosition()!=Position.Relative) floatRight();
 		
-		//Do relative positioning
+		/*
+		* Do relative positioning.
+		* Case mentioned above when float is right and there ARE other elements is respected within
+		* the call below.
+		*/
 		if (getPosition()==Position.Relative) positionRelatively();
-
+		
 		//Do collumn relative positioning
 		if (getPosition()==Position.CollumnRelative) positionCollumnRelatively();
 		
 		//Do fill
 		if (getFill()!=Fill.None) fillToNextElement();
 		checkMinMaxSize();
+		
+		//Do overflow
+		if (getOverflow()==Overflow.Scroll) doOverlowScroll();
 	}
 	
 	/**
@@ -483,14 +503,14 @@ public abstract class Element {
 			if (getFloat()==Float.Left) { //X from top right of sibling
 				UnitValue sibWidth = translateToUnit(lastRelativeSibling.getFuncWidth(), lastRelativeSibling, getX().u, this);
 				double x = sibX.v+sibWidth.v+getX().v;
-
-				//Check if new position will overflow parent
+				
+				//Check if new position will overflow parent width
 				UnitValue parentW = translateToUnit(getParent().getFuncWidth(), getParent(), getX().u, this);
 				//Special case for flex box - should consider max width not actual width as should still be allowed to resize
 				if (getParent() instanceof FlexBox) parentW = translateToUnit(getParent().getMaxWidth(), getParent(), getX().u, this);
 				
 				if (parentW==null) return; //TODO bodge fix but will be aight because positioning happens so often
-
+				
 				UnitValue width = translateToUnit(getFuncWidth(), this, getX().u, this);
 				if (x+width.v>parentW.v+2) {
 					//Position at left of element but down a 'row'
@@ -503,10 +523,10 @@ public abstract class Element {
 					rFunc.y = new UnitValue(getY().v+sibY.v, getY().u);
 				}
 			}
-			if (getFloat()==Float.Right) { //X backwards from top left of sibling
+			else if (getFloat()==Float.Right) { //X backwards from top left of sibling
 				UnitValue width = translateToUnit(getFuncWidth(), this, getX().u, this);
 				double x = sibX.v-width.v-getX().v;
-
+				
 				//Check if new position will overflow parent
 				if (x-width.v<0) {
 					//Position at right of element but down a 'row'
@@ -520,10 +540,10 @@ public abstract class Element {
 				}
 			}
 		}
-		//No eligable relative sibling, still need to handle float as described aboves
+		//No eligable relative sibling, still need to handle float as described above
 		else if (getFloat()==Float.Right) floatRight();
 	}
-
+	
 	private void positionCollumnRelatively() {
 		List<Component> siblings = parent.getComponents();
 		if (siblings==null||siblings.isEmpty()) return;
@@ -531,7 +551,7 @@ public abstract class Element {
 		//Find location of this element in siblings
 		int loc = 0;
 		for (; loc<siblings.size(); loc++) if (siblings.get(loc)==this) break;
-
+		
 		//Get last added eligable relative component
 		Component lastSibling = null;
 		for (int i=loc; i>=0; i--) { //Search back from this component
@@ -542,7 +562,7 @@ public abstract class Element {
 			}
 		}
 		if (lastSibling==null) return;
-
+		
 		//Position this element vertically down from last sibling
 		UnitValue sibY = translateToUnit(lastSibling.getFuncY(), lastSibling, getY().u, this);
 		UnitValue sibHeight = translateToUnit(lastSibling.getFuncHeight(), lastSibling, getY().u, this);
@@ -604,22 +624,47 @@ public abstract class Element {
 		UnitValue width = translateToUnit(getFuncWidth(), this, getX().u, this); 
 		rFunc.x = new UnitValue((parentW.v-width.v)/2, getX().u);
 	}
-
+	
 	/**
-	 * Note that y centering an element in a flex box will cause flexbox to resize with new position of
-	 * centered element, causing flexbox to shrink to the value that is not overflowwing above, meaning
-	 * a little of this element will likely peek out
-	 */
+	* Note that y centering an element in a flex box will cause flexbox to resize with new position of
+	* centered element, causing flexbox to shrink to the value that is not overflowwing above, meaning
+	* a little of this element will likely peek out
+	*/
 	private void yCenterElementInParent() {
 		if (getPosition()==Position.GlobalFixed) { //Center from top left
 			UnitValue height = translateToUnit(getFuncHeight(), this, Unit.pch, GUI.getInstance().getCurrentRoot()); 
 			rFunc.y = new UnitValue(50-(height.v/2), Unit.pch);
 			return;
 		}
-
+		
 		UnitValue parentH = translateToUnit(parent.getFuncHeight(), parent, getY().u, this);
 		UnitValue height = translateToUnit(getFuncHeight(), this, getY().u, this);
 		rFunc.y = new UnitValue((parentH.v-height.v)/2, getY().u);
+	}
+	
+	private void doOverlowScroll() {
+		List<Component> children = getComponents();
+		if (children==null||children.isEmpty()) return;
+		
+		//Find if elements overflow box
+		UnitValue height = getFuncHeight();
+		CLI.debug("considering height: "+height);
+		//Special case for flex box - should consider max height
+		if (this instanceof FlexBox) height = translateToUnit(getMaxHeight(), this, getFuncHeight().u, this);
+		
+		boolean overflows = false;
+		for (Component child : children) {
+			UnitValue childBot = translateToUnit(child.getFuncY(), child, getFuncHeight().u, this);
+			childBot.v = childBot.v+translateToUnit(child.getFuncHeight(), child, getFuncHeight().u, this).v;
+			
+			if (childBot.v>height.v) {
+				overflows = true;
+				CLI.debug("child "+childBot+" overflows this height "+height);
+				break;
+			}
+		}
+		
+		CLI.debug(this.getClass().getSimpleName()+" overflow: "+overflows);
 	}
 	
 	/**
@@ -767,7 +812,7 @@ public abstract class Element {
 		}
 		return null;
 	}
-
+	
 	public UnitPoint translateToUnit(UnitPoint oldP, Element oldScope, Unit newUnit, Element newScope) {
 		UnitPoint pNew = new UnitPoint();
 		pNew.x = translateToUnit(oldP.x, oldScope, newUnit, newScope);
@@ -819,7 +864,7 @@ public abstract class Element {
 	public boolean isOver(Point p) {
 		Rectangle rS = getRealRec();
 		if (p.x>=rS.x && p.x<=rS.x+rS.width &&
-			p.y>=rS.y && p.y<=rS.y+rS.height) {
+		p.y>=rS.y && p.y<=rS.y+rS.height) {
 			return true;
 		}
 		
@@ -858,7 +903,7 @@ public abstract class Element {
 	
 	public void drawComponentShadows(Graphics2D g) {
 		componentsLock.lock();
-
+		
 		for (Component c : getSortedComponents()) {
 			if (c.isVisible()&&c.hasShadow()) GUI.getScreenUtils().drawShadow(g, c);
 		}
@@ -877,31 +922,31 @@ public abstract class Element {
 	}
 	
 	/**
-	 * Need to search to leaf before implementing a click action. If a child is able to preform
-	 * a click action on these coordinates then that should be triggered rather than this. Only one
-	 * element should be able to do an action for every one click. If no children have succesfully performed
-	 * a click then this element should perform a click.
-	 * 
-	 * Therefore - method searches down child tree. If no child returns true then this element will return true
-	 * which indicates that it may perform a click action. If a child returns true then that child has performed
-	 * a click action and this method will return false as this method may perform a click action
-	 * 
-	 * 
-	 * Chain is
-	 * Element class will check if children will preform a click
-	 * This is done by calling onclick for all children components. Child call will first go to Component method
-	 * which will call Element method and verify that child has no clickable children. Then component method will return
-	 * true if a click action has been registered and run otherwise will return false.
-	 * 
-	 * The point of this being that a parent element will preform a click even if click happens over a child element,
-	 * given that the child element and all it's decendents have no click action registered. Otherwise a click
-	 * action will be preformed in that descendent.
-	 * This is opposed to a parent simply not preforming a click action whenever the mouse is over a child, even if that
-	 * child has no action to actually perform.
-	 * 
-	 * @param p
-	 * @return whether or not this element may perform a click action
-	 */
+	* Need to search to leaf before implementing a click action. If a child is able to preform
+	* a click action on these coordinates then that should be triggered rather than this. Only one
+	* element should be able to do an action for every one click. If no children have succesfully performed
+	* a click then this element should perform a click.
+	* 
+	* Therefore - method searches down child tree. If no child returns true then this element will return true
+	* which indicates that it may perform a click action. If a child returns true then that child has performed
+	* a click action and this method will return false as this method may perform a click action
+	* 
+	* 
+	* Chain is
+	* Element class will check if children will preform a click
+	* This is done by calling onclick for all children components. Child call will first go to Component method
+	* which will call Element method and verify that child has no clickable children. Then component method will return
+	* true if a click action has been registered and run otherwise will return false.
+	* 
+	* The point of this being that a parent element will preform a click even if click happens over a child element,
+	* given that the child element and all it's decendents have no click action registered. Otherwise a click
+	* action will be preformed in that descendent.
+	* This is opposed to a parent simply not preforming a click action whenever the mouse is over a child, even if that
+	* child has no action to actually perform.
+	* 
+	* @param p
+	* @return whether or not this element may perform a click action
+	*/
 	protected boolean doClick(Point p) {
 		componentsLock.lock();
 		
@@ -919,7 +964,7 @@ public abstract class Element {
 				if (c.isVisible()&&c.isSelected()) c.doDeselect();
 			}
 		}*/
-
+		
 		componentsLock.unlock();
 		return !hasClicked;
 	}
@@ -969,20 +1014,20 @@ public abstract class Element {
 	protected void doKeyPress(KeyEvent k) {}; //Doesn't need to recur due to key listener registration in IO
 	
 	/**
-	 * Searches up the parent tree from this element and checks if any parent element 
-	 * is of the specified class.
-	 */
+	* Searches up the parent tree from this element and checks if any parent element 
+	* is of the specified class.
+	*/
 	public Element getParentAssignableFrom(Class<?> clazz) {
 		if (!hasParent()) return null;
 		Element e = getParent();
-
+		
 		while (e.hasParent()) {
 			if (clazz.isAssignableFrom(e.getClass())) return e;
 			e = e.getParent();
 		}
 		return null;
 	}
-
+	
 	@Override
 	public String toString() {
 		String result = "["+CLI.orange+getClass().getSimpleName()+CLI.reset+": "+CLI.blue+"pos"+CLI.reset+": "+getPosition()+" "+CLI.blue+"float"+CLI.reset+": "+getFloat()+" "+CLI.blue+"dom"+CLI.reset+": "+inDOM()+" ";

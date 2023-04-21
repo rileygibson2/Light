@@ -31,9 +31,9 @@ public class FlexBox extends SimpleBox {
     }
 
     @Override
-    public void childUpdated() {
+    public void subtreeUpdated() {
         resize(); //Trigger resize
-        super.childUpdated();
+        super.subtreeUpdated();
     }
 
     /**
