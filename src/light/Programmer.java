@@ -49,11 +49,13 @@ public class Programmer extends DataStore implements OutputCapable, EncoderCapab
     
     public void select(Fixture fixture) {
         if (fixture!=null) selectedFixtures.add(fixture);
+        Encoders.getInstance().update();
         updateFixtureGUI(fixture);
     }
     
     public void select(Collection<Fixture> fixtures) {
         if (fixtures!=null) selectedFixtures.addAll(fixtures);
+        Encoders.getInstance().update();
         updateFixturesGUI(fixtures);
     }
     
@@ -61,18 +63,19 @@ public class Programmer extends DataStore implements OutputCapable, EncoderCapab
         if (address==null||!address.matchesScope(Fixture.class)) return;
         Fixture fixture = PatchManager.getInstance().getFixture(address);
         if (fixture!=null)  selectedFixtures.add(fixture);
+        Encoders.getInstance().update();
         updateFixturesGUI(selectedFixtures);
     }
     
     public void deselect(Fixture f) {
         selectedFixtures.remove(f);
-        if (selectedFixtures.isEmpty()) Encoders.getInstance().update();
+        Encoders.getInstance().update();
         updateFixtureGUI(f);
     }
     
     public void deselect(List<Fixture> f) {
         selectedFixtures.removeAll(f);
-        if (selectedFixtures.isEmpty()) Encoders.getInstance().update();
+        Encoders.getInstance().update();
         updateFixturesGUI(f);
     }
     

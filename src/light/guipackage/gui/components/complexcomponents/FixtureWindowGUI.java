@@ -48,6 +48,8 @@ public class FixtureWindowGUI extends SimpleBox implements FixtureWindowGUIInter
         this.fixtureWindow = fixtureWindow; 
         setColor(new Color(20, 20, 20));
         setRounded(true);
+        setMaxHeight(getHeight());
+        setClickAction(() -> {}); //To stop click chain 
         
         //Top bar
         SimpleBox topBar = new SimpleBox(new UnitRectangle(0, Unit.px, 0, Unit.px, 100, Unit.pcw, 4, Unit.vh));
@@ -79,16 +81,15 @@ public class FixtureWindowGUI extends SimpleBox implements FixtureWindowGUIInter
     }
     
     private void buildFixtures() {
-        
         CollumnBox wrapper = new CollumnBox(new UnitPoint(3, Unit.pcw, 0, Unit.px));
         wrapper.setPosition(Position.Relative);
-        wrapper.setOverflow(Overflow.Scroll);
+        wrapper.setMaxHeight(new UnitValue(90, Unit.pch));
         wrapper.setMinWidth(new UnitValue(90, Unit.pcw));
-        wrapper.setMaxHeight(new UnitValue(100, Unit.pch));
+        wrapper.setOverflow(Overflow.Scroll);
         addComponent(wrapper);
         
         for (Profile profile : PatchManager.getInstance().allProfileSet()) {
-            Label profileLabel =  new Label(new UnitRectangle(0, Unit.px, 2, Unit.vh, 100, Unit.pcw, 3, Unit.vh), profile.getName()+" "+profile.getModeName(), new Font(Styles.baseFont, Font.BOLD, 14), new Color(230, 230, 230));
+            Label profileLabel =  new Label(new UnitRectangle(0, Unit.px, 4, Unit.vh, 100, Unit.pcw, 3, Unit.vh), profile.getName()+" "+profile.getModeName(), new Font(Styles.baseFont, Font.BOLD, 14), new Color(230, 230, 230));
             profileLabel.setBorder(new int[] {2}, new Color(250, 250, 250));
             profileLabel.setTextYCentered(true);
             wrapper.addComponent(profileLabel);

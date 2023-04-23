@@ -1,6 +1,5 @@
 package light.guipackage.gui.components;
 
-import light.guipackage.cli.CLI;
 import light.guipackage.general.Point;
 import light.guipackage.general.Submitter;
 import light.guipackage.general.UnitRectangle;
@@ -77,7 +76,9 @@ public abstract class Component extends Element {
 	public void unfreezeShadow() {freezeShadow = false;}
 
 	public void setVisible(boolean v) {visible = v;}
-	public boolean isVisible() {return visible;}
+	public boolean isVisible() {
+		return visible&&!isHiddenForScroll();
+	}
 	
 	public void removeFromParent() {
 		if (getParent()!=null) getParent().removeComponent(this);

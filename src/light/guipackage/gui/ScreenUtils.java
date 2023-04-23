@@ -88,6 +88,7 @@ public class ScreenUtils {
 	}
 	
 	public void drawLabel(Graphics2D g, Label l) {
+		doClip(g, l);
 		Rectangle r = l.getRealRec();
 		Color col = new Color(l.textCol.getRed(), l.textCol.getGreen(), l.textCol.getBlue(), percToCol(l.getOpacity()));
 		g.setFont(l.font);
@@ -96,10 +97,14 @@ public class ScreenUtils {
 		else if (l.isTextXCentered()) drawXCenteredString(g, l.font, l.getText(), col, r);
 		else if (l.isTextYCentered()) drawYCenteredString(g, l.font, l.getText(), col, r);
 		else drawStringFromPoint(g, l.font, l.getText(), col, new Point(r.x, r.y));
+
+		//Reset clip
+		g.setClip(null);
 	}
 	
 	public void drawImage(Graphics2D g, Image i) {
 		if (i.getSource()==null) return;
+		doClip(g, i);
 		Rectangle r = i.getRealRec();
 		
 		BufferedImage img = null;
@@ -132,12 +137,12 @@ public class ScreenUtils {
 		affineTransformOp.filter(img, scaledImg);
 		g.drawImage(scaledImg, (int) (r.x+(r.width-scaledImg.getWidth())/2), (int) (r.y), null);
 		
-		//Reset alpha
+		//Reset alpha and clip
 		g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1f));
+		g.setClip(null);
 	}
 	
 	public BufferedImage makeImageTransparent(BufferedImage img) {
-		
 		int width = img.getWidth();
 		int height = img.getHeight();
 		
@@ -150,18 +155,19 @@ public class ScreenUtils {
 		
 		for (int x = 0; x < width; x++) {
 			for (int y = 0; y < height; y++) {
-                // Calculate the brightness of the pixel
-                Color color = new Color(img.getRGB(x, y), true);
-                float brightness = Color.RGBtoHSB(color.getRed(), color.getGreen(), color.getBlue(), null)[2];
-
-                // Set the alpha based on the brightness
-                transparentImage.setRGB(x, y, ((255-Math.round(brightness * 255)) << 24) | (0 << 16) | (0 << 8) | 0);
+				// Calculate the brightness of the pixel
+				Color color = new Color(img.getRGB(x, y), true);
+				float brightness = Color.RGBtoHSB(color.getRed(), color.getGreen(), color.getBlue(), null)[2];
+				
+				// Set the alpha based on the brightness
+				transparentImage.setRGB(x, y, ((255-Math.round(brightness * 255)) << 24) | (0 << 16) | (0 << 8) | 0);
 			}
 		}
 		return transparentImage;
 	}
 	
 	public void drawSimpleBox(Graphics2D g, SimpleBox b) {
+		doClip(g, b);
 		Rectangle r = b.getRealRec();
 		Color col = b.getColor();
 		
@@ -189,6 +195,16 @@ public class ScreenUtils {
 			
 			if (b.getBorderSides()!=null) knockoutBorderSides(g, b, r);
 		}
+
+		//Reset clip
+		g.setClip(null);
+	}
+
+	private void doClip(Graphics2D g, Element e) {
+		if (!e.hasClippingElement()) return;
+		g.setClip(null);
+		Rectangle r = e.getClippingRectangle();
+		g.setClip((int) r.x, (int) r.y, (int) r.width, (int) r.height);
 	}
 	
 	public void drawShadow(Graphics2D g, Component c) {
