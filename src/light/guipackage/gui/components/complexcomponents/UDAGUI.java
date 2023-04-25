@@ -8,6 +8,7 @@ import java.util.Map;
 import light.encoders.Encoders;
 import light.executors.Executor;
 import light.general.ConsoleAddress;
+import light.general.Utils;
 import light.guipackage.general.Point;
 import light.guipackage.general.Rectangle;
 import light.guipackage.general.Submitter;
@@ -93,7 +94,7 @@ public class UDAGUI extends Component implements UDAGUIInterface {
         if (openZonePicker!=null) return;
 
         TempWindow tB = new TempWindow("Create Zone");
-        tB.setCloseAction(() -> closeZonePicker());
+        tB.setCloseAction(() -> {openZonePicker = null;});
         GUI.getInstance().getCurrentRoot().addComponent(tB);
         tB.addTab("Presets");
         tB.addTab("Pools");
@@ -103,7 +104,7 @@ public class UDAGUI extends Component implements UDAGUIInterface {
         
         //Presets tab
         Map<String, Object> nametags = new LinkedHashMap<>();
-        for (PresetType p : PresetType.values()) nametags.put(p.toString(), p.getBaseAddress());
+        for (PresetType p : PresetType.values()) nametags.put(Utils.capitaliseFirst(p.toString()), p.getBaseAddress());
         fillTab(tB, 0, zoneRec, nametags);
         
         //Pools tab
@@ -154,7 +155,7 @@ public class UDAGUI extends Component implements UDAGUIInterface {
     }
     
     public void closeZonePicker() {
-        openZonePicker = null;
+        if (openZonePicker!=null) openZonePicker.close(false);
     }
     
     @Override

@@ -365,11 +365,11 @@ public abstract class Element {
 		componentsLock.lock();
 		components.add(index, c);
 		componentsLock.unlock();
+		c.doPositioning();
 		
 		if (inDOM()) {
 			c.triggerDOMEntry();
-			//Don't need to position till in dom
-			c.doPositioning();
+			//Don't need to update subtree till in dom
 			subtreeUpdated(this);
 		}
 	}

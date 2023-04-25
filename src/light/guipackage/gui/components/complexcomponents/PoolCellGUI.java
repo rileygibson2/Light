@@ -7,6 +7,7 @@ import light.commands.commandcontrol.CommandLine;
 import light.commands.commandcontrol.CommandProxy;
 import light.executors.Executor;
 import light.general.ConsoleAddress;
+import light.general.Utils;
 import light.guipackage.general.GUIUtils;
 import light.guipackage.general.Point;
 import light.guipackage.general.Submitter;
@@ -128,7 +129,7 @@ public class PoolCellGUI extends Component {
     }
 
     private String getTypeText() {
-        if (address.matchesScope(Preset.class)) return Preset.getTypeFromAddress(address).toString();
+        if (address.matchesScope(Preset.class)) return Utils.capitaliseFirst(Preset.getTypeFromAddress(address).toString());
         return address.getScope().getSimpleName();
     }
     
