@@ -19,6 +19,7 @@ import light.guipackage.general.UnitValue;
 import light.guipackage.general.UnitValue.Unit;
 import light.guipackage.gui.components.Component;
 import light.guipackage.gui.components.basecomponents.ScrollBar;
+import light.guipackage.gui.components.basecomponents.ScrollBar.ScrollDir;
 import light.guipackage.gui.components.boxes.FlexBox;
 
 public abstract class Element {
@@ -72,14 +73,21 @@ public abstract class Element {
 	public enum Overflow {
 		Default, //Content overflows bounding element
 		Hidden, //Overflowing content is hidden TODO
-		Scroll //Overflowing content is hidden and scroll bar is added
+		ScrollY, //Overflowing y content is hidden and scroll bar is added
+		ScrollX, //Overflowing x content is hidden and scroll bar is added
+		ScrollBoth; //Overflowing content in both directions is hidden and scroll bar is added
+		
+		public boolean isScroll() {return this==ScrollY||this==ScrollX||this==ScrollBoth;}
+		public boolean isScrollY() {return this==ScrollY||this==ScrollBoth;}
+		public boolean isScrollX() {return this==ScrollX||this==ScrollBoth;}
 	}
 	private Overflow overflow;
 	
-	private ScrollBar scrollBar;
-	private boolean hiddenForScroll; //Whether not this element has been hidden to facilitate scrolling
-	private Element clipElement; //If an element needs to be clipped rather then hidden for overflow then this variable will have a value
-	private UnitValue yScrollOffset; //Used to offset elements during scroll - will be a percentage of parent height
+	private ScrollBar scrollBarY;
+	private ScrollBar scrollBarX;
+	private boolean hiddenForOverflow; //Whether not this element has been hidden to facilitate overflow setting
+	private Element clippingElement; //If an element needs to be clipped rather then hidden for overflow then this variable will have a value
+	private UnitPoint scrollOffset; //Used to offset elements during scroll - will be a percentage of parent height
 	
 	private Object tag;
 	public String tagString;
@@ -100,22 +108,22 @@ public abstract class Element {
 	
 	public void setX(UnitValue p) {
 		r.x = p;
-		doPositioning();
-		if (parent!=null) parent.subtreeUpdated();
+		//doPositioning();
+		if (hasParent()) parent.subtreeUpdated(this);
 	}
 	public void setY(UnitValue p) {
 		r.y = p;
-		if (parent!=null) parent.subtreeUpdated();
+		if (hasParent()) parent.subtreeUpdated(this);
 	}
 	public void setWidth(UnitValue p) {
 		r.width = p;
-		doPositioning();
-		if (parent!=null) parent.subtreeUpdated();
+		//doPositioning();
+		if (hasParent()) parent.subtreeUpdated(this);
 	}
 	public void setHeight(UnitValue p) {
 		r.height = p;
-		doPositioning();
-		if (parent!=null) parent.subtreeUpdated();
+		//doPositioning();
+		if (hasParent()) parent.subtreeUpdated(this);
 	}
 	
 	/**
@@ -143,33 +151,33 @@ public abstract class Element {
 	public void setMinWidth(UnitValue p) {
 		minSize.x = p;
 		doPositioning();
-		if (parent!=null) parent.subtreeUpdated();
+		if (hasParent()) parent.subtreeUpdated(this);
 	}
 	public void setMinHeight(UnitValue p) {
 		minSize.y = p;
 		doPositioning();
-		if (parent!=null) parent.subtreeUpdated();
+		if (hasParent()) parent.subtreeUpdated(this);
 	}
 	public void setMinSize(UnitPoint p) {
 		this.minSize = p;
 		doPositioning();
-		if (parent!=null) parent.subtreeUpdated();
+		if (hasParent()) parent.subtreeUpdated(this);
 	}
 	
 	public void setMaxWidth(UnitValue p) {
 		maxSize.x = p;
 		doPositioning();
-		if (parent!=null) parent.subtreeUpdated();
+		if (hasParent()) parent.subtreeUpdated(this);
 	}
 	public void setMaxHeight(UnitValue p) {
 		maxSize.y = p;
 		doPositioning();
-		if (parent!=null) parent.subtreeUpdated();
+		if (hasParent()) parent.subtreeUpdated(this);
 	}
 	public void setMaxSize(UnitPoint p)  {
 		this.maxSize = p;
 		doPositioning();
-		if (parent!=null) parent.subtreeUpdated();
+		if (hasParent()) parent.subtreeUpdated(this);
 	}
 	
 	public UnitValue getX() {return r.x;}
@@ -188,7 +196,7 @@ public abstract class Element {
 	public void setRec(UnitRectangle r) {
 		this.r = r;
 		doPositioning();
-		if (parent!=null) parent.subtreeUpdated();
+		if (hasParent()) parent.subtreeUpdated(this);
 	}
 	public UnitRectangle getRec() {return r;}
 	public UnitRectangle getFunctionalRec() {return rFunc;}
@@ -211,15 +219,32 @@ public abstract class Element {
 	public void setOverflow(Overflow o) {this.overflow = o;}
 	public Overflow getOverflow() {return overflow;}
 	
-	public boolean isHiddenForScroll() {return hiddenForScroll;}
-	protected void setHiddenForScroll(boolean hidden) {this.hiddenForScroll = hidden;}
+	public boolean isHiddenForOverflow() {return hiddenForOverflow;}
+	protected void setHiddenForOverflow(boolean hidden) {this.hiddenForOverflow = hidden;}
 	
-	public boolean hasClippingElement() {return clipElement!=null;}
-	protected void setClippingElement(Element element) {this.clipElement = element;}
+	public boolean hasClippingElement() {return clippingElement!=null;}
+	protected void setClippingElement(Element element) {this.clippingElement = element;}
+	public Element getClippingElement() {return clippingElement;}
 	
-	public boolean hasYScrollOffset() {return yScrollOffset!=null;}
-	public UnitValue getYScrollOffset() {return yScrollOffset;}
-	protected void setYScrollOffset(UnitValue offset) {this.yScrollOffset = offset;}
+	public boolean hasYScrollOffset() {return scrollOffset!=null&&scrollOffset.y!=null;}
+	protected void setYScrollOffset(UnitValue offset) {
+		if (scrollOffset==null) {
+			scrollOffset = new UnitPoint();
+			scrollOffset.x = null;
+		}
+		scrollOffset.y = offset;
+	}
+	
+	public boolean hasXScrollOffset() {return scrollOffset!=null&&scrollOffset.x!=null;}
+	protected void setXScrollOffset(UnitValue offset) {
+		if (scrollOffset==null) {
+			scrollOffset = new UnitPoint();
+			scrollOffset.y = null;
+		}
+		scrollOffset.x = offset;
+	}
+
+	public UnitPoint getScrollOffset() {return scrollOffset;}
 	
 	public Element getParent() {return parent;}
 	public void setParent(Element e) {parent = e;}
@@ -230,6 +255,7 @@ public abstract class Element {
 	
 	public void setRoot() {
 		isRoot = true;
+		inDOM = true;
 		setPosition(Position.GlobalFixed);
 	}
 	public boolean isRoot() {return isRoot;}
@@ -268,6 +294,14 @@ public abstract class Element {
 		componentsLock.unlock();
 		return c;
 	}
+	
+	/**
+	* Whether or not an element is visible.
+	* Is overriden in Component class to include the progranner visibility setting,
+	* at this class only the overflow hidding value is respected.
+	* @return
+	*/
+	public boolean isVisible() {return !isHiddenForOverflow();}
 	
 	private List<Component> getSortedReversedComponents() {
 		List<Component> co = getComponents();
@@ -332,14 +366,12 @@ public abstract class Element {
 		components.add(index, c);
 		componentsLock.unlock();
 		
-		c.doPositioning();
-		subtreeUpdated();
-		
-		/*
-		* Trigger DOM entry action if this is the root node adding a component
-		* Also trigger if this is another element is already in dom
-		*/
-		if (isRoot()||inDOM) c.triggerDOMEntry();
+		if (inDOM()) {
+			c.triggerDOMEntry();
+			//Don't need to position till in dom
+			c.doPositioning();
+			subtreeUpdated(this);
+		}
 	}
 	
 	public void removeComponent(Component c) {
@@ -349,7 +381,7 @@ public abstract class Element {
 		componentsLock.unlock();
 		
 		c.triggerDOMExit();
-		subtreeUpdated();
+		subtreeUpdated(this);
 	}
 	
 	public void removeComponents(Collection<Component> toRemove) {
@@ -359,7 +391,7 @@ public abstract class Element {
 		componentsLock.unlock();
 		
 		for (Component c : toRemove) c.triggerDOMExit();
-		subtreeUpdated();
+		subtreeUpdated(this);
 	}
 	
 	public void clearComponents() {
@@ -402,9 +434,12 @@ public abstract class Element {
 	* 
 	* To get around this there are public methods which change an elements propertys with no propogation and no consequence.
 	*/
-	protected void subtreeUpdated() {
-		if (parent!=null) parent.subtreeUpdated(); //Propogate upwards
-		positionSubtree(); //Propogate downwards
+	protected void subtreeUpdated(Element updatedElement) {
+		if (parent!=null) parent.subtreeUpdated(updatedElement); //Propogate upwards
+		positionSubtree();
+		/*for (Component child : components) {
+			if (child.elementInSubtree(updatedElement)) child.positionSubtree();
+		}*/
 	}
 	
 	/**
@@ -413,6 +448,14 @@ public abstract class Element {
 	protected void positionSubtree() {
 		doPositioning();
 		for (Component c : getComponents()) c.positionSubtree();
+	}
+	
+	public boolean elementInSubtree(Element toCheck) {
+		if (equals(toCheck)) return true;
+		for (Component child : components) {
+			if (child.elementInSubtree(toCheck)) return true;
+		}
+		return false;
 	}
 	
 	/**
@@ -469,7 +512,7 @@ public abstract class Element {
 		checkMinMaxSize();
 		
 		//Do overflow
-		if (getOverflow()==Overflow.Scroll) doOverlowScroll();
+		if (getOverflow().isScroll()) doOverlowScroll();
 	}
 	
 	/**
@@ -658,72 +701,86 @@ public abstract class Element {
 		rFunc.y = new UnitValue((parentH.v-height.v)/2, getY().u);
 	}
 	
+	/**
+	* Scroll procedure;
+	* 
+	* Parent element sets overflow to scroll
+	* 
+	* On next positioning doOverflowScroll method call
+	* Parent finds the bounding box this scroll element should be defined by (normally the rec of the parent)
+	* Initiates calls to investigateYOverflowInSubtree for all subtree elements.
+	* 
+	* investigateYOverflowInSubtree checks an elements position relative to the provided bounding box
+	* If the element is completely outside the box then the element is hidden.
+	* If the element is only partially outside the box then the clipping element is set to the scrolling parent
+	* so only part of the box is drawn
+	* 
+	* TODO - here need to change implementations of user input methods to consider clipping element if set.
+	* This is so if an element is partially hidden by scroll, a click to the hidden part will not trigger the elements click actions.
+	* 
+	* Then the parent overflow scroll method sets up a scrollbar element.
+	* 
+	* When the scroll bar is moved it calculates the amount the entire box should be shifted by and calles
+	* moveElementsForScroll in it's parent. This method sets the yScrollIffset unit value for all
+	* children elements of the scrolling box. The entire subtree does not have to be investigated because
+	* just changing the position of the immediate children will cause all other sub children to be naturally
+	* repositioned aswell.
+	* 
+	* The yScrollOffset variable is seperated from all other positioning elements. If we instead changed
+	* the functional rectangle when moving elements from scroll, then it would be difficult to keep track
+	* of an elements original position pre scroll. This makes the whole thing stateful as to how much to move an element
+	* we must consider where an element currently is and we wouldn't be able to simply "turn off" the scroll
+	* functionality at any point as original state has been lost.
+	* 
+	* As such the scroll offset variables are seperate to all positioning and are considered ONLY on a call
+	* to getRealRec(). If needed this may be extended so a call to getter for a functional rec component will include
+	* the relevant scroll offset component if this becomes nessacary.
+	* 
+	* This goes hand in hand with the seperation of the user defined rectangle and the internal positioning functional
+	* rectangle which allows the user/programmer to have controll of defined values for the location of the element
+	* and for those values to be exactly what the user/programmer expects them to be, with internal positioning stuff
+	* kept seperate.
+	* 
+	*/
 	private void doOverlowScroll() {
-		if (components==null||components.isEmpty()) return;
-		
-		//Find bounding box to consider
-		UnitRectangle box = getFunctionalRec();
-		//Special case for flex box - should consider max height
-		if (this instanceof FlexBox) box.height = translateToUnit(getMaxHeight(), this, getFuncHeight().u, this);
-		Rectangle bounds = getRealRec(box);
-		
-		//Consider all children
-		for (Component child : components) child.investigateYOverflowInSubtree(bounds.y+bounds.height, this);
-
+		if (!getOverflow().isScroll()||components==null||components.isEmpty()) return;
+		for (Component child : components) child.investigateOverflowInSubtree(this);
 		implementScrollBar();
-	}
-	
-	private void implementScrollBar() {
-		if (getOverflow()!=Overflow.Scroll) return;
-		
-		//Implement a scrollbar
-		if (scrollBar==null) {
-			scrollBar = new ScrollBar();
-			scrollBar.setParent(this);
-		}
-		/**
-		* Find what percentage of the largest bounding box (i.e the box from the top of this element
-		* to the bottom of the lowest overflowing element) the actual bounding box is.
-		* 
-		* This becomes the size of the scroll bar handle as the whole height of the scroll bar box is
-		* meant to represent the whole overflowing box and the handle is meant to represent the height
-		* and position of the actual bounding box in that overflowing box.
-		*/
-
-		//Find bounding box to consider
-		UnitRectangle box = getFunctionalRec();
-		//Special case for flex box - should consider max height
-		if (this instanceof FlexBox) box.height = translateToUnit(getMaxHeight(), this, getFuncHeight().u, this);
-		Rectangle bounds = getRealRec(box);
-
-		double lowestY = 0;
-		for (Component child : components) {
-			double y = child.getLowestYInSubtree();
-			if (y>lowestY) lowestY = y;
-		}
-		double perc = bounds.height/(lowestY-bounds.y);
-		CLI.debug("bounding box is "+perc+" of actual real overflowing box");
-		
-		//Update scroll bar handle height
-		scrollBar.updateHandleHeight(new UnitValue(perc*100, Unit.pch));
 	}
 	
 	/**
 	* Implements scroll controls for all elements in the subtree
-	* @param yLimit
 	* @param clipElement
 	*/
-	protected void investigateYOverflowInSubtree(double yLimit, Element clipElement) {
+	protected void investigateOverflowInSubtree(Element boundingElement) {
+		Rectangle bounds = boundingElement.getBoundingRectangle();
 		Rectangle r = getRealRec();
-		if (r.y>=yLimit) { //Check if all of element is outside bounds
-			setHiddenForScroll(true);//No further action needs to be taken
-			setClippingElement(null);
+		//Reset
+		setHiddenForOverflow(false);
+		setClippingElement(null);
+
+		//Y scroll
+		if (boundingElement.getOverflow().isScrollY()) {
+			//Check if all of element is outside bounds
+			if (r.y>bounds.y+bounds.height||r.y+r.height<bounds.y) setHiddenForOverflow(true);
+			//Check if part of element is outside box
+			else if (r.y+r.height>bounds.y+bounds.height||r.y<bounds.y) {
+				//This element needs to stay visible but will get clipped. Children elements need to be investigated
+				setClippingElement(boundingElement);
+				for (Component child : components) child.investigateOverflowInSubtree(boundingElement);
+			}
 		}
-		if (r.y+r.height>=yLimit) { //Check if part of element is outside box
-			//This element needs to stay visible but will get clipped. Children elements need to be investigated
-			setHiddenForScroll(false);
-			setClippingElement(clipElement);
-			for (Component child : components) child.investigateYOverflowInSubtree(yLimit, clipElement);
+		
+		//X scroll
+		if (boundingElement.getOverflow().isScrollX()) {
+			//Check if all of element is outside bounds
+			if (r.x>bounds.x+bounds.width||r.x+r.width<bounds.x) setHiddenForOverflow(true);
+			//Check if part of element is outside box
+			else if (r.x+r.width>bounds.x+bounds.width||r.x<bounds.x) {
+				//This element needs to stay visible but will get clipped. Children elements need to be investigated
+				setClippingElement(boundingElement);
+				for (Component child : components) child.investigateOverflowInSubtree(boundingElement);
+			}
 		}
 	}
 	
@@ -737,51 +794,98 @@ public abstract class Element {
 		return lowestY;
 	}
 	
+	protected double getRightMostXInSubtree() {
+		Rectangle r = getRealRec();
+		double rightMostX = r.x+r.width;
+		for (Component child : components) {
+			double x = child.getRightMostXInSubtree();
+			if (x>rightMostX) rightMostX = x;
+		}
+		return rightMostX;
+	}
+	
+	private void implementScrollBar() {
+		//Y scroll
+		if (getOverflow().isScrollY()) {
+			//Create a scrollbar if none present
+			if (scrollBarY==null) {
+				scrollBarY = new ScrollBar(ScrollDir.Y);
+				scrollBarY.setParent(this);
+			}
+			
+			/**
+			* Find what percentage of the largest bounding box (i.e the box from the top of this element
+			* to the bottom of the lowest overflowing element) the actual bounding box is.
+			* 
+			* This becomes the size of the scroll bar handle as the whole height of the scroll bar box is
+			* meant to represent the whole overflowing box and the handle is meant to represent the height
+			* and position of the actual bounding box in that overflowing box.
+			*/
+			Rectangle bounds = getBoundingRectangle();
+			double perc = bounds.height/(getLowestYInSubtree()-bounds.y);
+			
+			//Update scroll bar handle height
+			scrollBarY.updateHandle(new UnitValue(perc*100, Unit.pch));
+		}
+
+		//X scroll
+		if (getOverflow().isScrollX()) {
+			//Create a scrollbar if none present
+			if (scrollBarX==null) {
+				scrollBarX = new ScrollBar(ScrollDir.X);
+				scrollBarX.setParent(this);
+			}
+
+			Rectangle bounds = getBoundingRectangle();
+			double perc = bounds.width/(getRightMostXInSubtree()-bounds.x);
+			
+			//Update scroll bar handle height
+			scrollBarX.updateHandle(new UnitValue(perc*100, Unit.pcw));
+		}
+	}
+	
 	/**
 	* Should only ever be called by scroll bar or element controlling scroll. Prompts the element
 	* to move all of it's children in accordance with the bounds offset.
 	* The bounds offset is the amount the bounding box that represents the view port is shifted by.
 	*/
-	public void moveElementsForScroll(UnitValue boundsOffset) {
-		if (getOverflow()!=Overflow.Scroll) return;
+	public void moveElementsForScroll(UnitValue boundsOffset, Overflow direction) {
+		if (!getOverflow().isScroll()) return;
 		
-		for (Component child : components) child.setYScrollOffset(boundsOffset);
+		//Check not asking to move elements a positive amount in (should never happen in a scroll)
+		if (boundsOffset.v>0) boundsOffset.v = 0;
 		
-
-		//Find bounding box to consider
-		UnitRectangle box = getFunctionalRec();
-		//Special case for flex box - should consider max height
-		if (this instanceof FlexBox) box.height = translateToUnit(getMaxHeight(), this, getFuncHeight().u, this);
-		Rectangle bounds = getRealRec(box);
-		
-		//Consider all children
-		for (Component child : components) child.investigateYOverflowInSubtree(bounds.y+bounds.height, this);
+		//Set scroll offset for all children and re-check all hides and clips in subtree
+		for (Component child : components) {
+			if (direction==Overflow.ScrollX) child.setXScrollOffset(boundsOffset);
+			else if (direction==Overflow.ScrollY) child.setYScrollOffset(boundsOffset);
+			child.investigateOverflowInSubtree(this);
+		}
 	}
 	
 	/**
 	* Resets all scroll control elements for this element and all down stream elements.
 	*/
 	protected void resetScrollControlInSubtree() {
-		hiddenForScroll = false;
-		clipElement = null;
-		yScrollOffset = null;
+		hiddenForOverflow = false;
+		clippingElement = null;
+		scrollOffset = null;
 		for (Component child : components) child.resetScrollControlInSubtree();
 	}
 	
 	/**
-	* Gets the rectangle that the drawing of this element should be clipped by.
-	* This involves generating a real pixel unit rectangle from the element that this element has
-	* been told to clop by.
-	* The clipping rectangle is usually set to facilitate overflow functionality
+	* Gets the pixel unit rectangle that this element is currently bound by.
+	* Usually called on element set as a clip element clipping to facilitate overflow functionality.
 	* @return
 	*/
-	public Rectangle getClippingRectangle() {
-		if (clipElement==null) return null;
-		//Find bounding box to conider
-		UnitRectangle box = clipElement.getFunctionalRec();
+	public Rectangle getBoundingRectangle() {
+		UnitRectangle box = getFunctionalRec(); //Find bounding box to conider
 		//Special case for flex box - should consider max height
-		if (this instanceof FlexBox) box.height = translateToUnit(clipElement.getMaxHeight(), clipElement, clipElement.getFuncHeight().u, clipElement);
-		return clipElement.getRealRec(box);
+		if (this instanceof FlexBox) {
+			box.height = translateToUnit(getMaxHeight(), this, getFuncHeight().u, this);
+			box.width = translateToUnit(getMaxWidth(), this, getFuncWidth().u, this);
+		}
+		return getRealRec(box);
 	}
 	
 	/**
@@ -791,9 +895,13 @@ public abstract class Element {
 	*/
 	public Rectangle getRealRec() {
 		UnitRectangle rToReal = rFunc.clone();
-		if (hasYScrollOffset()) { //Need to add the offset to rFunc before realing
-			rToReal.y.v = rToReal.y.v+translateToUnit(getYScrollOffset(), this, rFunc.y.u, this).v;
+		if (hasXScrollOffset()) { //Need to add the x offset to rFunc before realing
+			rToReal.x.v = rToReal.x.v+translateToUnit(getScrollOffset().x, this, rFunc.x.u, this).v;
 		}
+		if (hasYScrollOffset()) { //Need to add the y offset to rFunc before realing
+			rToReal.y.v = rToReal.y.v+translateToUnit(getScrollOffset().y, this, rFunc.y.u, this).v;
+		}
+
 		return getRealRec(rToReal);
 	}
 	
@@ -983,8 +1091,7 @@ public abstract class Element {
 	*/
 	public boolean isOver(Point p) {
 		Rectangle rS = getRealRec();
-		if (p.x>=rS.x && p.x<=rS.x+rS.width &&
-		p.y>=rS.y && p.y<=rS.y+rS.height) {
+		if (p.x>=rS.x && p.x<=rS.x+rS.width && p.y>=rS.y && p.y<=rS.y+rS.height) {
 			return true;
 		}
 		
@@ -992,7 +1099,11 @@ public abstract class Element {
 		* At this point look at all components down the tree from this element in case
 		* a component is setup outside the bounds of this box, but isOver should still
 		* trigger so events can reach that component.
+		*
+		* This functionality of click events reaching elements outside the bounding box
+		* can only occur for elements with default overflow.
 		*/
+		if (getOverflow()!=Overflow.Default) return false;
 		for (Component c : getComponents()) {
 			if (c.isOver(p)) return true;
 		}
@@ -1033,7 +1144,8 @@ public abstract class Element {
 	public void draw(Graphics2D g) {
 		//drawComponentShadows(g);
 		drawComponents(g);
-		if (scrollBar!=null) scrollBar.draw(g);
+		if (scrollBarY!=null) scrollBarY.draw(g);
+		if (scrollBarX!=null) scrollBarX.draw(g);
 	}
 	
 	public void destroy() {
@@ -1078,6 +1190,7 @@ public abstract class Element {
 				if (hasClicked) break;
 			}
 		}
+		CLI.debug("aa"+simpleName());
 		
 		//Deselect all non clicked components
 		/*for (Component c : getComponents()) {
@@ -1105,17 +1218,23 @@ public abstract class Element {
 		componentsLock.unlock();*/
 	}
 	
+	/**
+	* Implements a mouse drag action.
+	* Relevant element to drag is found from entry point, not current point,
+	* as an element that the drag started on has control over that drag until the drag ends.
+	*/
 	protected void doDrag(Point entry, Point current) {
 		componentsLock.lock();
 		for (Component c : getSortedReversedComponents()) {
-			if (c.isVisible()&&c.isOver(current)) {
+			if (c.isVisible()&&c.isOver(entry)) {
 				c.doDrag(entry, current); //Will recur down
 				break;
 			}
 		}
 		
-		//Check drag on scrollbar
-		if (scrollBar!=null&&scrollBar.isOver(current)) scrollBar.doDrag(entry, current);
+		//Check drag on scrollbars
+		if (scrollBarY!=null&&scrollBarY.isOver(entry)) scrollBarY.doDrag(entry, current);
+		if (scrollBarX!=null&&scrollBarX.isOver(entry)) scrollBarX.doDrag(entry, current);
 	}
 	
 	protected void doScroll(Point p, int amount) {

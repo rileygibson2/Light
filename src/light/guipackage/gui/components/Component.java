@@ -76,8 +76,9 @@ public abstract class Component extends Element {
 	public void unfreezeShadow() {freezeShadow = false;}
 
 	public void setVisible(boolean v) {visible = v;}
+	@Override
 	public boolean isVisible() {
-		return visible&&!isHiddenForScroll();
+		return super.isVisible()&&visible;
 	}
 	
 	public void removeFromParent() {

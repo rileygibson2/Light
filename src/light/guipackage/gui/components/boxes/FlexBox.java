@@ -4,6 +4,7 @@ import light.guipackage.general.UnitPoint;
 import light.guipackage.general.UnitRectangle;
 import light.guipackage.general.UnitValue;
 import light.guipackage.general.UnitValue.Unit;
+import light.guipackage.gui.Element;
 import light.guipackage.gui.components.Component;
 
 public class FlexBox extends SimpleBox {
@@ -31,9 +32,9 @@ public class FlexBox extends SimpleBox {
     }
 
     @Override
-    public void subtreeUpdated() {
+    public void subtreeUpdated(Element updatedElement) {
         resize(); //Trigger resize
-        super.subtreeUpdated();
+        super.subtreeUpdated(updatedElement);
     }
 
     /**

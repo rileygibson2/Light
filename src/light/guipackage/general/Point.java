@@ -18,9 +18,9 @@ public class Point {
 	
 	@Override
 	public boolean equals(Object o) {
-		if (!(o instanceof Rectangle)) return false;
-		Rectangle r = (Rectangle) o;
-		if (x==r.x&&y==r.y) return true;
+		if (!(o instanceof Point)) return false;
+		Point p = (Point) o;
+		if (x==p.x&&y==p.y) return true;
 		return false;
 	}
 	

@@ -201,9 +201,9 @@ public class ScreenUtils {
 	}
 
 	private void doClip(Graphics2D g, Element e) {
-		if (!e.hasClippingElement()) return;
 		g.setClip(null);
-		Rectangle r = e.getClippingRectangle();
+		if (!e.hasClippingElement()) return;
+		Rectangle r = e.getClippingElement().getBoundingRectangle();
 		g.setClip((int) r.x, (int) r.y, (int) r.width, (int) r.height);
 	}
 	

@@ -49,7 +49,9 @@ public class FixtureWindowGUI extends SimpleBox implements FixtureWindowGUIInter
         setColor(new Color(20, 20, 20));
         setRounded(true);
         setMaxHeight(getHeight());
-        setClickAction(() -> {}); //To stop click chain 
+        setMaxWidth(getWidth());
+        setClickAction(() -> {}); //To stop click chain
+        setOverflow(Overflow.ScrollY);
         
         //Top bar
         SimpleBox topBar = new SimpleBox(new UnitRectangle(0, Unit.px, 0, Unit.px, 100, Unit.pcw, 4, Unit.vh));
@@ -83,9 +85,7 @@ public class FixtureWindowGUI extends SimpleBox implements FixtureWindowGUIInter
     private void buildFixtures() {
         CollumnBox wrapper = new CollumnBox(new UnitPoint(3, Unit.pcw, 0, Unit.px));
         wrapper.setPosition(Position.Relative);
-        wrapper.setMaxHeight(new UnitValue(90, Unit.pch));
         wrapper.setMinWidth(new UnitValue(90, Unit.pcw));
-        wrapper.setOverflow(Overflow.Scroll);
         addComponent(wrapper);
         
         for (Profile profile : PatchManager.getInstance().allProfileSet()) {

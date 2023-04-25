@@ -44,7 +44,8 @@ public class EncodersGUI extends Component implements EncodersGUIInterface {
     
     public EncodersGUI(UnitRectangle r) {
         super(r);
-        
+        setClickAction(() -> CLI.debug("clicckcckedddd"));
+
         mainBox = new SimpleBox(new UnitRectangle(0, 0, 100, 100));
         addComponent(mainBox);
         

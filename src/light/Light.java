@@ -181,7 +181,7 @@ public class Light {
             fixture1 = new Fixture(new ConsoleAddress(Fixture.class, 0, i+1), pro1);
             PatchManager.getInstance().addFixture(fixture1);
         }
-        for (; i<100; i++) {
+        for (; i<53; i++) {
             fixture2 = new Fixture(new ConsoleAddress(Fixture.class, 0, i+1), pro2);
             PatchManager.getInstance().addFixture(fixture2);
         }
@@ -201,7 +201,7 @@ public class Light {
         prog.set(fixture1, Attribute.GOBO1_INDEX, 20d, false);
         
         currentView.getUDA().createZone(Encoders.class, new Rectangle(0, 7, 10, 2));
-        currentView.getUDA().createZone(FixtureWindow.class, new Rectangle(0, 0, 11, 7));
+        currentView.getUDA().createZone(FixtureWindow.class, new Rectangle(0, 1, 11, 6));
     }
     
     public static void main(String args[]) {
