@@ -48,7 +48,7 @@ public class Persistency {
         
         //Fixtures
         pW.openSegment();
-        for (Fixture f : PatchManager.getInstance().allFixtureSet()) pW.put(f.getBytes());
+        for (Fixture f : PatchManager.getInstance().allFixtureList()) pW.put(f.getBytes());
         pW.closeSegmenet();
 
         //Groups

@@ -23,7 +23,6 @@ import light.fixtures.profile.ProfileParseException;
 import light.general.Addressable;
 import light.general.ConsoleAddress;
 import light.guipackage.cli.CLI;
-import light.guipackage.general.Rectangle;
 import light.guipackage.gui.GUI;
 import light.guipackage.gui.IO;
 import light.stores.AbstractStore;
@@ -33,7 +32,6 @@ import light.stores.Preset.PresetType;
 import light.stores.Sequence;
 import light.stores.View;
 import light.stores.effects.Effect;
-import light.uda.FixtureWindow;
 import light.uda.UDA;
 
 public class Light {
@@ -122,6 +120,14 @@ public class Light {
         return pool.get(address);
     }
 
+    public void switchView(ConsoleAddress address) {
+        if (viewPool.contains(address)) switchView(viewPool.get(address));
+    }
+
+    public void switchView(View view) {
+        currentView = view;
+    }
+
     public View getCurrentView() {return currentView;}
     
     private void setup() {
@@ -135,16 +141,19 @@ public class Light {
         
         //Make pools
         presetPools = new HashMap<PresetType, Pool<Preset>>();
+        int i = 0;
         for (PresetType pT : PresetType.values()) {
-            presetPools.put(pT, new Pool<Preset>(new ConsoleAddress(Preset.class, pT.ordinal()+1, 0)));
+            i = pT.ordinal()+1;
+            presetPools.put(pT, new Pool<Preset>(new ConsoleAddress(Preset.class, i, 0)));
         }
         
-        groupPool = new Pool<Group>(new ConsoleAddress(Group.class, 0, 0));
+        groupPool = new Pool<Group>(new ConsoleAddress(Group.class, i++, 0));
+        effectPool = new Pool<Effect>(new ConsoleAddress(Effect.class, i++, 0));
+        viewPool = new Pool<View>(new ConsoleAddress(View.class, i++, 0));
+        //Sequence and executor pool do not follow other pools in having relevant base prefix numbers
         sequencePool = new Pool<Sequence>(new ConsoleAddress(Sequence.class, 0, 0));
-        effectPool = new Pool<Effect>(new ConsoleAddress(Effect.class, 0, 0));
-        viewPool = new Pool<View>(new ConsoleAddress(View.class, 0, 0));
         executorPool = new Pool<Executor>(new ConsoleAddress(Executor.class, 0, 0));
-        
+
         //Setup command line and add commands
         CommandLine commandLine = CommandLine.getInstance();
         commandLine.registerCommand(Store.class);
@@ -157,7 +166,14 @@ public class Light {
         commandLine.registerCommand(Modulate.class, "at");
         
         //Setup view
-        currentView = new View(new UDA());
+        currentView = new View(new ConsoleAddress(View.class, viewPool.getAddress().getPrefix(), 1));
+        currentView.setLabel("Default view");
+        viewPool.add(currentView);
+
+        //Special case (AT THE MOMENT TODO) add views window as doesn't have relevant logic component
+        GUI.getInstance().addToGUI(View.class);
+
+        GUI.getInstance().switchView(currentView);
         IO.getInstance().requestPaint();
     }
     
@@ -181,7 +197,7 @@ public class Light {
             fixture1 = new Fixture(new ConsoleAddress(Fixture.class, 0, i+1), pro1);
             PatchManager.getInstance().addFixture(fixture1);
         }
-        for (; i<53; i++) {
+        for (; i<10; i++) {
             fixture2 = new Fixture(new ConsoleAddress(Fixture.class, 0, i+1), pro2);
             PatchManager.getInstance().addFixture(fixture2);
         }
@@ -200,8 +216,8 @@ public class Light {
         prog.set(fixture1, Attribute.COLORRGB3, 100d, false);
         prog.set(fixture1, Attribute.GOBO1_INDEX, 20d, false);
         
-        currentView.getUDA().createZone(Encoders.class, new Rectangle(0, 7, 10, 2));
-        currentView.getUDA().createZone(FixtureWindow.class, new Rectangle(0, 1, 11, 6));
+        //currentView.getUDA().createZone(Encoders.class, new Rectangle(0, 7, 10, 2));
+        //currentView.getUDA().createZone(FixtureWindow.class, new Rectangle(0, 0, 11, 7));
     }
     
     public static void main(String args[]) {

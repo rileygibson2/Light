@@ -5,6 +5,7 @@ import java.util.List;
 
 import light.Pool;
 import light.general.ConsoleAddress;
+import light.guipackage.general.Rectangle;
 import light.guipackage.general.UnitPoint;
 import light.guipackage.general.UnitRectangle;
 import light.guipackage.general.UnitValue;
@@ -19,7 +20,7 @@ public class PoolGUI extends Component implements PoolGUIInterface {
 
     private Pool<?> pool;
     private SimpleBox mainBox;
-    private List<PoolCellGUI> poolCells;
+    private List<PoolCellGUI> poolCellGUIs;
 
     public PoolGUI(UnitRectangle r, Pool<?> pool) {
         super(r);
@@ -29,28 +30,28 @@ public class PoolGUI extends Component implements PoolGUIInterface {
         addComponent(mainBox);
 
         //Make cells
-        poolCells = new ArrayList<PoolCellGUI>();
+        poolCellGUIs = new ArrayList<PoolCellGUI>();
         
-        UDA uda = GUI.getUDAGUI().getUDA();
-        UnitPoint cellDims = GUI.getUDAGUI().getCellDims();
+        UDA uda = GUI.getCurrentUDAGUI().getUDA();
+        UnitPoint cellDims = GUI.getCurrentUDAGUI().getCellDimensions();
+        Rectangle poolCells = uda.getCellsForUDAElement(pool);
         PoolCellGUI p;
 
         int i = 0;
-        for (int y=0; y<uda.getCells(pool).height; y++) {
-            for (int x=0; x<uda.getCells(pool).width; x++, i++) {
+        for (int y=0; y<poolCells.height; y++) {
+            for (int x=0; x<poolCells.width; x++, i++) {
                 ConsoleAddress a = pool.getAddress().clone();
                 a.setSuffix(i);
-                boolean titleCell = false;
-                if (y==0&&x==0) titleCell = true;
+                boolean titleCell = (y==0&&x==0) ? true : false;
 
-                p = new PoolCellGUI(new UnitRectangle(new UnitValue(0, Unit.vw), new UnitValue(0, Unit.vh), cellDims.x, cellDims.y), this, a, titleCell);
+                p = new PoolCellGUI(new UnitRectangle(new UnitValue(0, Unit.vw), new UnitValue(0, Unit.vh), cellDims.x, cellDims.y), pool, a, titleCell);
                 p.setPosition(Position.Relative);
-                poolCells.add(p);
+                poolCellGUIs.add(p);
                 mainBox.addComponent(p);
             }
         }
 
-        poolCells.get(poolCells.size()-1).addDragIcon();
+        poolCellGUIs.get(poolCellGUIs.size()-1).addDragIcon();
     }
 
     public Pool<?> getPool() {return pool;}

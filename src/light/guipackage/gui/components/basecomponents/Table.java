@@ -3,86 +3,80 @@ package light.guipackage.gui.components.basecomponents;
 import java.awt.Color;
 import java.awt.Font;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
+import light.guipackage.general.Point;
 import light.guipackage.general.UnitPoint;
 import light.guipackage.general.UnitRectangle;
 import light.guipackage.general.UnitValue;
 import light.guipackage.general.UnitValue.Unit;
 import light.guipackage.gui.Styles;
 import light.guipackage.gui.components.Component;
-import light.guipackage.gui.components.InputComponent;
 import light.guipackage.gui.components.boxes.CollumnBox;
 import light.guipackage.gui.components.boxes.FlexBox;
-import light.guipackage.gui.components.boxes.SimpleBox;
 
 public class Table extends FlexBox {
-
-    private List<TableCollumn> collumns;
-
+    
+    private List<CollumnBox> collumns;
+    
     public Table(UnitPoint pos) {
         super(pos);
-        collumns = new ArrayList<TableCollumn>();
+        collumns = new ArrayList<CollumnBox>();
     }
-
-    public void addCollumn(Class<?> type, String title, UnitValue width) {
-        addCollumn(type, null, title, width);
+    
+    public void addCollumn(UnitValue width, String title) {
+        addCollumn(width, null, title);
     }
-
-    public void addCollumn(Class<?> type, Object tag, String title, UnitValue width) {
+    
+    public void addCollumn(UnitValue width, Object tag, String title) {
         CollumnBox c = new CollumnBox();
         c.setPosition(Position.Relative);
         c.setMinWidth(width);
+        c.setTag(tag);
         addComponent(c);
-
+        
         //Add title label
-        SimpleBox b = new SimpleBox(new UnitRectangle(0, Unit.px, 0, Unit.px, 100, Unit.pcw, 5, Unit.vh), Styles.fg);
-        b.setBorder(new Color(100, 100, 100));
+        Label b = new Label(new UnitRectangle(0, Unit.px, 0, Unit.px, 100, Unit.pcw, 5, Unit.vh), title, new Font("Geneva", Font.PLAIN, 12), Styles.textMain);
+        b.setColor(new Color(90, 90, 90));
+        b.setBorder(new Color(80, 80, 80));
+        b.setTextCentered(true);
         c.addComponent(b);
-        Label l = new Label(new UnitRectangle(10, 10, 80, 80, Unit.pcw, Unit.pch), title, new Font("Geneva", Font.PLAIN, 10), Styles.textMain);
-        l.setTextCentered(true);
-        l.fitFont();
-        b.addComponent(l);
-
-        collumns.add(new TableCollumn(c, type, tag));
+        collumns.add(c);
     }
-
-    public void addRow() {
-        for (TableCollumn t : collumns) {
-            Component c = null;
-           
-            //Create element
-            if (t.type==Label.class) {
-                SimpleBox b = new SimpleBox(new UnitRectangle(0, Unit.px, 0, Unit.px, 100, Unit.pcw, 5, Unit.vh), Styles.focus2);
-                b.setBorder(Styles.focus);
-                Label l = new Label(new UnitRectangle(10, 10, 80, 80, Unit.pcw, Unit.pch), "hello", new Font("Geneva", Font.PLAIN, 10), Styles.textMain);
-                l.setTextCentered(true);
-                l.fitFont();
-                b.addComponent(l);
-                c = b;
-            }
-            if (t.type==CheckBoxInput.class) {
-                CheckBoxInput cB = new CheckBoxInput(new UnitRectangle(0, Unit.px, 0, Unit.px, 100, Unit.pcw, 5, Unit.vh));
-                cB.setBorder(Styles.focus);
-                c = cB;
-            }
-            if (t.type==TextInput.class) {
-                TextInput tB = new TextInput(new UnitRectangle(0, Unit.px, 0, Unit.px, 100, Unit.pcw, 5, Unit.vh));
-                tB.setBorder(Styles.focus);
-                c = tB;
-            }
-
-            //Add element to collumn
-            t.cBox.addComponent(c);
+    
+    public void addRow(Object tag) {
+        for (CollumnBox collumn : collumns) {
+            //Add content label
+            Label b = new Label(new UnitRectangle(0, Unit.px, 0, Unit.px, 100, Unit.pcw, 5, Unit.vh), "", new Font("Geneva", Font.PLAIN, 12), Styles.textMain);
+            b.setColor(new Color(50, 50, 50));
+            b.setBorder(new Color(80, 80, 80));
+            b.setTextCentered(true);
+            b.setTag(tag);
+            collumn.addComponent(b);
         }
     }
 
-    public Map<Object, Object> getValuesForRow(int i) {
+    public void setText(Point p, String text) {
+        if (collumns.isEmpty()||p.x<0||p.x>collumns.size()||p.y<0||p.y>=collumns.get((int) (p.x)).getNumComponents()) return; 
+        Label box = (Label) collumns.get((int) p.x).getNthComponent((int) p.y);
+        box.setText(text);
+    }
+
+    public void setText(Object collumnTag, Object rowTag, String text) {
+        for (CollumnBox collumn : collumns) {
+            if (collumn.getTag()==null||!collumn.getTag().equals(collumnTag)) continue;
+            for (Component box : collumn.getComponents()) {
+                if (box.getTag()!=null&&box.getTag().equals(rowTag)&&box instanceof Label) {
+                    ((Label) box).setText(text);
+                }
+            }
+        }
+    }
+    
+    /*public Map<Object, Object> getValuesForRow(int i) {
         if (collumns.isEmpty()) return null;
         if (i==0||i>collumns.get(0).cBox.getNumComponents()-1) return null;
-
+        
         Map<Object, Object> values = new HashMap<>();
         for (int z=0; z<collumns.size(); z++) {
             Component c = collumns.get(z).cBox.getNthComponent(i-1);
@@ -90,17 +84,5 @@ public class Table extends FlexBox {
             values.put(collumns.get(z).tag, ((InputComponent) c).getValue());
         }
         return values;
-    }
-
-    private class TableCollumn {
-        CollumnBox cBox;
-        Class<?> type;
-        Object tag;
-
-        public TableCollumn(CollumnBox cBox, Class<?> type, Object tag) {
-            this.cBox = cBox;
-            this.type = type;
-            this.tag = tag;
-        }
-    }
+    }*/
 }

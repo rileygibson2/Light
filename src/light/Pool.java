@@ -2,10 +2,8 @@ package light;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
 import light.general.Addressable;
 import light.general.ConsoleAddress;
@@ -14,13 +12,13 @@ import light.persistency.PersistencyWriter;
 import light.uda.UDACapable;
 import light.uda.guiinterfaces.GUIInterface;
 
-public class Pool<T extends Addressable & PersistencyCapable> extends Addressable implements PersistencyCapable, UDACapable {
+public class Pool<T extends Addressable & PersistencyCapable> extends Addressable implements PersistencyCapable, UDACapable, Iterable<T> {
 
-    Set<T> elements;
+    List<T> elements;
 
     public Pool(ConsoleAddress address) {
         super(address);
-        elements = new HashSet<T>();
+        elements = new ArrayList<T>();
     }
 
     public T get(ConsoleAddress address) {
@@ -34,24 +32,22 @@ public class Pool<T extends Addressable & PersistencyCapable> extends Addressabl
 
     public int size() {return elements.size();}
 
-    public List<T> getList() {
-        List<T> result = new ArrayList<>(elements);
-        Collections.sort(result, new Comparator<T>() {
-			public int compare(T t1, T t2) {
-				return t1.getAddress().compareTo(t2.getAddress());
-			}
-		});
-        return result;
+    public void add(T t) {
+        if (!t.getAddress().matchesScope(getAddress())) return;
+        elements.add(t);
+        Collections.sort(elements);
     }
 
-    public void add(T t) {elements.add(t);}
-
-    public void remove(T t) {elements.remove(t);}
+    public void remove(T t) {
+        elements.remove(t);
+        Collections.sort(elements);
+    }
 
     public void remove(ConsoleAddress address) {
         for (T t : elements) {
             if (t.getAddress().equals(address)) elements.remove(t);
         }
+        Collections.sort(elements);
     }
 
     public boolean contains(T t) {return elements.contains(t);}
@@ -84,4 +80,20 @@ public class Pool<T extends Addressable & PersistencyCapable> extends Addressabl
 
     @Override
     public void setGUI(GUIInterface gui) {}
+
+    @Override
+    public Iterator<T> iterator() {
+        return new Iterator<T>() {
+            private int current = 0;
+            @Override
+            public boolean hasNext() {return current<elements.size();}
+            @Override
+            public T next() {return hasNext() ? elements.get(current++) : null;}
+        };
+    }
+
+    @Override
+    public String toString() {
+        return "[Pool "+elements.toString()+"]";
+    }
 }

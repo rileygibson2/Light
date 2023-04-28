@@ -1,14 +1,10 @@
 package light.commands.commandcontrol;
 
 import java.awt.event.KeyEvent;
-import java.util.ArrayDeque;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 
 import light.commands.Command;
-import light.commands.commandcontrol.CommandProxy.Operator;
 import light.guipackage.cli.CLI;
 import light.guipackage.general.Submitter;
 import light.guipackage.gui.GUI;
@@ -24,7 +20,7 @@ public class CommandLine {
     private CommandController controller;
 
     private CommandLine() {
-        gui = (CommandLineGUIInterface) GUI.getInstance().addToGUI(this);
+        gui = (CommandLineGUIInterface) GUI.getInstance().addToGUI(CommandLine.class);
         registeredCommands = new HashMap<Class<? extends Command>, String>();
         controller = new CommandController();
 

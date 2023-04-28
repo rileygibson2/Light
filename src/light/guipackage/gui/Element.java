@@ -96,7 +96,7 @@ public abstract class Element {
 		this.r = r;
 		this.rFunc = r.clone();
 		this.minSize = new UnitPoint(0, Unit.px, 0, Unit.px);
-		this.maxSize = new UnitPoint(GUI.screen.width, Unit.px, GUI.screen.height, Unit.px);
+		this.maxSize = new UnitPoint(Double.MAX_VALUE, Unit.px, Double.MAX_VALUE, Unit.px);
 		this.components = new ArrayList<Component>();
 		componentsLock = new ReentrantLock();
 		position = Position.Absolute;
@@ -243,7 +243,7 @@ public abstract class Element {
 		}
 		scrollOffset.x = offset;
 	}
-
+	
 	public UnitPoint getScrollOffset() {return scrollOffset;}
 	
 	public Element getParent() {return parent;}
@@ -743,14 +743,27 @@ public abstract class Element {
 	* 
 	*/
 	private void doOverlowScroll() {
+		if (!childrenOverflow()) { //Check if elements do actually overflow bounding box
+			scrollBarX = null;
+			scrollBarY = null;
+			resetScrollControlInSubtree();
+			return;
+		}
+		
 		if (!getOverflow().isScroll()||components==null||components.isEmpty()) return;
 		for (Component child : components) child.investigateOverflowInSubtree(this);
 		implementScrollBar();
 	}
 	
+	public boolean childrenOverflow() {
+		Rectangle bounds = getRealRec();
+		Rectangle actual = getSubtreeBoundingBox(null);
+		return actual.x<bounds.x||actual.y<bounds.y||actual.x+actual.width>bounds.x+bounds.width||actual.y+actual.height>bounds.y+bounds.height;
+	}
+	
 	/**
 	* Implements scroll controls for all elements in the subtree
-	* @param clipElement
+	* @param boundingElement
 	*/
 	protected void investigateOverflowInSubtree(Element boundingElement) {
 		Rectangle bounds = boundingElement.getBoundingRectangle();
@@ -758,7 +771,7 @@ public abstract class Element {
 		//Reset
 		setHiddenForOverflow(false);
 		setClippingElement(null);
-
+		
 		//Y scroll
 		if (boundingElement.getOverflow().isScrollY()) {
 			//Check if all of element is outside bounds
@@ -784,26 +797,6 @@ public abstract class Element {
 		}
 	}
 	
-	protected double getLowestYInSubtree() {
-		Rectangle r = getRealRec();
-		double lowestY = r.y+r.height;
-		for (Component child : components) {
-			double y = child.getLowestYInSubtree();
-			if (y>lowestY) lowestY = y;
-		}
-		return lowestY;
-	}
-	
-	protected double getRightMostXInSubtree() {
-		Rectangle r = getRealRec();
-		double rightMostX = r.x+r.width;
-		for (Component child : components) {
-			double x = child.getRightMostXInSubtree();
-			if (x>rightMostX) rightMostX = x;
-		}
-		return rightMostX;
-	}
-	
 	private void implementScrollBar() {
 		//Y scroll
 		if (getOverflow().isScrollY()) {
@@ -822,12 +815,14 @@ public abstract class Element {
 			* and position of the actual bounding box in that overflowing box.
 			*/
 			Rectangle bounds = getBoundingRectangle();
-			double perc = bounds.height/(getLowestYInSubtree()-bounds.y);
+			Rectangle actualBounds = getSubtreeBoundingBox(null);
+			double highestY = actualBounds.y+actualBounds.height;
+			double perc = bounds.height/(highestY-bounds.y);
 			
 			//Update scroll bar handle height
 			scrollBarY.updateHandle(new UnitValue(perc*100, Unit.pch));
 		}
-
+		
 		//X scroll
 		if (getOverflow().isScrollX()) {
 			//Create a scrollbar if none present
@@ -835,9 +830,11 @@ public abstract class Element {
 				scrollBarX = new ScrollBar(ScrollDir.X);
 				scrollBarX.setParent(this);
 			}
-
+			
 			Rectangle bounds = getBoundingRectangle();
-			double perc = bounds.width/(getRightMostXInSubtree()-bounds.x);
+			Rectangle actualBounds = getSubtreeBoundingBox(null);
+			double highestX = actualBounds.x+actualBounds.width;
+			double perc = bounds.width/(highestX-bounds.x);
 			
 			//Update scroll bar handle height
 			scrollBarX.updateHandle(new UnitValue(perc*100, Unit.pcw));
@@ -873,6 +870,46 @@ public abstract class Element {
 		for (Component child : components) child.resetScrollControlInSubtree();
 	}
 	
+	protected Rectangle getSubtreeBoundingBox(Rectangle widest) {
+		//Entry condition
+		if (widest==null) widest = new Rectangle(Double.MAX_VALUE, Double.MAX_VALUE, 0, 0);
+		else {
+			Rectangle r = getRealRec();
+			//Find biggest box including this element
+			if (r.x<widest.x) widest.x = r.x;
+			if (r.x+r.width>widest.x+widest.width) { //New width is highest x-widest.x to preserve low value
+				widest.width = (r.x+r.width)-widest.x;
+			}
+			if (r.y<widest.x) widest.y = r.y;
+			if (r.y+r.height>widest.y+widest.height) { //New height is highest y-widest.y to preserve low value
+				widest.height = (r.y+r.height)-widest.y;
+			}
+		}
+		
+		for (Component child : components) widest = child.getSubtreeBoundingBox(widest);
+		return widest;
+	}
+	
+	/*protected double getLowestYInSubtree() {
+		Rectangle r = getRealRec();
+		double lowestY = r.y+r.height;
+		for (Component child : components) {
+			double y = child.getLowestYInSubtree();
+			if (y>lowestY) lowestY = y;
+		}
+		return lowestY;
+	}
+	
+	protected double getHighestXInSubtree() {
+		Rectangle r = getRealRec();
+		double rightMostX = r.x+r.width;
+		for (Component child : components) {
+			double x = child.getHighestXInSubtree();
+			if (x>rightMostX) rightMostX = x;
+		}
+		return rightMostX;
+	}*/
+	
 	/**
 	* Gets the pixel unit rectangle that this element is currently bound by.
 	* Usually called on element set as a clip element clipping to facilitate overflow functionality.
@@ -901,7 +938,7 @@ public abstract class Element {
 		if (hasYScrollOffset()) { //Need to add the y offset to rFunc before realing
 			rToReal.y.v = rToReal.y.v+translateToUnit(getScrollOffset().y, this, rFunc.y.u, this).v;
 		}
-
+		
 		return getRealRec(rToReal);
 	}
 	
@@ -1190,7 +1227,6 @@ public abstract class Element {
 				if (hasClicked) break;
 			}
 		}
-		CLI.debug("aa"+simpleName());
 		
 		//Deselect all non clicked components
 		/*for (Component c : getComponents()) {

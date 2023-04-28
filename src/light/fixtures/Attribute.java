@@ -38,7 +38,7 @@ public enum Attribute {
     IRIS(Feature.BEAM, "Iris"),
     FROST(Feature.BEAM, "Frost"),
     PRISM1(Feature.BEAM, "Prism"),
-    PRISM1_ROTATION(Feature.BEAM, "Prism Rotate"),
+    PRISM1_ROTATION(Feature.BEAM, "PrismRot"),
 
     //Focus sub attributes
     FOCUS(Feature.FOCUS, "Focus"),

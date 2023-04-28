@@ -3,6 +3,7 @@ package light.guipackage.gui.components.complexcomponents;
 import java.awt.Color;
 import java.awt.Font;
 
+import light.Pool;
 import light.commands.commandcontrol.CommandLine;
 import light.commands.commandcontrol.CommandProxy;
 import light.executors.Executor;
@@ -19,11 +20,12 @@ import light.guipackage.gui.components.basecomponents.Label;
 import light.guipackage.gui.components.boxes.SimpleBox;
 import light.stores.Group;
 import light.stores.Preset;
+import light.stores.View;
 import light.stores.effects.Effect;
 
 public class PoolCellGUI extends Component {
     
-    PoolGUI poolGUI;
+    private Pool<?> pool;
     ConsoleAddress address;
     
     SimpleBox mainBox;
@@ -47,11 +49,12 @@ public class PoolCellGUI extends Component {
         new Color(150, 150, 150),
         new Color(150, 0, 0),
         new Color(50, 0, 200),
+        new Color(150, 0, 0),
     };
     
-    public PoolCellGUI(UnitRectangle r, PoolGUI poolGUI, ConsoleAddress address, boolean titleCell) {
+    public PoolCellGUI(UnitRectangle r, Pool<?> pool, ConsoleAddress address, boolean titleCell) {
         super(r);
-        this.poolGUI = poolGUI;
+        this.pool = pool;
         this.address = address;
         
         //Box
@@ -85,7 +88,7 @@ public class PoolCellGUI extends Component {
         idLabel.setTextYCentered(true);
         idLabel.fitFont();
         
-        if (poolGUI.getPool().contains(address)) { //Filled cell
+        if (pool.contains(address)) { //Filled cell
             mainBox.setColor(new Color(10, 10, 10));
             mainBox.setBorderColor(getTypeColor());
             idLabel.setTextColor(Styles.textMain);
@@ -100,7 +103,7 @@ public class PoolCellGUI extends Component {
             Label name = new Label(new UnitRectangle(0, 25, 100, 50), "aaa", new Font("Geneva", Font.PLAIN, 20), Styles.textMain);
             name.setTextCentered(true);
             name.fitFont();
-            name.setText(poolGUI.getPool().get(address).getLabel());
+            name.setText(pool.get(address).getLabel());
             bottom.addComponent(name);
 
         }
@@ -112,20 +115,18 @@ public class PoolCellGUI extends Component {
         mainBox.addComponent(idLabel);
 
         //Click action
-		setClickAction(new Submitter<Point>() {
-			@Override
-			public void submit(Point p) {
-				click(p);
-			}
-		});
+		setClickAction(() -> click());
     }
+
+    public ConsoleAddress getAddress() {return address;}
     
     private Color getTypeColor() {
         if (address.matchesScope(Preset.class)) return typeCols[Preset.getTypeFromAddress(address).ordinal()];
         if (address.matchesScope(Group.class)) return typeCols[7];
         if (address.matchesScope(Effect.class)) return typeCols[8];
         if (address.matchesScope(Executor.class)) return typeCols[9];
-        return null;
+        if (address.matchesScope(View.class)) return typeCols[10];
+        else return typeCols[10];
     }
 
     private String getTypeText() {
@@ -144,7 +145,7 @@ public class PoolCellGUI extends Component {
     
     public void removeDragIcon() {mainBox.removeComponent(dragIcon);}
     
-    public void click(Point p) {
+    public void click() {
         CommandLine.getInstance().getCommandController().addToCommand(new CommandProxy(address));
     }
     

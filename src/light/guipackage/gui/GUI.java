@@ -8,7 +8,9 @@ import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
 import java.awt.RenderingHints;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -29,6 +31,8 @@ import light.guipackage.gui.components.complexcomponents.EncodersGUI;
 import light.guipackage.gui.components.complexcomponents.FixtureWindowGUI;
 import light.guipackage.gui.components.complexcomponents.PoolGUI;
 import light.guipackage.gui.components.complexcomponents.UDAGUI;
+import light.guipackage.gui.components.complexcomponents.ViewGUI;
+import light.stores.View;
 import light.uda.FixtureWindow;
 import light.uda.UDA;
 import light.uda.UDACapable;
@@ -38,7 +42,7 @@ import light.uda.guiinterfaces.GUIInterface;
 public class GUI extends JPanel {
 	
 	private static final long serialVersionUID = 1L;
-	private Object parent; // The creator of this GUI
+	private Object creator; // The creator of this GUI
 	private static GUI singleton;
 	public static Rectangle screen;
 	public static JFrame frame;
@@ -47,7 +51,9 @@ public class GUI extends JPanel {
 	private IO io;
 	
 	private RootElement currentRoot;
-	private static UDAGUI udaGUI;
+
+	private Set<UDAGUI> udaGUIs;
+	private static UDAGUI currentUDAGUI;
 	
 	private List<MessageBox> messages;
 	
@@ -62,6 +68,7 @@ public class GUI extends JPanel {
 		messages = new ArrayList<MessageBox>();
 		antiAlias = false;
 		currentRoot = new RootElement();
+		udaGUIs = new HashSet<UDAGUI>();
 		
 		setFocusable(true);
 		setFocusTraversalKeysEnabled(false);
@@ -77,40 +84,64 @@ public class GUI extends JPanel {
 		return singleton;
 	}
 	
-	public void setParent(Object parent) {this.parent = parent;}
+	public void setCreator(Object creator) {this.creator = creator;}
+
+	public Object getCreator() {return creator;}
+
+	public GUIInterface addUDA(UDA uda) {
+		UDAGUI udaGUI = new UDAGUI(new UnitRectangle(5, 0, 90, 93), uda);
+		udaGUIs.add(udaGUI);
+		return udaGUI;
+	}
+	
+	public static UDAGUI getCurrentUDAGUI() {return currentUDAGUI;}
 	
 	public GUIInterface addToGUI(Object o) {
+		if (o instanceof UDA) return null; //Cannot add uda's in this method
+		
 		GUIInterface c = null;
-		if (o instanceof CommandLine) {
+		//Static components
+		if (o==CommandLine.class) {
 			c = new CommandLineGUI(new UnitRectangle(5, 93, 80, 5));
 			currentRoot.addComponent((Component) c);
 		}
-		else if (o instanceof UDA) {
-			udaGUI = new UDAGUI(new UnitRectangle(5, 0, 95, 93), (UDA) o);
-			c = udaGUI;
+		else if (o==View.class) { //TODO bodge fix to get GUI to recognise this is the view window
+			c = new ViewGUI(new UnitRectangle(95, 0, 5, 100));
 			currentRoot.addComponent((Component) c);
 		}
-		else { //UDA elements
+		//UDA elements
+		else {
 			//Find size
 			UDACapable oU = (UDACapable) o;
-			UnitPoint cellDims = udaGUI.getCellDims();
+			UnitPoint cellDims = currentUDAGUI.getCellDimensions(); //Dimensions of a cell
+			Rectangle elementDims = currentUDAGUI.getUDA().getCellsForUDAElement(oU); //Dimensions (in num cells) of this element
 			UnitRectangle r = new UnitRectangle();
-			r.x = new UnitValue(udaGUI.getUDA().getCells(oU).x*cellDims.x.v, cellDims.x.u);
-			r.y = new UnitValue(udaGUI.getUDA().getCells(oU).y*cellDims.y.v,cellDims.y.u);
-			r.width = new UnitValue(udaGUI.getUDA().getCells(oU).width*cellDims.x.v, cellDims.x.u);
-			r.height = new UnitValue(udaGUI.getUDA().getCells(oU).height*cellDims.y.v, cellDims.y.u);
+			r.x = new UnitValue(elementDims.x*cellDims.x.v, cellDims.x.u);
+			r.y = new UnitValue(elementDims.y*cellDims.y.v,cellDims.y.u);
+			r.width = new UnitValue(elementDims.width*cellDims.x.v, cellDims.x.u);
+			r.height = new UnitValue(elementDims.height*cellDims.y.v, cellDims.y.u);
 			
 			if (o instanceof Pool) c = new PoolGUI(r, (Pool<?>) o);
 			if (o instanceof FixtureWindow) c = new FixtureWindowGUI(r, (FixtureWindow) o);
 			if (o instanceof Encoders) c = new EncodersGUI(r);
 
-			if (c!=null) udaGUI.addComponent((Component) c);
+			if (c!=null) currentUDAGUI.addComponent((Component) c);
 		}
 		
 		return c;
 	}
-	
-	public static UDAGUI getUDAGUI() {return udaGUI;}
+
+	public void switchView(View view) {
+		for (UDAGUI udaGUI : udaGUIs) {
+			if (udaGUI.getUDA().getView().equals(view)) {
+				//Remove current uda from DOM
+				if (currentUDAGUI!=null) currentRoot.removeComponent(currentUDAGUI);
+				//Add found uda gui to dom
+				currentUDAGUI = udaGUI;
+				currentRoot.addComponent(currentUDAGUI);
+			}
+		}
+	}
 	
 	public void addMessage(String message, Color col) {
 		//Find y position message should animate to
@@ -162,7 +193,7 @@ public class GUI extends JPanel {
 			if (dom.visualiserVisible()) dom.update(getCurrentRoot());
 		}
 		
-		public static void initialise(Object controller, Rectangle screen) {
+		public static void initialise(Object creator, Rectangle screen) {
 			//Full screen check
 			if (screen==null) {
 				GraphicsDevice device = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
@@ -172,7 +203,7 @@ public class GUI extends JPanel {
 			
 			//Make GUI
 			GUI.singleton = new GUI();
-			GUI.singleton.setParent(controller);
+			GUI.singleton.setCreator(creator);
 			
 			javax.swing.SwingUtilities.invokeLater(new Runnable() {
 				public void run() {

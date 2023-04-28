@@ -56,8 +56,8 @@ public class Output {
         }
         
         //Check for fixtures not present
-        for (Fixture fixture : PatchManager.getInstance().allFixtureSet()) {
-            for (Attribute attribute : fixture.getProfile().getAttributeSet()) {
+        for (Fixture fixture : PatchManager.getInstance().allFixtureList()) {
+            for (Attribute attribute : fixture.getProfile().getAttributeList()) {
                 if (!result.contains(fixture, attribute)) {
                     //Need to add default value so output for all fixtures on all channels is represented in this store
                     result.set(fixture, attribute, fixture.getProfile().getChannelWithAttribute(attribute).getDefaultValue(), false);

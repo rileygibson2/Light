@@ -10,7 +10,6 @@ import light.fixtures.Attribute;
 import light.fixtures.Feature;
 import light.fixtures.FeatureGroup;
 import light.fixtures.FixtureType;
-import light.guipackage.cli.CLI;
 import light.persistency.PersistencyCapable;
 
 /**
@@ -87,9 +86,10 @@ public class Profile implements PersistencyCapable {
         return false;
     }
 
-    public Set<Attribute> getAttributeSet() {
-        Set<Attribute> attributes = new HashSet<>();
+    public List<Attribute> getAttributeList() {
+        List<Attribute> attributes = new ArrayList<>();
         for (ProfileChannel c : channels) attributes.add(c.getAttribute());
+        Collections.sort(attributes);
         return attributes;
     }
 

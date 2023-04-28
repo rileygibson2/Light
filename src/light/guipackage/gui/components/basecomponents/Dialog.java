@@ -19,8 +19,8 @@ public class Dialog extends Component {
 
 	private Runnable onClose;
 	SimpleBox mainBox;
-	Button close;
-	Button accept;
+	SimpleBox close;
+	SimpleBox accept;
 	Set<Component> addedComponents; //Components that are not part of the core box
 	List<SimpleBox> tabs; //Tabs added to this popup;
 	

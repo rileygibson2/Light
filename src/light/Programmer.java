@@ -88,7 +88,7 @@ public class Programmer extends DataStore implements OutputCapable, EncoderCapab
     public void clearSelected() {
         selectedFixtures.clear();
         Encoders.getInstance().update();
-        updateFixturesGUI(PatchManager.getInstance().allFixtureSet()); //Update all fixtures in gui
+        updateFixturesGUI(PatchManager.getInstance().allFixtureList()); //Update all fixtures in gui
     }
 
     @Override

@@ -8,10 +8,12 @@ public class View extends AbstractStore implements PersistencyCapable {
     
     private UDA uda;
 
-    public View(UDA uda) {
-        super(new ConsoleAddress(View.class, 0, 0));
-        this.uda = uda;
+    public View(ConsoleAddress address) {
+        super(address);
+        this.uda = new UDA(this);
     }
+
+    
 
     public View(ConsoleAddress address, UDA uda) {
         super(address);

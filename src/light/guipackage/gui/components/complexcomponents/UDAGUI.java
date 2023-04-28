@@ -9,6 +9,7 @@ import light.encoders.Encoders;
 import light.executors.Executor;
 import light.general.ConsoleAddress;
 import light.general.Utils;
+import light.guipackage.cli.CLI;
 import light.guipackage.general.Point;
 import light.guipackage.general.Rectangle;
 import light.guipackage.general.Submitter;
@@ -30,37 +31,64 @@ import light.uda.FixtureWindow;
 import light.uda.UDA;
 import light.uda.guiinterfaces.UDAGUIInterface;
 
-public class UDAGUI extends Component implements UDAGUIInterface {
+public class UDAGUI extends SimpleBox implements UDAGUIInterface {
     
     private UDA uda;
-    private UnitPoint cellDims; //Dimensions of a cell relative to the mainBox
+    private UnitPoint cellDims; //Width and height of a cell
     
     private TempWindow openZonePicker;
     
     public UDAGUI(UnitRectangle r, UDA uda) {
         super(r);
         this.uda = uda;
-        cellDims = new UnitPoint(6, Unit.vw, 6, Unit.vw); //Cell dimensions
         
+        /*
+         * This constructor needs to find the amount of uda cells there can be for this device and
+         * this screen. UDA cells must be a square and the UDA class defines the amount of cells wide
+         * it wants the program to have.
+         * Therefore this class uses that information to find the width of a cell based on the width
+         * of this element, sets the height a cell to the same and then the UDA class can query for the
+         * actual maximum number of cells deep this GUI was able to construct. The collaboration between
+         * this GUI class and the UDA element is what sets the size of the user defined area.
+         */
         setDOMEntryAction(() -> {
+            if (cellDims!=null) return; //Stops recalculation and recreation of all dots on view switch
+            /*
+             * TODO need something here where on a view switch all uda capable elements are rechecked
+             * incase the uda window has been changed or resized somehow.
+             * Ideally this would happen without all the uda elements rebuilding
+             */
+
+            //Find cell dims
+            cellDims = new UnitPoint(getFuncWidth().clone(), new UnitValue());
+            cellDims.x.v = cellDims.x.v/uda.getPreferredWidth();
+            cellDims.x = translateToUnit(cellDims.x, this, Unit.vw, this);
+            cellDims.y = cellDims.x.clone();
+
             //Add dots
-            for (int i=0; i<300; i++) {
+            int i = 0;
+            for (i=0; i<1000; i++) { //Limit is just a saftey to replace a while true
                 SimpleBox sB = new SimpleBox(new UnitRectangle(new UnitValue(), new UnitValue(), cellDims));
-                //sB.setBorder(Color.WHITE);
                 sB.setPosition(Position.Relative);
                 addComponent(sB);
                 SimpleBox oval = new SimpleBox(new UnitRectangle(48, 48, 4, 4), new Color(100, 100, 100));
                 oval.setOval(true);
                 sB.addComponent(oval);
                 
-                //Check not overflowing edge
-                UnitValue x = translateToUnit(sB.getFuncX(), sB, getWidth().u, this);
-                UnitValue y = translateToUnit(sB.getFuncY(), sB, getHeight().u, this);
-                if (x.v>getWidth().v||y.v>getHeight().v) {
+                //Check if last created cell's bottom edge is overflowing this height
+                double bottomEdge = translateToUnit(sB.getFuncY(), this, getFuncHeight().u, this).v+translateToUnit(sB.getFuncHeight(), this, getFuncHeight().u, this).v;
+                if (bottomEdge>getFuncHeight().v) {
                     removeComponent(sB);
                     break;
                 }
             }
+
+            /*
+             * Need to set new height of UDAGUI to actual height of all cells
+             * So need to find number of cells in each collumn.
+             */
+            double numInRow = Math.round(translateToUnit(getFuncWidth(), this, cellDims.x.u, this).v/cellDims.x.v);
+            setHeight(new UnitValue((i/numInRow)*cellDims.y.v, cellDims.y.u));
         });
         
         //Click action
@@ -73,12 +101,13 @@ public class UDAGUI extends Component implements UDAGUIInterface {
     }
     
     public Point getSize() {
+        if (cellDims==null) return null; //Size won't have been calculated
         UnitValue width = translateToUnit(getWidth(), this, cellDims.x.u, this);
         UnitValue height = translateToUnit(getHeight(), this, cellDims.y.u, this);
-        return new Point((int) (width.v/cellDims.x.v), (int) (height.v/cellDims.y.v));
+        return new Point((int) (Math.round(width.v/cellDims.x.v)), (int) (Math.round(height.v/cellDims.y.v)));
     }
     
-    public UnitPoint getCellDims() {return cellDims;}
+    public UnitPoint getCellDimensions() {return cellDims;}
     
     public UDA getUDA() {return uda;}
     

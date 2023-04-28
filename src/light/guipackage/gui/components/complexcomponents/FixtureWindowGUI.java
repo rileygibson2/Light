@@ -6,6 +6,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.sound.midi.Patch;
+
 import light.Programmer;
 import light.fixtures.Attribute;
 import light.fixtures.FeatureGroup;
@@ -26,6 +28,7 @@ import light.guipackage.general.UnitValue.Unit;
 import light.guipackage.gui.Styles;
 import light.guipackage.gui.components.basecomponents.Image;
 import light.guipackage.gui.components.basecomponents.Label;
+import light.guipackage.gui.components.basecomponents.Table;
 import light.guipackage.gui.components.boxes.CollumnBox;
 import light.guipackage.gui.components.boxes.FlexBox;
 import light.guipackage.gui.components.boxes.SimpleBox;
@@ -37,12 +40,12 @@ import light.uda.guiinterfaces.FixtureWindowGUIInterface;
 public class FixtureWindowGUI extends SimpleBox implements FixtureWindowGUIInterface {
     
     private FixtureWindow fixtureWindow;
-    private Map<Profile, FlexBox> profileBoxes;
     private Map<Fixture, SimpleBox> fixtureGUIs;
+    private Table fixtureTable;
+    private boolean tableView = true;
     
     public FixtureWindowGUI(UnitRectangle r, FixtureWindow fixtureWindow) {
         super(r);
-        profileBoxes = new HashMap<Profile, FlexBox>();
         fixtureGUIs = new HashMap<Fixture, SimpleBox>();
         
         this.fixtureWindow = fixtureWindow; 
@@ -51,7 +54,7 @@ public class FixtureWindowGUI extends SimpleBox implements FixtureWindowGUIInter
         setMaxHeight(getHeight());
         setMaxWidth(getWidth());
         setClickAction(() -> {}); //To stop click chain
-        setOverflow(Overflow.ScrollY);
+        setOverflow(Overflow.ScrollBoth);
         
         //Top bar
         SimpleBox topBar = new SimpleBox(new UnitRectangle(0, Unit.px, 0, Unit.px, 100, Unit.pcw, 4, Unit.vh));
@@ -79,15 +82,42 @@ public class FixtureWindowGUI extends SimpleBox implements FixtureWindowGUIInter
         addComponent(topBar);
         
         //Create fixtues
-        buildFixtures();
+        if (tableView) buildFixturesTableView();
+        else buildFixturesBlockView();
     }
     
-    private void buildFixtures() {
+    private void buildFixturesTableView() {
+        fixtureTable = new Table(new UnitPoint(0, Unit.pcw, 0, Unit.vh));
+        fixtureTable.setPosition(Position.Relative);
+        addComponent(fixtureTable);
+
+        //Setup table
+        fixtureTable.addCollumn(new UnitValue(5, Unit.vw), Fixture.class, "Fixtures");
+        for (Attribute a : PatchManager.getInstance().allAttributeList()) {
+            fixtureTable.addCollumn(new UnitValue(5, Unit.vw), a, a.getUserName());
+        }
+        for (Fixture f : PatchManager.getInstance().allFixtureList()) {
+            fixtureTable.addRow(f);
+            fixtureTable.setText(Fixture.class, f, f.getAddress().getSuffix()+"");
+            populateFixtureBoxTableView(f);
+        }
+    }
+
+    private void populateFixtureBoxTableView(Fixture f) {
+        DataStore outputStore = Output.getInstance().generateOutputStore();
+        for (Map.Entry<Attribute, Double> values : outputStore.getFixtureValues(f).entrySet()) {
+            fixtureTable.setText(values.getKey(), f, Math.round(values.getValue())+"");
+        }
+
+    }
+
+    private void buildFixturesBlockView() {
         CollumnBox wrapper = new CollumnBox(new UnitPoint(3, Unit.pcw, 0, Unit.px));
         wrapper.setPosition(Position.Relative);
         wrapper.setMinWidth(new UnitValue(90, Unit.pcw));
         addComponent(wrapper);
-        
+        fixtureGUIs.clear();
+
         for (Profile profile : PatchManager.getInstance().allProfileSet()) {
             Label profileLabel =  new Label(new UnitRectangle(0, Unit.px, 4, Unit.vh, 100, Unit.pcw, 3, Unit.vh), profile.getName()+" "+profile.getModeName(), new Font(Styles.baseFont, Font.BOLD, 14), new Color(230, 230, 230));
             profileLabel.setBorder(new int[] {2}, new Color(250, 250, 250));
@@ -116,12 +146,16 @@ public class FixtureWindowGUI extends SimpleBox implements FixtureWindowGUIInter
                 });
                 fBox.addComponent(box);
                 
-                populateFixtureBox(f, box);
+                fixtureGUIs.put(f, box);
+                populateFixtureBoxBlockView(f);
             }
         }
     }
     
-    private void populateFixtureBox(Fixture f, SimpleBox box) {
+    private void populateFixtureBoxBlockView(Fixture f) {
+        SimpleBox box = fixtureGUIs.get(f);
+        if (box==null) return;
+        box.clearComponents();
         DataStore outputStore = Output.getInstance().generateOutputStore();
         
         if (Programmer.getInstance().isSelected(f)) {
@@ -217,8 +251,6 @@ public class FixtureWindowGUI extends SimpleBox implements FixtureWindowGUIInter
         SimpleBox inner = new SimpleBox(new UnitRectangle(20, Unit.pcw, 98.5-iB, Unit.pch, 62, Unit.pcw, iB, Unit.pch));
         inner.setColor(new Color(255, 200, 7));
         bar.addComponent(inner);
-        
-        fixtureGUIs.put(f, box);
     }
     
     public Color getDisplayColor(Fixture fixture) {
@@ -277,14 +309,14 @@ public class FixtureWindowGUI extends SimpleBox implements FixtureWindowGUIInter
         
         for (Fixture fixture : fixtures) {
             if (fixtureGUIs.get(fixture)==null) continue;
-            SimpleBox box = fixtureGUIs.get(fixture);
-            box.clearComponents();
-            populateFixtureBox(fixture, box);
+            if (tableView) populateFixtureBoxTableView(fixture);
+            else populateFixtureBoxBlockView(fixture);
         }
     }
     
     @Override
     public void update() {
-        buildFixtures();
+        if (tableView) buildFixturesTableView();
+        else buildFixturesBlockView();
     }
 }

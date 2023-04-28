@@ -69,10 +69,21 @@ public class PatchManager {
         return fixtures;
     }
 
-    public Set<Fixture> allFixtureSet() {
-        Set<Fixture> allFixtures = new LinkedHashSet<>();
+    public List<Fixture> allFixtureList() {
+        List<Fixture> allFixtures = new ArrayList<>();
         for (Set<Fixture> profile : patch.values()) allFixtures.addAll(profile);
+        Collections.sort(allFixtures);
         return allFixtures;
+    }
+
+    public List<Attribute> allAttributeList() {
+        Set<Attribute> allAttributes = new HashSet<>();
+        for (Fixture fixture : allFixtureList()) {
+            allAttributes.addAll(fixture.getProfile().getAttributeList());
+        }
+        List<Attribute> result = new ArrayList<>(allAttributes);
+        Collections.sort(result);
+        return result;
     }
 
     public Set<Profile> allProfileSet() {
