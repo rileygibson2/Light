@@ -24,7 +24,9 @@ import light.guipackage.general.Pair;
 import light.output.Output;
 import light.output.OutputCapable;
 import light.stores.effects.Effect;
-import light.uda.FixtureWindow;
+import light.uda.UDA;
+import light.uda.guiinterfaces.FixtureWindowGUIInterface;
+import light.uda.guiinterfaces.GUIInterface;
 
 public class Programmer extends DataStore implements OutputCapable, EncoderCapable {
     
@@ -114,8 +116,9 @@ public class Programmer extends DataStore implements OutputCapable, EncoderCapab
     }
     
     private void updateFixturesGUI(Collection<Fixture> changed) {
-        FixtureWindow fWindow = (FixtureWindow) Light.getInstance().getCurrentView().getUDA().getUDAElementForClass(FixtureWindow.class);
-        if (fWindow!=null) fWindow.getGUI().updateFixtures(changed);
+        for (GUIInterface gui : UDA.getInstance().getGUIInterfacesOfClass(FixtureWindowGUIInterface.class)) {
+            ((FixtureWindowGUIInterface) gui).updateFixtures(changed);
+        }
     }
     
     private List<ProfileChannel> getChannelsForEncoderPage() {

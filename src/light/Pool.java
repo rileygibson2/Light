@@ -7,14 +7,20 @@ import java.util.List;
 
 import light.general.Addressable;
 import light.general.ConsoleAddress;
+import light.guipackage.gui.components.complexcomponents.PoolGUI;
+import light.guipackage.gui.components.complexcomponents.ViewGUI;
 import light.persistency.PersistencyCapable;
 import light.persistency.PersistencyWriter;
+import light.stores.View;
+import light.uda.UDA;
 import light.uda.UDACapable;
 import light.uda.guiinterfaces.GUIInterface;
+import light.uda.guiinterfaces.PoolGUIInterface;
+import light.uda.guiinterfaces.ViewGUIInterface;
 
 public class Pool<T extends Addressable & PersistencyCapable> extends Addressable implements PersistencyCapable, UDACapable, Iterable<T> {
 
-    List<T> elements;
+    private List<T> elements;
 
     public Pool(ConsoleAddress address) {
         super(address);
@@ -36,11 +42,13 @@ public class Pool<T extends Addressable & PersistencyCapable> extends Addressabl
         if (!t.getAddress().matchesScope(getAddress())) return;
         elements.add(t);
         Collections.sort(elements);
+        updateGUI();
     }
 
     public void remove(T t) {
         elements.remove(t);
         Collections.sort(elements);
+        updateGUI();
     }
 
     public void remove(ConsoleAddress address) {
@@ -48,6 +56,7 @@ public class Pool<T extends Addressable & PersistencyCapable> extends Addressabl
             if (t.getAddress().equals(address)) elements.remove(t);
         }
         Collections.sort(elements);
+        updateGUI();
     }
 
     public boolean contains(T t) {return elements.contains(t);}
@@ -59,6 +68,20 @@ public class Pool<T extends Addressable & PersistencyCapable> extends Addressabl
             if (t.getAddress().equals(address)) return true;
         }
         return false;
+    }
+
+    private void updateGUI() {
+        //Check UDA guis
+        for (GUIInterface inter : UDA.getInstance().getGUIInterfacesOfClass(PoolGUIInterface.class)) {
+            Pool<?> pool = ((PoolGUI) inter).getPool();
+            if (pool.equals(this)) ((PoolGUIInterface) inter).update();
+        }
+
+        //Special case for view pool as is a static gui element as well as UDA gui element
+        if (getAddress().matchesScope(View.class)) {
+            GUIInterface inter = Light.getInstance().getStaticGUIElement(ViewGUIInterface.class);
+            if (inter!=null) ((ViewGUIInterface) inter).update();
+        }
     }
 
     @Override
@@ -77,9 +100,6 @@ public class Pool<T extends Addressable & PersistencyCapable> extends Addressabl
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'generateFromBytes'");
     }
-
-    @Override
-    public void setGUI(GUIInterface gui) {}
 
     @Override
     public Iterator<T> iterator() {

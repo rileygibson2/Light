@@ -41,9 +41,8 @@ public class ViewGUI extends SimpleBox implements ViewGUIInterface {
         while (i<100) {
             ConsoleAddress a = viewPool.getAddress().clone();
             a.setSuffix(i);
-            boolean titleCell = (i==0) ? true : false;
             
-            PoolCellGUI p = new PoolCellGUI(new UnitRectangle(0, Unit.vw, 0, Unit.vh, 100, Unit.pcw, 10, Unit.vh), viewPool, a, titleCell);
+            PoolCellGUI p = new PoolCellGUI(new UnitRectangle(0, Unit.vw, 0, Unit.vh, 100, Unit.pcw, 10, Unit.vh), viewPool, a);
             p.setClickAction(() -> viewCellClicked(p));
             viewCells.add(p);
             mainBox.addComponent(p);
@@ -55,12 +54,13 @@ public class ViewGUI extends SimpleBox implements ViewGUIInterface {
     
     private void viewCellClicked(PoolCellGUI viewCell) {
         CLI.debug("clicked: "+viewCell.getAddress());
+        View view = Light.getInstance().getViewPool().get(viewCell.getAddress());
+        if (view!=null) view.load();
     }
 
     @Override
     public void update() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'update'");
+        for (PoolCellGUI cell : viewCells) cell.build();
     }
     
 }

@@ -1,7 +1,11 @@
 package light;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import light.commands.Clear;
 import light.commands.Copy;
@@ -23,6 +27,7 @@ import light.fixtures.profile.ProfileParseException;
 import light.general.Addressable;
 import light.general.ConsoleAddress;
 import light.guipackage.cli.CLI;
+import light.guipackage.general.Rectangle;
 import light.guipackage.gui.GUI;
 import light.guipackage.gui.IO;
 import light.stores.AbstractStore;
@@ -33,6 +38,8 @@ import light.stores.Sequence;
 import light.stores.View;
 import light.stores.effects.Effect;
 import light.uda.UDA;
+import light.uda.guiinterfaces.CommandLineGUIInterface;
+import light.uda.guiinterfaces.GUIInterface;
 
 public class Light {
     
@@ -45,8 +52,9 @@ public class Light {
     private Pool<Sequence> sequencePool;
     private Pool<Group> groupPool;
     private Pool<Executor> executorPool;
-    
-    private View currentView;
+
+    //Static (Non-UDA) element GUIs
+    private Set<GUIInterface> staticGUIs;
     
     private Light() {
         setup();
@@ -120,22 +128,23 @@ public class Light {
         return pool.get(address);
     }
 
-    public void switchView(ConsoleAddress address) {
-        if (viewPool.contains(address)) switchView(viewPool.get(address));
+    public GUIInterface getStaticGUIElement(Class<? extends GUIInterface> clazz) {
+        for (GUIInterface inter : staticGUIs) {
+            List<Class<?>> interfaces = Arrays.asList(inter.getClass().getInterfaces());
+            if (interfaces.contains(clazz)) return inter;
+        }
+        return null;
     }
-
-    public void switchView(View view) {
-        currentView = view;
-    }
-
-    public View getCurrentView() {return currentView;}
     
     private void setup() {
+        staticGUIs = new HashSet<GUIInterface>();
+
         GUI.initialise(this, null); //Passing null forces full screen
         
         //Insantiate logic components
         ProfileManager.getInstance();
         PatchManager.getInstance();
+        UDA.getInstance();
         Encoders.getInstance();
         Programmer.getInstance();
         
@@ -164,16 +173,12 @@ public class Light {
         commandLine.registerCommand(Clear.class);
         commandLine.registerCommand(Copy.class);
         commandLine.registerCommand(Modulate.class, "at");
-        
-        //Setup view
-        currentView = new View(new ConsoleAddress(View.class, viewPool.getAddress().getPrefix(), 1));
-        currentView.setLabel("Default view");
-        viewPool.add(currentView);
 
-        //Special case (AT THE MOMENT TODO) add views window as doesn't have relevant logic component
-        GUI.getInstance().addToGUI(View.class);
+        //Generate static gui elements
+        staticGUIs.add(GUI.getInstance().addStaticElementToGUI(commandLine));
+        staticGUIs.add(GUI.getInstance().addStaticElementToGUI(UDA.getInstance()));        
+        staticGUIs.add(GUI.getInstance().addStaticElementToGUI(View.class));
 
-        GUI.getInstance().switchView(currentView);
         IO.getInstance().requestPaint();
     }
     
@@ -215,6 +220,30 @@ public class Light {
         prog.set(fixture1, Attribute.COLORRGB1, 100d, false);
         prog.set(fixture1, Attribute.COLORRGB3, 100d, false);
         prog.set(fixture1, Attribute.GOBO1_INDEX, 20d, false);
+
+        //Mock zones
+
+        View view = new View(new ConsoleAddress(View.class, viewPool.getAddress().getPrefix(), 1));
+        int x = 0, y = 0;
+        for (PresetType p : PresetType.values()) {
+            if (x>UDA.getInstance().getSize().x) {
+                x = 0;
+                y += 10;
+            }
+            view.add(getPresetPool(p), new Rectangle(x,y, 3, 10));
+            x += 3;
+        }
+        view.add(groupPool, new Rectangle(0, 10, 6, 3));
+        view.setLabel("Pools");
+        viewPool.add(view);
+
+        view = new View(new ConsoleAddress(View.class, viewPool.getAddress().getPrefix(), 2));
+        view.setLabel("Prog");
+        viewPool.add(view);
+
+        view = new View(new ConsoleAddress(View.class, viewPool.getAddress().getPrefix(), 3));
+        view.setLabel("Effects");
+        viewPool.add(view);
         
         //currentView.getUDA().createZone(Encoders.class, new Rectangle(0, 7, 10, 2));
         //currentView.getUDA().createZone(FixtureWindow.class, new Rectangle(0, 0, 11, 7));

@@ -1,33 +1,42 @@
 package light.stores;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import light.general.ConsoleAddress;
+import light.guipackage.general.Pair;
+import light.guipackage.general.Rectangle;
 import light.persistency.PersistencyCapable;
 import light.uda.UDA;
+import light.uda.UDACapable;
 
 public class View extends AbstractStore implements PersistencyCapable {
     
-    private UDA uda;
+    private List<Pair<UDACapable, Rectangle>> zones;
 
     public View(ConsoleAddress address) {
         super(address);
-        this.uda = new UDA(this);
+        zones = new ArrayList<Pair<UDACapable, Rectangle>>();
     }
 
-    
-
-    public View(ConsoleAddress address, UDA uda) {
-        super(address);
-        this.uda = uda;
+    public List<Pair<UDACapable, Rectangle>> getZones() {
+        //Clone list
+        List<Pair<UDACapable, Rectangle>> copy = new ArrayList<>();
+        for (Pair<UDACapable, Rectangle> zone : zones) copy.add(new Pair<UDACapable, Rectangle>(zone.a, zone.b));
+        return copy;
     }
 
-    public UDA getUDA() {return uda;}
+    public void add(UDACapable udaCapable, Rectangle zoneRec) {
+        zones.add(new Pair<UDACapable,Rectangle>(udaCapable, zoneRec));
+    }
 
     public void clear() {
-        uda.clear();
+        zones.clear();
     }
 
+    @Override
     public void load() {
-        
+       UDA.getInstance().loadView(this);
     }
 
     @Override

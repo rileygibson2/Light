@@ -8,9 +8,7 @@ import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
 import java.awt.RenderingHints;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -51,14 +49,12 @@ public class GUI extends JPanel {
 	private IO io;
 	
 	private RootElement currentRoot;
-
-	private Set<UDAGUI> udaGUIs;
-	private static UDAGUI currentUDAGUI;
+	private static UDAGUI udaGUI;
 	
 	private List<MessageBox> messages;
 	
 	DOM dom;
-
+	
 	private boolean antiAlias;
 	
 	private GUI() {
@@ -68,7 +64,6 @@ public class GUI extends JPanel {
 		messages = new ArrayList<MessageBox>();
 		antiAlias = false;
 		currentRoot = new RootElement();
-		udaGUIs = new HashSet<UDAGUI>();
 		
 		setFocusable(true);
 		setFocusTraversalKeysEnabled(false);
@@ -85,62 +80,53 @@ public class GUI extends JPanel {
 	}
 	
 	public void setCreator(Object creator) {this.creator = creator;}
-
+	
 	public Object getCreator() {return creator;}
-
-	public GUIInterface addUDA(UDA uda) {
-		UDAGUI udaGUI = new UDAGUI(new UnitRectangle(5, 0, 90, 93), uda);
-		udaGUIs.add(udaGUI);
-		return udaGUI;
-	}
 	
-	public static UDAGUI getCurrentUDAGUI() {return currentUDAGUI;}
+	public static UDAGUI getUDAGUI() {return udaGUI;}
 	
-	public GUIInterface addToGUI(Object o) {
-		if (o instanceof UDA) return null; //Cannot add uda's in this method
+	public GUIInterface addStaticElementToGUI(Object o) {
+		GUIInterface inter = null;
 		
-		GUIInterface c = null;
-		//Static components
-		if (o==CommandLine.class) {
-			c = new CommandLineGUI(new UnitRectangle(5, 93, 80, 5));
-			currentRoot.addComponent((Component) c);
-		}
-		else if (o==View.class) { //TODO bodge fix to get GUI to recognise this is the view window
-			c = new ViewGUI(new UnitRectangle(95, 0, 5, 100));
-			currentRoot.addComponent((Component) c);
-		}
-		//UDA elements
-		else {
-			//Find size
-			UDACapable oU = (UDACapable) o;
-			UnitPoint cellDims = currentUDAGUI.getCellDimensions(); //Dimensions of a cell
-			Rectangle elementDims = currentUDAGUI.getUDA().getCellsForUDAElement(oU); //Dimensions (in num cells) of this element
-			UnitRectangle r = new UnitRectangle();
-			r.x = new UnitValue(elementDims.x*cellDims.x.v, cellDims.x.u);
-			r.y = new UnitValue(elementDims.y*cellDims.y.v,cellDims.y.u);
-			r.width = new UnitValue(elementDims.width*cellDims.x.v, cellDims.x.u);
-			r.height = new UnitValue(elementDims.height*cellDims.y.v, cellDims.y.u);
-			
-			if (o instanceof Pool) c = new PoolGUI(r, (Pool<?>) o);
-			if (o instanceof FixtureWindow) c = new FixtureWindowGUI(r, (FixtureWindow) o);
-			if (o instanceof Encoders) c = new EncodersGUI(r);
-
-			if (c!=null) currentUDAGUI.addComponent((Component) c);
+		if (o instanceof CommandLine) inter = new CommandLineGUI(new UnitRectangle(5, 93, 80, 5));
+		//Special case for View screen as this does not have a controlling class but is a normal pool, so View class is used as the signifier
+		else if (o==View.class) inter = new ViewGUI(new UnitRectangle(95, 0, 5, 100));
+		else if (o instanceof UDA) {
+			/*
+			* UDA is passed as constructor param to prevent stack overflow, as UDA is not finished
+			* instantiating when the UDAGUI is created so UDA.getInstance() cannot be called, and
+			* UDAGUI constructor needs to access UDA methods.
+			*/
+			udaGUI = new UDAGUI(new UnitRectangle(5, 0, 90, 93), (UDA) o);
+			inter = udaGUI;
 		}
 		
-		return c;
+		currentRoot.addComponent((Component) inter);
+		return inter;
 	}
-
-	public void switchView(View view) {
-		for (UDAGUI udaGUI : udaGUIs) {
-			if (udaGUI.getUDA().getView().equals(view)) {
-				//Remove current uda from DOM
-				if (currentUDAGUI!=null) currentRoot.removeComponent(currentUDAGUI);
-				//Add found uda gui to dom
-				currentUDAGUI = udaGUI;
-				currentRoot.addComponent(currentUDAGUI);
-			}
-		}
+	
+	public GUIInterface addUDAElementToGUI(UDACapable o, Rectangle udaCells) {
+		if (udaGUI==null) return null;
+		GUIInterface inter = null;
+		
+		//Find size
+		UnitPoint cellDims = udaGUI.getCellDimensions(); //Dimensions of a cell
+		UnitRectangle r = new UnitRectangle();
+		r.x = new UnitValue(udaCells.x*cellDims.x.v, cellDims.x.u);
+		r.y = new UnitValue(udaCells.y*cellDims.y.v,cellDims.y.u);
+		r.width = new UnitValue(udaCells.width*cellDims.x.v, cellDims.x.u);
+		r.height = new UnitValue(udaCells.height*cellDims.y.v, cellDims.y.u);
+		
+		if (o instanceof Pool) inter = new PoolGUI(r, (Pool<?>) o);
+		if (o instanceof FixtureWindow) inter = new FixtureWindowGUI(r, (FixtureWindow) o);
+		if (o instanceof Encoders) inter = new EncodersGUI(r);
+		
+		if (inter!=null) udaGUI.addComponent((Component) inter);
+		return inter;
+	}
+	
+	public void clearUDAGUI() {
+		udaGUI.clear();
 	}
 	
 	public void addMessage(String message, Color col) {

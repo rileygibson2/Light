@@ -20,7 +20,7 @@ public class PoolGUI extends Component implements PoolGUIInterface {
 
     private Pool<?> pool;
     private SimpleBox mainBox;
-    private List<PoolCellGUI> poolCellGUIs;
+    private List<PoolCellGUI> poolCells;
 
     public PoolGUI(UnitRectangle r, Pool<?> pool) {
         super(r);
@@ -30,35 +30,33 @@ public class PoolGUI extends Component implements PoolGUIInterface {
         addComponent(mainBox);
 
         //Make cells
-        poolCellGUIs = new ArrayList<PoolCellGUI>();
+        poolCells = new ArrayList<PoolCellGUI>();
         
-        UDA uda = GUI.getCurrentUDAGUI().getUDA();
-        UnitPoint cellDims = GUI.getCurrentUDAGUI().getCellDimensions();
-        Rectangle poolCells = uda.getCellsForUDAElement(pool);
+        UnitPoint cellDims = GUI.getUDAGUI().getCellDimensions();
+        Rectangle cells = UDA.getInstance().getCellsForUDAElement(pool);
         PoolCellGUI p;
 
         int i = 0;
-        for (int y=0; y<poolCells.height; y++) {
-            for (int x=0; x<poolCells.width; x++, i++) {
+        for (int y=0; y<cells.height; y++) {
+            for (int x=0; x<cells.width; x++, i++) {
                 ConsoleAddress a = pool.getAddress().clone();
                 a.setSuffix(i);
-                boolean titleCell = (y==0&&x==0) ? true : false;
 
-                p = new PoolCellGUI(new UnitRectangle(new UnitValue(0, Unit.vw), new UnitValue(0, Unit.vh), cellDims.x, cellDims.y), pool, a, titleCell);
+                p = new PoolCellGUI(new UnitRectangle(new UnitValue(0, Unit.vw), new UnitValue(0, Unit.vh), cellDims.x, cellDims.y), pool, a);
                 p.setPosition(Position.Relative);
-                poolCellGUIs.add(p);
+                poolCells.add(p);
                 mainBox.addComponent(p);
             }
         }
 
-        poolCellGUIs.get(poolCellGUIs.size()-1).addDragIcon();
+        poolCells.get(poolCells.size()-1).addDragIcon();
     }
 
+    @Override
     public Pool<?> getPool() {return pool;}
 
     @Override
     public void update() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'update'");
+        for (PoolCellGUI cell : poolCells) cell.build();
     }
 }

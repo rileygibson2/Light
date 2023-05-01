@@ -7,20 +7,16 @@ import java.util.Map;
 import light.commands.Command;
 import light.guipackage.cli.CLI;
 import light.guipackage.general.Submitter;
-import light.guipackage.gui.GUI;
 import light.guipackage.gui.IO;
-import light.uda.guiinterfaces.CommandLineGUIInterface;
 
 public class CommandLine {
 
     private static CommandLine singleton;
 
-    private CommandLineGUIInterface gui;
     private Map<Class<? extends Command>, String> registeredCommands; //Register of currently active commands that should be parsed
     private CommandController controller;
 
     private CommandLine() {
-        gui = (CommandLineGUIInterface) GUI.getInstance().addToGUI(CommandLine.class);
         registeredCommands = new HashMap<Class<? extends Command>, String>();
         controller = new CommandController();
 

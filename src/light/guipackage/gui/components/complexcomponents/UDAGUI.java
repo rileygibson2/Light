@@ -2,14 +2,15 @@ package light.guipackage.gui.components.complexcomponents;
 
 import java.awt.Color;
 import java.awt.Font;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 
 import light.encoders.Encoders;
 import light.executors.Executor;
 import light.general.ConsoleAddress;
 import light.general.Utils;
-import light.guipackage.cli.CLI;
 import light.guipackage.general.Point;
 import light.guipackage.general.Rectangle;
 import light.guipackage.general.Submitter;
@@ -33,14 +34,12 @@ import light.uda.guiinterfaces.UDAGUIInterface;
 
 public class UDAGUI extends SimpleBox implements UDAGUIInterface {
     
-    private UDA uda;
     private UnitPoint cellDims; //Width and height of a cell
     
     private TempWindow openZonePicker;
     
     public UDAGUI(UnitRectangle r, UDA uda) {
         super(r);
-        this.uda = uda;
         
         /*
          * This constructor needs to find the amount of uda cells there can be for this device and
@@ -50,6 +49,9 @@ public class UDAGUI extends SimpleBox implements UDAGUIInterface {
          * of this element, sets the height a cell to the same and then the UDA class can query for the
          * actual maximum number of cells deep this GUI was able to construct. The collaboration between
          * this GUI class and the UDA element is what sets the size of the user defined area.
+         * 
+         * Note: UDA is passed as constructor param to prevent stack overflow, as UDA is not finished
+         * instantiating when the UDAGUI is created so UDA.getInstance() cannot be called.
          */
         setDOMEntryAction(() -> {
             if (cellDims!=null) return; //Stops recalculation and recreation of all dots on view switch
@@ -68,17 +70,18 @@ public class UDAGUI extends SimpleBox implements UDAGUIInterface {
             //Add dots
             int i = 0;
             for (i=0; i<1000; i++) { //Limit is just a saftey to replace a while true
-                SimpleBox sB = new SimpleBox(new UnitRectangle(new UnitValue(), new UnitValue(), cellDims));
-                sB.setPosition(Position.Relative);
-                addComponent(sB);
+                SimpleBox dot = new SimpleBox(new UnitRectangle(new UnitValue(), new UnitValue(), cellDims));
+                dot.setPosition(Position.Relative);
+                dot.setTag("udaDot");
+                addComponent(dot);
                 SimpleBox oval = new SimpleBox(new UnitRectangle(48, 48, 4, 4), new Color(100, 100, 100));
                 oval.setOval(true);
-                sB.addComponent(oval);
+                dot.addComponent(oval);
                 
                 //Check if last created cell's bottom edge is overflowing this height
-                double bottomEdge = translateToUnit(sB.getFuncY(), this, getFuncHeight().u, this).v+translateToUnit(sB.getFuncHeight(), this, getFuncHeight().u, this).v;
+                double bottomEdge = translateToUnit(dot.getFuncY(), this, getFuncHeight().u, this).v+translateToUnit(dot.getFuncHeight(), this, getFuncHeight().u, this).v;
                 if (bottomEdge>getFuncHeight().v) {
-                    removeComponent(sB);
+                    removeComponent(dot);
                     break;
                 }
             }
@@ -108,15 +111,22 @@ public class UDAGUI extends SimpleBox implements UDAGUIInterface {
     }
     
     public UnitPoint getCellDimensions() {return cellDims;}
+
+    public void clear() {
+		Set<Component> toRemove = new HashSet<>();
+		for (Component c : getComponents()) {
+			if (!c.hasTag()||!c.getTag().equals("udaDot")) toRemove.add(c);
+		}
+		removeComponents(toRemove);
+	}
     
-    public UDA getUDA() {return uda;}
     
     public void click(Point p) {
         Point p1 = scalePoint(p);
         
         int x = (int) Math.abs((p1.x*100)/translateToUnit(cellDims.x, this, Unit.pcw, this).v);
         int y = (int) Math.abs((p1.y*100)/translateToUnit(cellDims.y, this, Unit.pch, this).v);
-        uda.doClick(x, y);
+        UDA.getInstance().doClick(x, y);
     }
     
     public void openZonePicker(Rectangle zoneRec) {
@@ -173,7 +183,7 @@ public class UDAGUI extends SimpleBox implements UDAGUIInterface {
             
             l.setClickAction(() -> {
                 closeZonePicker();
-                uda.createZone(l.getTag(), zoneRec);
+                UDA.getInstance().createZone(l.getTag(), zoneRec);
             });
             
             cB.addComponent(l);
