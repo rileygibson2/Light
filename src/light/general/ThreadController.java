@@ -51,6 +51,10 @@ public class ThreadController extends Thread {
 
 	public Set<?> getElements() {return Collections.unmodifiableSet(elements);}
 
+	public boolean hasExtras() {return extras!=null&&!extras.isEmpty();}
+
+	public List<Object> getExtras() {return extras;}
+
 	public Object getTarget() {return target;}
 	
 	public void setTarget(Object t) {target = t;}

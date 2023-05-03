@@ -8,9 +8,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import light.general.Getter;
+import light.general.Submitter;
 import light.general.ThreadController;
 import light.guipackage.cli.CLI;
-import light.guipackage.general.GetterSubmitter;
 import light.guipackage.general.Pair;
 import light.guipackage.general.Point;
 import light.guipackage.general.Rectangle;
@@ -76,11 +77,13 @@ public class AnimationFactory {
 			public void run() {
 				doInitialDelay();
 				@SuppressWarnings("unchecked")
-				GetterSubmitter<Boolean, Boolean> gS = (GetterSubmitter<Boolean, Boolean>) getTarget();
+				Getter<Boolean> getter = (Getter<Boolean>) extras.get(0);
+				@SuppressWarnings("unchecked")
+				Submitter<Boolean> submitter = (Submitter<Boolean>) extras.get(1);
 				
 				while (isRunning()) {
-					if (gS.get()) {
-						gS.submit(true);
+					if (getter.get()) {
+						submitter.submit(true);
 						break;
 					}
 					iterate();
@@ -238,14 +241,14 @@ public class AnimationFactory {
 				while (isRunning()) {
 					if (t.cursor.isEmpty()) t.cursor = "_";
 					else t.cursor = "";
-					t.textLabel.setText(t.getValue()+t.cursor);
+					t.getLabel().setText(t.getValue()+t.cursor);
 
 					iterate();
 				}
 
 				//Reset
 				t.cursor = "";
-				t.textLabel.setText(t.getValue());
+				t.getLabel().setText(t.getValue());
 				finish();
 			}
 		};

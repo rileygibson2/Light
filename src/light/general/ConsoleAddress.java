@@ -67,12 +67,16 @@ public class ConsoleAddress implements Comparable<ConsoleAddress>, PersistencyCa
         return c.scope==this.scope&&c.prefix==this.prefix&&c.suffix==this.suffix;
     }
 
+    public String toAddressString() {return prefix+"."+suffix;}
+
+    public String toDisplayString() {
+        return getScope().getSimpleName()+" "+toAddressString();
+    }
+
     @Override
     public String toString() {
         return "["+scope.getSimpleName()+" "+prefix+"."+suffix+"]";
     }
-
-    public String toAddressString() {return prefix+"."+suffix;}
 
     public static ConsoleAddress getBase(Class<? extends Addressable> scope) {
         return new ConsoleAddress(scope);

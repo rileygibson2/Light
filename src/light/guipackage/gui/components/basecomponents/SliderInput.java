@@ -2,8 +2,8 @@ package light.guipackage.gui.components.basecomponents;
 
 import java.awt.Color;
 
+import light.general.Submitter;
 import light.guipackage.general.Point;
-import light.guipackage.general.Submitter;
 import light.guipackage.general.UnitRectangle;
 import light.guipackage.general.UnitValue;
 import light.guipackage.general.UnitValue.Unit;
@@ -41,12 +41,7 @@ public class SliderInput extends InputComponent<Double> {
 		mainBox.addComponent(ball);
 
 		//Click action
-		setClickAction(new Submitter<Point>() {
-			@Override
-			public void submit(Point p) {
-				click(p);
-			}
-		});
+		setClickAction(p -> click(p));
 	}
 
 	@Override
@@ -64,7 +59,7 @@ public class SliderInput extends InputComponent<Double> {
 			ball.setX(new UnitValue(x-ball.getWidth().v/2, Unit.pcw));
 			grooveFill.setWidth(new UnitValue(x-grooveFill.getX().v, Unit.pcw));
 		}
-		if (hasActions()) getActions().submit(getValue());
+		if (hasActions()) submitAction().submit(getValue());
 	}
 	
 	@Override
@@ -76,7 +71,7 @@ public class SliderInput extends InputComponent<Double> {
 			ball.setX(new UnitValue(x-ball.getWidth().v/2, Unit.pcw));
 			grooveFill.setWidth(new UnitValue(x-grooveFill.getX().v, Unit.pcw));
 		}
-		if (hasActions()) getActions().submit(getValue());
+		if (hasActions()) submitAction().submit(getValue());
 		
 		super.doDrag(entry, current);
 	}

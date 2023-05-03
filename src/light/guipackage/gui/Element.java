@@ -369,8 +369,7 @@ public abstract class Element {
 		
 		if (inDOM()) {
 			c.triggerDOMEntry();
-			//Don't need to update subtree till in dom
-			subtreeUpdated(this);
+			subtreeUpdated(this); //Don't need to update subtree till in dom
 		}
 	}
 	
@@ -380,7 +379,7 @@ public abstract class Element {
 		components.remove(c);
 		componentsLock.unlock();
 		
-		c.triggerDOMExit();
+		if (inDOM) c.triggerDOMExit();
 		subtreeUpdated(this);
 	}
 	
@@ -390,7 +389,7 @@ public abstract class Element {
 		components.removeAll(toRemove);
 		componentsLock.unlock();
 		
-		for (Component c : toRemove) c.triggerDOMExit();
+		if (inDOM) for (Component c : toRemove) c.triggerDOMExit();
 		subtreeUpdated(this);
 	}
 	
@@ -1285,8 +1284,6 @@ public abstract class Element {
 		}
 		componentsLock.unlock();*/
 	}
-	
-	protected void doKeyPress(KeyEvent k) {}; //Doesn't need to recur due to key listener registration in IO
 	
 	/**
 	* Searches up the parent tree from this element and checks if any parent element 

@@ -5,11 +5,11 @@ import light.Pool;
 import light.general.ConsoleAddress;
 import light.stores.AbstractStore;
 
-public class Delete implements Command {
+public class DeleteCommand implements Command {
 
     ConsoleAddress target;
 
-    public Delete(ConsoleAddress target) {
+    public DeleteCommand(ConsoleAddress target) {
         this.target = target;
     }
 

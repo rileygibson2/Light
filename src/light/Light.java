@@ -7,14 +7,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import light.commands.Clear;
-import light.commands.Copy;
-import light.commands.Delete;
-import light.commands.Edit;
-import light.commands.Label;
-import light.commands.Modulate;
-import light.commands.Move;
-import light.commands.Store;
+import light.commands.ClearCommand;
+import light.commands.CopyCommand;
+import light.commands.DeleteCommand;
+import light.commands.EditCommand;
+import light.commands.LabelCommand;
+import light.commands.ModulateCommand;
+import light.commands.MoveCommand;
+import light.commands.StoreCommand;
 import light.commands.commandcontrol.CommandLine;
 import light.encoders.Encoders;
 import light.executors.Executor;
@@ -37,8 +37,9 @@ import light.stores.Preset.PresetType;
 import light.stores.Sequence;
 import light.stores.View;
 import light.stores.effects.Effect;
+import light.uda.FixtureWindow;
+import light.uda.KeyWindow;
 import light.uda.UDA;
-import light.uda.guiinterfaces.CommandLineGUIInterface;
 import light.uda.guiinterfaces.GUIInterface;
 
 public class Light {
@@ -147,6 +148,7 @@ public class Light {
         UDA.getInstance();
         Encoders.getInstance();
         Programmer.getInstance();
+        CommandLine.getInstance();
         
         //Make pools
         presetPools = new HashMap<PresetType, Pool<Preset>>();
@@ -163,19 +165,9 @@ public class Light {
         sequencePool = new Pool<Sequence>(new ConsoleAddress(Sequence.class, 0, 0));
         executorPool = new Pool<Executor>(new ConsoleAddress(Executor.class, 0, 0));
 
-        //Setup command line and add commands
-        CommandLine commandLine = CommandLine.getInstance();
-        commandLine.registerCommand(Store.class);
-        commandLine.registerCommand(Move.class);
-        commandLine.registerCommand(Label.class);
-        commandLine.registerCommand(Delete.class);
-        commandLine.registerCommand(Edit.class);
-        commandLine.registerCommand(Clear.class);
-        commandLine.registerCommand(Copy.class);
-        commandLine.registerCommand(Modulate.class, "at");
 
         //Generate static gui elements
-        staticGUIs.add(GUI.getInstance().addStaticElementToGUI(commandLine));
+        staticGUIs.add(GUI.getInstance().addStaticElementToGUI(CommandLine.class));
         staticGUIs.add(GUI.getInstance().addStaticElementToGUI(UDA.getInstance()));        
         staticGUIs.add(GUI.getInstance().addStaticElementToGUI(View.class));
 
@@ -224,6 +216,7 @@ public class Light {
         //Mock zones
 
         View view = new View(new ConsoleAddress(View.class, viewPool.getAddress().getPrefix(), 1));
+        view.setLabel("Pools");
         int x = 0, y = 0;
         for (PresetType p : PresetType.values()) {
             if (x>UDA.getInstance().getSize().x) {
@@ -234,11 +227,14 @@ public class Light {
             x += 3;
         }
         view.add(groupPool, new Rectangle(0, 10, 6, 3));
-        view.setLabel("Pools");
         viewPool.add(view);
 
         view = new View(new ConsoleAddress(View.class, viewPool.getAddress().getPrefix(), 2));
         view.setLabel("Prog");
+        view.add(new FixtureWindow(), new Rectangle(0, 0, 8, 7));
+        view.add(Encoders.getInstance(), new Rectangle(0, 9, 9, 2));
+        view.add(new KeyWindow(), new Rectangle(9, 0, 9, 8));
+        view.add(getPresetPool(Preset.PresetType.COLOR), new Rectangle(9,8, 9, 3));
         viewPool.add(view);
 
         view = new View(new ConsoleAddress(View.class, viewPool.getAddress().getPrefix(), 3));

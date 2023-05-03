@@ -27,6 +27,13 @@ public class Label extends SimpleBox {
 		this.textCol = textCol;
 	}
 
+	public Label(UnitRectangle r, Font font, Color textCol) {
+		super(r);
+		this.text = "";
+		this.font = font;
+		this.textCol = textCol;
+	}
+
 	public String getText() {return text;}
 
 	public void setText(String t) {text = t;}

@@ -1,5 +1,6 @@
-package light.guipackage.general;
+package light.general;
 
+@FunctionalInterface
 public interface Getter<G> {
 	public G get();
 }

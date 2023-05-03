@@ -40,12 +40,15 @@ public class Pool<T extends Addressable & PersistencyCapable> extends Addressabl
 
     public void add(T t) {
         if (!t.getAddress().matchesScope(getAddress())) return;
+        t.setUpdateAction(() -> updateGUI());
         elements.add(t);
         Collections.sort(elements);
         updateGUI();
     }
 
     public void remove(T t) {
+        if (!contains(t)) return;
+        t.setUpdateAction(null); //Will stop updates to this element updating this pool anymore
         elements.remove(t);
         Collections.sort(elements);
         updateGUI();

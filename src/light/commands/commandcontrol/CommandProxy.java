@@ -2,6 +2,7 @@ package light.commands.commandcontrol;
 
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import light.commands.Command;
@@ -168,24 +169,23 @@ public class CommandProxy {
         switch (type) {
             case Command:
             //Find resolve types of all arguments
-            List<Class<?>> childTypes = new ArrayList<>();
-            for (CommandProxy cP : children) childTypes.add(cP.getResolveType());
+            Class<?>[] childTypes = new Class<?>[children.size()];
+            int i = 0;
+            for (CommandProxy cP : children) {
+                childTypes[i] = cP.getResolveType();
+                i++;
+            }
             
-            //Check command has constructor that can take those params
-            try {
-                Constructor<?> constructor = commandClass.getConstructor((Class<?>[]) childTypes.toArray());
-                
+            try { //Check command has constructor that can take those params
+                Constructor<?> constructor = commandClass.getConstructor(childTypes);
                 //Get actual parameters by resolving arguments
                 List<Object> params = new ArrayList<>();
                 for (CommandProxy cP : children) params.add(cP.resolve());
                 
-                //Creat command
+                //Create command
                 return constructor.newInstance(params.toArray());
                 
-            } catch (Exception e) {
-                e.printStackTrace();
-                CLI.error(e.toString());
-            }
+            } catch (Exception e) {CLI.error("While resolving command, a constructor for "+commandClass+" could not be found for args "+Arrays.deepToString(childTypes)+"\nSpecific construction problem: "+e.toString());}
             return null;
             
             case Address: return consoleAddress;
@@ -280,12 +280,12 @@ public class CommandProxy {
         String result = "";
         switch (type) {
             case Address:
-            result =  consoleAddress.getScope().getSimpleName()+" "+consoleAddress.toAddressString();
+            result =  consoleAddress.toDisplayString();
             for (CommandProxy child : children) result += " "+child.toString();
             break;
 
             case Command:
-            result = commandClass.getSimpleName();
+            result = commandClass.getSimpleName().replace("Command", "");
             for (CommandProxy child : children) result += " "+child.toString();
             break;
 

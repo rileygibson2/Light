@@ -27,8 +27,8 @@ import light.guipackage.gui.components.basecomponents.Label;
 import light.guipackage.gui.components.basecomponents.TempWindow;
 import light.guipackage.gui.components.boxes.FlexBox;
 import light.guipackage.gui.components.boxes.SimpleBox;
-import light.physical.HardButton;
-import light.physical.HardButton.Bank;
+import light.physical.PhysicalKey;
+import light.physical.PhysicalKeyBank;
 import light.uda.guiinterfaces.EncodersGUIInterface;
 
 
@@ -162,13 +162,13 @@ public class EncodersGUI extends Component implements EncodersGUIInterface {
         calculatorCommand.setCommandUpdatedAction(() -> {input.setText(calculatorCommand.getCommandAsString());});
         
         //Button banks
-        Bank[] banks = new Bank[] {Bank.Number, Bank.Operator, Bank.Function};
+        PhysicalKeyBank[] banks = new PhysicalKeyBank[] {PhysicalKeyBank.NUMERIC, PhysicalKeyBank.OPERATOR, PhysicalKeyBank.FUNCTION};
         
-        for (Bank bank : banks) {
+        for (PhysicalKeyBank bank : banks) {
             int x = 1;
             double y = 0;
             double mw = 10.5;
-            if (bank==Bank.Number) {
+            if (bank==PhysicalKeyBank.NUMERIC) {
                 x = 0;
                 y = 5.5;
             }
@@ -179,9 +179,9 @@ public class EncodersGUI extends Component implements EncodersGUIInterface {
             bankBox.setMaxWidth(new UnitValue(mw, Unit.vw));
             tB.addContent(bankBox);
             
-            for (HardButton button : HardButton.getBankList(bank)) {
+            for (PhysicalKey button : PhysicalKey.getBankList(bank)) {
                 double w = 3.5;
-                if (button==HardButton.PLEASE) w = 7;
+                if (button==PhysicalKey.PLEASE) w = 7;
                 
                 Label b = new Label(new UnitRectangle(0, Unit.px, 0, Unit.px, w, Unit.vw, 3.5, Unit.vw), button.getText(), new Font(Styles.baseFont, Font.BOLD, 12), new Color(230, 230, 230));
                 b.setPosition(Position.Relative);

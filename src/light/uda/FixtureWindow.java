@@ -1,9 +1,9 @@
 package light.uda;
 
-import light.uda.guiinterfaces.FixtureWindowGUIInterface;
-import light.uda.guiinterfaces.GUIInterface;
-
 public class FixtureWindow implements UDACapable {
+    
+    private boolean tableMode;
 
-   
+    public void setTableMode(boolean tableMode) {this.tableMode = tableMode;}
+    public boolean getTableMode() {return tableMode;}
 }

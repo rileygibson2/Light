@@ -1,10 +1,11 @@
 package light.guipackage.gui.components;
 
-import light.guipackage.general.GetterSubmitter;
+import light.general.Getter;
+import light.general.Submitter;
 import light.guipackage.general.UnitRectangle;
 import light.guipackage.gui.components.boxes.SimpleBox;
 
-public class InputComponent<T> extends SimpleBox {
+public abstract class InputComponent<T> extends SimpleBox {
     
     public enum InputType {
         CheckBox,
@@ -15,7 +16,8 @@ public class InputComponent<T> extends SimpleBox {
     
     private T value;
 
-    private GetterSubmitter<T, T> actions;
+    private Getter<T> getAction;
+    private Submitter<T> submitAction;
     
     public InputComponent(UnitRectangle r) {
         super(r);
@@ -25,19 +27,22 @@ public class InputComponent<T> extends SimpleBox {
 
     public T getValue() {return this.value;}
     
-    public void setActions(GetterSubmitter<T, T> actions) {
-        this.actions = actions;
+    public void setActions(Getter<T> getAction, Submitter<T> submitAction) {
+        this.getAction = getAction;
+        this.submitAction = submitAction;
         actionsUpdated();
     }
     
-    public boolean hasActions() {return this.actions!=null;}
+    public boolean hasActions() {return this.getAction!=null&&this.submitAction!=null;}
+
+    public Getter<T> getAction() {return getAction;}
+
+    public Submitter<T> submitAction() {return submitAction;}
     
     /**
     * Update hook for when actions are added to allow inputs to get initial state
     */
     public void actionsUpdated() {
-        this.value = getActions().get();
+        this.value = getAction.get();
     }
-    
-    public GetterSubmitter<T, T> getActions() {return this.actions;}
 }

@@ -12,34 +12,34 @@ import light.fixtures.Fixture;
 import light.fixtures.PatchManager;
 import light.general.ConsoleAddress;
 
-public class Modulate implements Command {
+public class ModulateCommand implements Command {
     
     List<ConsoleAddress> targetFixtures;
     Object source;
     
-    public Modulate(ConsoleAddress targetFixture, double value) {
+    public ModulateCommand(ConsoleAddress targetFixture, double value) {
         targetFixtures = new ArrayList<ConsoleAddress>();
         targetFixtures.add(targetFixture);
         this.source = value;
     }
 
-    public Modulate(List<ConsoleAddress> targetFixtures, double value) {
+    public ModulateCommand(List<ConsoleAddress> targetFixtures, double value) {
         this.targetFixtures = targetFixtures;
         this.source = value;
     }
     
-    public Modulate(List<ConsoleAddress> targetFixtures, ConsoleAddress sourceFixture) {
+    public ModulateCommand(List<ConsoleAddress> targetFixtures, ConsoleAddress sourceFixture) {
         this.targetFixtures = targetFixtures;
         this.source = sourceFixture;
     }
     
-    public Modulate(ConsoleAddress targetFixture, ConsoleAddress sourceFixture) {
+    public ModulateCommand(ConsoleAddress targetFixture, ConsoleAddress sourceFixture) {
         targetFixtures = new ArrayList<ConsoleAddress>();
         targetFixtures.add(targetFixture);
         this.source = sourceFixture;
     }
     
-    public Modulate(List<ConsoleAddress> targetFixtures, List<ConsoleAddress> sourceFixtures) {
+    public ModulateCommand(List<ConsoleAddress> targetFixtures, List<ConsoleAddress> sourceFixtures) {
         this.targetFixtures = targetFixtures;
         this.source = sourceFixtures;
     }

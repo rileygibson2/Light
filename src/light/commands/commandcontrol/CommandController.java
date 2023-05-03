@@ -1,14 +1,20 @@
 package light.commands.commandcontrol;
 
 import java.util.ArrayDeque;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Set;
 
 import light.commands.Command;
+import light.commands.commandcontrol.CommandProxy.CommandProxyType;
 import light.commands.commandcontrol.CommandProxy.Operator;
 import light.guipackage.cli.CLI;
 import light.guipackage.gui.IO;
 
 public class CommandController {
+    
+    private Set<Class<? extends Command>> acceptedCommands; //Register of commands this controller will accept
+    private boolean acceptAllCommands;
     
     private CommandProxy commandRoot;
     private ArrayDeque<CommandProxy> commandStack; //Working stack of all parts of this command
@@ -18,6 +24,8 @@ public class CommandController {
     private boolean allowLeadingTerminals; //When set the controller will allow the leading proxy to be a terminal
     
     public CommandController() {
+        acceptAllCommands = false;
+        acceptedCommands = new HashSet<Class<? extends Command>>();
         commandRoot = null;
         commandStack = new ArrayDeque<CommandProxy>();
         workingText = "";
@@ -49,41 +57,47 @@ public class CommandController {
     */
     public void addToCommand(CommandProxy cP) {
         if (cP==null) return;
+        //Check (if proxy is command) if command is accepted
+        if (cP.getType()==CommandProxyType.Command&&!commandAccepted((Class<? extends Command>) cP.getResolveType())) {
+            CLI.error("This command controller cannot accept the command class "+cP.getResolveType());
+            return;
+        }
         
         if (commandRoot==null) { //Start new command
             commandRoot = cP;
             commandStack.push(cP);
-            return;
         }
-        
-        //Work back through command stack to find last non-terminal proxy
-        CommandProxy lastNonTerminal = null;
-        Iterator<CommandProxy> i = commandStack.iterator();
-        
-        while (i.hasNext()) {
-            CommandProxy next = i.next();
-            if (!next.isTerminal()) {
-                lastNonTerminal = next;
-                break;
+        else { //Continue current command
+            //Work back through command stack to find last non-terminal proxy
+            CommandProxy lastNonTerminal = null;
+            Iterator<CommandProxy> i = commandStack.iterator();
+            
+            while (i.hasNext()) {
+                CommandProxy next = i.next();
+                if (!next.isTerminal()) {
+                    lastNonTerminal = next;
+                    break;
+                }
             }
-        }
-        
-        if (lastNonTerminal==null) { //This only occurs in one of the below edge cases
-            //plus and thru edge case
-            if (cP.getType()==Operator.PLUS||cP.getType()==Operator.THRU) {
-                CommandProxy prevProxy = commandStack.pop();
-                cP.addChild(prevProxy);
-                //Need to check if previous was root because if so then cP needs to become root
-                if (commandRoot==prevProxy) commandRoot = cP;
+            
+            if (lastNonTerminal==null) { //This only occurs in one of the below edge cases
+                //plus and thru edge case
+                if (cP.getType()==Operator.PLUS||cP.getType()==Operator.THRU) {
+                    CommandProxy prevProxy = commandStack.pop();
+                    cP.addChild(prevProxy);
+                    //Need to check if previous was root because if so then cP needs to become root
+                    if (commandRoot==prevProxy) commandRoot = cP;
+                    commandStack.push(cP);
+                }
+            }
+            else { //General case
+                lastNonTerminal.addChild(cP);
                 commandStack.push(cP);
             }
         }
-        else { //General case
-            lastNonTerminal.addChild(cP);
-            commandStack.push(cP);
-        }
         
         if (hasCommandUpdatedAction()) commandUpdatedAction.run();
+        CLI.debug("Command controller updated:\n"+getTreeString());
     }
     
     /**
@@ -133,10 +147,34 @@ public class CommandController {
         return false;
     }
     
+    public void acceptAllCommands(boolean accept) { acceptAllCommands = accept;}
+    
+    /**
+    * Register command class with command line using the class's simple name as the name mapping
+    * @param s
+    * @param c
+    */
+    public void registerCommand(Class<? extends Command> c) {acceptedCommands.add(c);}
+    
+    public void deregisterCommand(Class<? extends Command> c) {acceptedCommands.remove(c);}
+    
+    public boolean commandAccepted(Class<? extends Command> c) {
+        return (acceptAllCommands) ? true : acceptedCommands.contains(c);
+    }
+    
+    public Set<Class<? extends Command>> acceptedCommands() {return acceptedCommands;}
+
+    public void executeCommand() throws CommandFormatException {
+        Command c = null;
+        c = resolveForCommand();
+        if (c!=null) c.execute();
+        clear();
+    }
+    
     public Command resolveForCommand() throws CommandFormatException {
         if (commandRoot==null) throw new CommandFormatException("Cannot resolve command - no command root");
         Object o = commandRoot.resolve();
-
+        
         if (o instanceof Command) return ((Command) o);
         else throw new CommandFormatException("Did not resolve to an object of class Command");
     }
@@ -144,7 +182,7 @@ public class CommandController {
     public Double resolveForDouble() throws CommandFormatException {
         if (commandRoot==null) throw new CommandFormatException("Cannot resolve command - no command root");
         Object o = commandRoot.resolve();
-
+        
         if (o instanceof Double) return ((Double) o);
         else throw new CommandFormatException("Did not resolve to an object of class double");
     }

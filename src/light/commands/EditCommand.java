@@ -2,7 +2,7 @@ package light.commands;
 
 import light.general.ConsoleAddress;
 
-public class Edit implements Command {
+public class EditCommand implements Command {
 
     ConsoleAddress target;
 

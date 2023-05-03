@@ -3,9 +3,9 @@ package light.commands;
 import light.Programmer;
 import light.commands.commandcontrol.CommandLine;
 
-public class Clear implements Command {
+public class ClearCommand implements Command {
 
-    public Clear() {}
+    public ClearCommand() {}
 
     @Override
     public void execute() {

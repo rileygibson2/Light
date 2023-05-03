@@ -9,7 +9,6 @@ import light.fixtures.Attribute;
 import light.fixtures.FeatureGroup;
 import light.fixtures.Fixture;
 import light.fixtures.profile.ProfileChannel;
-import light.guipackage.cli.CLI;
 import light.persistency.PersistencyCapable;
 import light.persistency.PersistencyWriter;
 
@@ -18,10 +17,15 @@ public class DataStore implements PersistencyCapable {
     public final static double NONE = -12345d;
 
     protected Map<Fixture, Map<Attribute, Double>> store;
+    private Runnable updateAction; //Action run when store is updated
     
     public DataStore() {
         store = new HashMap<Fixture, Map<Attribute, Double>>();
     }
+
+    public void setUpdateAction(Runnable action) {this.updateAction = action;}
+    public boolean hasUpdateAction() {return updateAction!=null;}
+    public Runnable getUpdateAction() {return updateAction;}
     
     /**
      * 
@@ -45,6 +49,8 @@ public class DataStore implements PersistencyCapable {
             attributes.put(attribute, value);
             store.put(fixture, attributes);
         }
+
+        if (hasUpdateAction()) updateAction.run();
     }
 
     public void set(Fixture fixture, Map<Attribute, Double> attributes, boolean overwritePriority) {
@@ -68,6 +74,8 @@ public class DataStore implements PersistencyCapable {
 
         //Assign values to this fixture's mapping
         store.put(fixture, attributes);
+
+        if (hasUpdateAction()) updateAction.run();
     }
 
     public double validate(Fixture fixture, Attribute attribute, double value) {
@@ -90,9 +98,14 @@ public class DataStore implements PersistencyCapable {
             //If no values left then remove fixture
             if (store.get(fixture).isEmpty()) remove(fixture);
         }
+
+        if (hasUpdateAction()) updateAction.run();
     }
 
-    public void clear() {store.clear();}
+    public void clear() {
+        store.clear();
+        if (hasUpdateAction()) updateAction.run();
+    }
 
     public Double get(Fixture fixture, Attribute attribute) {
         if (fixture==null||attribute==null||!store.containsKey(fixture)||!store.get(fixture).containsKey(attribute)) return NONE;

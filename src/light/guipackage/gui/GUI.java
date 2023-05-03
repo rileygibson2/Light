@@ -27,14 +27,18 @@ import light.guipackage.gui.components.basecomponents.MessageBox;
 import light.guipackage.gui.components.complexcomponents.CommandLineGUI;
 import light.guipackage.gui.components.complexcomponents.EncodersGUI;
 import light.guipackage.gui.components.complexcomponents.FixtureWindowGUI;
+import light.guipackage.gui.components.complexcomponents.KeyWindowGUI;
 import light.guipackage.gui.components.complexcomponents.PoolGUI;
+import light.guipackage.gui.components.complexcomponents.TemporaryGUIInteractions;
 import light.guipackage.gui.components.complexcomponents.UDAGUI;
 import light.guipackage.gui.components.complexcomponents.ViewGUI;
 import light.stores.View;
 import light.uda.FixtureWindow;
+import light.uda.KeyWindow;
 import light.uda.UDA;
 import light.uda.UDACapable;
 import light.uda.guiinterfaces.GUIInterface;
+import light.uda.guiinterfaces.TemporyGUIInteractionsInterface;
 
 
 public class GUI extends JPanel {
@@ -88,7 +92,7 @@ public class GUI extends JPanel {
 	public GUIInterface addStaticElementToGUI(Object o) {
 		GUIInterface inter = null;
 		
-		if (o instanceof CommandLine) inter = new CommandLineGUI(new UnitRectangle(5, 93, 80, 5));
+		if (o==CommandLine.class) inter = new CommandLineGUI(new UnitRectangle(5, 93, 80, 5));
 		//Special case for View screen as this does not have a controlling class but is a normal pool, so View class is used as the signifier
 		else if (o==View.class) inter = new ViewGUI(new UnitRectangle(95, 0, 5, 100));
 		else if (o instanceof UDA) {
@@ -118,8 +122,9 @@ public class GUI extends JPanel {
 		r.height = new UnitValue(udaCells.height*cellDims.y.v, cellDims.y.u);
 		
 		if (o instanceof Pool) inter = new PoolGUI(r, (Pool<?>) o);
-		if (o instanceof FixtureWindow) inter = new FixtureWindowGUI(r, (FixtureWindow) o);
 		if (o instanceof Encoders) inter = new EncodersGUI(r);
+		if (o instanceof FixtureWindow) inter = new FixtureWindowGUI(r, (FixtureWindow) o);
+		if (o instanceof KeyWindow) inter = new KeyWindowGUI(r, (KeyWindow) o);
 		
 		if (inter!=null) udaGUI.addComponent((Component) inter);
 		return inter;
@@ -170,6 +175,8 @@ public class GUI extends JPanel {
 			CLI.debug(indent+e.toString());
 			for (Component c : e.getComponents()) scanDOM(c, indent+" - ");
 		}
+
+		public TemporyGUIInteractionsInterface getTemporyActionsImplementation() {return new TemporaryGUIInteractions();}
 		
 		@Override
 		public void paintComponent(Graphics g) {

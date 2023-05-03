@@ -1,9 +1,9 @@
 package light.guipackage.gui.components.basecomponents;
 
+import light.general.Submitter;
 import light.general.ThreadController;
 import light.guipackage.general.Point;
 import light.guipackage.general.Rectangle;
-import light.guipackage.general.Submitter;
 import light.guipackage.general.UnitRectangle;
 import light.guipackage.gui.Styles;
 import light.guipackage.gui.components.InputComponent;
@@ -34,12 +34,7 @@ public class CheckBoxInput extends InputComponent<Boolean> {
 		addComponent(tick);
 
 		//Click action
-		setClickAction(new Submitter<Point>() {
-			@Override
-			public void submit(Point p) {
-				click(p);
-			}
-		});
+		setClickAction(p -> click(p));
 	}
 
 	@Override
@@ -56,8 +51,8 @@ public class CheckBoxInput extends InputComponent<Boolean> {
 
 	public void click(Point p) {
 		if (hasActions()) {
-			getActions().submit(!getValue());
-			setValue(getActions().get());
+			submitAction().submit(!getValue());
+			setValue(getAction().get());
 		}
 		else setValue(!getValue());
 		

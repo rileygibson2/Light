@@ -5,23 +5,18 @@ import java.awt.Cursor;
 import java.awt.Font;
 import java.awt.event.KeyEvent;
 
+import light.general.Getter;
 import light.general.ThreadController;
+import light.guipackage.cli.CLI;
 import light.guipackage.general.GUIUtils;
-import light.guipackage.general.Getter;
-import light.guipackage.general.Point;
-import light.guipackage.general.Submitter;
 import light.guipackage.general.UnitRectangle;
 import light.guipackage.gui.IO;
 import light.guipackage.gui.Styles;
 import light.guipackage.gui.components.InputComponent;
-import light.guipackage.threads.AnimationFactory;
-import light.guipackage.threads.AnimationFactory.Animations;
 
 public class TextInput extends InputComponent<String> {
 	
-	public Label textLabel;
-	public Label descriptionLabel;
-	private Getter<String> description;
+	private Label label;
 	
 	//Cursor
 	private ThreadController cursorAni;
@@ -29,81 +24,70 @@ public class TextInput extends InputComponent<String> {
 	
 	public TextInput(UnitRectangle r) {
 		super(r);
-		if (getValue()==null) setValue("");
 		cursor = "";
 		
 		setColor(Styles.focus);
 		setRounded(true);
 		
-		textLabel = new Label(new UnitRectangle(8, 55, 0, 0), getValue(), new Font(Styles.baseFont, Font.ITALIC, 15), new Color(200, 200, 200));
-		addComponent(textLabel);
-		descriptionLabel = new Label(new UnitRectangle(8, 55, 0, 0), getValue(), new Font(Styles.baseFont, Font.ITALIC, 15), new Color(140, 140, 140));
-		descriptionLabel.setVisible(false);
-		addComponent(descriptionLabel);
+		label = new Label(new UnitRectangle(0, 0, 100, 100), new Font(Styles.baseFont, Font.BOLD, 12), new Color(200, 200, 200));
+		label.setColor(new Color(20, 20, 20));
+        label.setBorder(new Color(100, 100, 100));
+        label.setRounded(true);
+		label.setTextCentered(true);
+		
+		addComponent(label);
 
-		//Click action
-		setClickAction(new Submitter<Point>() {
-			@Override
-			public void submit(Point p) {
-				click(p);
-			}
-		});
+		if (getValue()==null) setValue(""); 
+		setClickAction(() -> click());
 	}
+
+	public Label getLabel() {return label;}
 	
 	@Override
 	public void actionsUpdated() {
-		textLabel.setText(getValue());
+		label.setText(getValue());
 	}
 	
 	@Override
 	public void setValue(String v) {
 		super.setValue(v);
-		textLabel.setText(getValue()+cursor);
+		label.setText(getValue()+cursor);
 	}
 	
-	public void setDescriptionAction(Getter<String> d) {
-		description = d;
-		if (getValue().isEmpty()) {
-			descriptionLabel.setText(description.get());
-			descriptionLabel.setVisible(true);
-		}
-		else descriptionLabel.setVisible(false);
-	}
-	
-	public void click(Point p) {
+	public void click() {
 		setSelected(true);
-		TextInput t = this;
-		IO.getInstance().registerKeyListener(this, new Submitter<KeyEvent>() {
-			@Override
-			public void submit(KeyEvent e) {
-				t.doKeyPress(e);
-			}
-		});
+		IO.getInstance().setOverrideKeyListener(e -> keyPressed(e));
 		
-		cursorAni = AnimationFactory.getAnimation(this, Animations.CursorBlip);
-		cursorAni.start();
-		descriptionLabel.setVisible(false);
-		super.doClick(p);
+		//cursorAni = AnimationFactory.getAnimation(this, Animations.CursorBlip);
+		//cursorAni.start();
+	}
+
+	public void keyPressed(KeyEvent e) {
+		//Submit on enter
+		if (e.getExtendedKeyCode()==10) submitAction().submit(getValue());
+		//Backspace
+		else if (e.getExtendedKeyCode()==8&&!getValue().isEmpty()) setValue(getValue().substring(0, getValue().length()-1));
+		else setValue(getValue()+e.getKeyChar());
+		label.setText(getValue()+cursor);
 	}
 	
 	@Override
 	public void doDeselect() {
-		IO.getInstance().deregisterKeyListener(textLabel);;
+		IO.getInstance().deregisterKeyListener(label);
 		setSelected(false);
 		if (cursorAni!=null) cursorAni.end();
 		
 		//Submit input
 		if (hasActions()) {
-			getActions().submit(getValue()); //Submit input
-			setValue(getActions().get()); //Update text
-			textLabel.setText(getValue());
+			submitAction().submit(getValue()); //Submit input
+			setValue(getAction().get()); //Update text
+			label.setText(getValue());
 		}
-		if (getValue().isEmpty()&&description!=null) {
+		/*if (getValue().isEmpty()&&description!=null) {
 			descriptionLabel.setText(description.get());
 			descriptionLabel.setVisible(true);
 		}
-		else descriptionLabel.setVisible(false);
-		super.doDeselect();
+		else descriptionLabel.setVisible(false);*/
 	}
 	
 	@Override
@@ -120,12 +104,5 @@ public class TextInput extends InputComponent<String> {
 	@Override
 	public void doUnhover() {
 		GUIUtils.setCursor(Cursor.DEFAULT_CURSOR);
-	}
-	
-	@Override
-	public void doKeyPress(KeyEvent e) {
-		if (e.getExtendedKeyCode()==8&&!getValue().isEmpty()) setValue(getValue().substring(0, getValue().length()-1));
-		else setValue(getValue()+e.getKeyChar());
-		textLabel.setText(getValue()+cursor);
 	}
 }

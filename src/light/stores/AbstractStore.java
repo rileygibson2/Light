@@ -20,6 +20,16 @@ public abstract class AbstractStore extends Addressable {
     public void setStore(DataStore store) {this.store = store;}
 
     /**
+     * Overridden here so same update action passed to for Addressable super can be used for updates
+     * to store as well.
+     */
+    @Override
+    public void setUpdateAction(Runnable action) {
+        super.setUpdateAction(action);
+        store.setUpdateAction(action);
+    }
+
+    /**
      * Can be overridden but by default will load this store's address into the commandline
      */
     public void select() {

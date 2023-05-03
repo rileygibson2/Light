@@ -16,11 +16,11 @@ import light.stores.Preset;
 import light.stores.Preset.PresetType;
 import light.stores.Sequence;
 
-public class Store implements Command {
+public class StoreCommand implements Command {
 
     ConsoleAddress address;
 
-    public Store(ConsoleAddress address) {
+    public StoreCommand(ConsoleAddress address) {
         this.address = address;
     }
 

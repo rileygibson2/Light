@@ -1,7 +1,7 @@
 package light.guipackage.gui.components;
 
+import light.general.Submitter;
 import light.guipackage.general.Point;
-import light.guipackage.general.Submitter;
 import light.guipackage.general.UnitRectangle;
 import light.guipackage.general.UnitValue;
 import light.guipackage.gui.Element;

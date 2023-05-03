@@ -13,7 +13,6 @@ import light.general.ConsoleAddress;
 import light.general.Utils;
 import light.guipackage.general.Point;
 import light.guipackage.general.Rectangle;
-import light.guipackage.general.Submitter;
 import light.guipackage.general.UnitPoint;
 import light.guipackage.general.UnitRectangle;
 import light.guipackage.general.UnitValue;
@@ -27,8 +26,10 @@ import light.guipackage.gui.components.boxes.CollumnBox;
 import light.guipackage.gui.components.boxes.SimpleBox;
 import light.stores.Group;
 import light.stores.Preset.PresetType;
+import light.stores.View;
 import light.stores.effects.Effect;
 import light.uda.FixtureWindow;
+import light.uda.KeyWindow;
 import light.uda.UDA;
 import light.uda.guiinterfaces.UDAGUIInterface;
 
@@ -95,12 +96,7 @@ public class UDAGUI extends SimpleBox implements UDAGUIInterface {
         });
         
         //Click action
-        setClickAction(new Submitter<Point>() {
-            @Override
-            public void submit(Point p) {
-                click(p);
-            }
-        });
+        setClickAction(p -> click(p));
     }
     
     public Point getSize() {
@@ -151,6 +147,7 @@ public class UDAGUI extends SimpleBox implements UDAGUIInterface {
         nametags.put("Groups", ConsoleAddress.getBase(Group.class));
         nametags.put("Effects", ConsoleAddress.getBase(Effect.class));
         nametags.put("Executors", ConsoleAddress.getBase(Executor.class));
+        nametags.put("Views", ConsoleAddress.getBase(View.class));
         fillTab(tB, 1, zoneRec, nametags);
         
         //Sheets tab
@@ -158,6 +155,11 @@ public class UDAGUI extends SimpleBox implements UDAGUIInterface {
         nametags.put("Fixtures", FixtureWindow.class);
         nametags.put("Encoders", Encoders.class);
         fillTab(tB, 2, zoneRec, nametags);
+
+        //Other tab
+        nametags.clear();
+        nametags.put("Command Palate", KeyWindow.class);
+        fillTab(tB, 4, zoneRec, nametags);
         
         openZonePicker = tB;
     }
@@ -183,7 +185,7 @@ public class UDAGUI extends SimpleBox implements UDAGUIInterface {
             
             l.setClickAction(() -> {
                 closeZonePicker();
-                UDA.getInstance().createZone(l.getTag(), zoneRec);
+                UDA.getInstance().createZoneFromTag(l.getTag(), zoneRec);
             });
             
             cB.addComponent(l);

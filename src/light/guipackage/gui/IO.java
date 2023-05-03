@@ -11,10 +11,10 @@ import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 
-import light.general.ThreadController;
+import light.general.Submitter;
 import light.guipackage.cli.CLI;
+import light.guipackage.general.Pair;
 import light.guipackage.general.Point;
-import light.guipackage.general.Submitter;
 import light.guipackage.threads.GUIThreadController;
 
 public class IO implements MouseListener, MouseMotionListener, MouseWheelListener, KeyListener {
@@ -22,6 +22,7 @@ public class IO implements MouseListener, MouseMotionListener, MouseWheelListene
 	static IO singleton;
 	
 	private Map<Object, Submitter<KeyEvent>> keyListeners;
+	private Submitter<KeyEvent> overrideKeyListener; //Will force key events only to be sent to this submitter
 	private Map<KeyEvent, Runnable> keyActions;
 	private Point dragPoint;
 	
@@ -42,11 +43,20 @@ public class IO implements MouseListener, MouseMotionListener, MouseWheelListene
 	}
 	
 	public void registerKeyListener(Object listener, Submitter<KeyEvent> s) {keyListeners.put(listener, s);}
-	
 	public void deregisterKeyListener(Object listener) {keyListeners.remove(listener);}
-
+	
+	/**
+	* Will force key events only to be sent to this submitter and block all other
+	* registed key listeners from recieving key press events
+	* This functionality is designed to be used temporarily and released quickly.
+	* @param listener
+	* @param s
+	*/
+	public void setOverrideKeyListener(Submitter<KeyEvent> s) {overrideKeyListener =  s;}
+	public boolean hasOverrideKeyListener() {return overrideKeyListener!=null;}
+	public void removeOverrideKeyListener() {overrideKeyListener = null;}
+	
 	public void registerKeyAction(KeyEvent e, Runnable r) {keyActions.put(e, r);}
-
 	public void removeKeyAction(KeyEvent r) {keyActions.remove(r);}
 	
 	public void finishEvent() {
@@ -72,12 +82,12 @@ public class IO implements MouseListener, MouseMotionListener, MouseWheelListene
 	
 	public boolean paintExpired() {
 		if (paintRequested==null) return true;
-        if ((Instant.now().getEpochSecond()-paintRequested.getEpochSecond())>=paintTimeout) {
-        	paintRequested = null;
-        	return true;
-        }
-        return false;
-    }
+		if ((Instant.now().getEpochSecond()-paintRequested.getEpochSecond())>=paintTimeout) {
+			paintRequested = null;
+			return true;
+		}
+		return false;
+	}
 	
 	@Override
 	public void mouseMoved(MouseEvent e) {
@@ -97,7 +107,7 @@ public class IO implements MouseListener, MouseMotionListener, MouseWheelListene
 		dragPoint = null;
 		finishEvent();
 	}
-
+	
 	@Override
 	public void mouseClicked(MouseEvent e) {
 		GUI.getInstance().getCurrentRoot().doClick(new Point(e.getX(), e.getY()));
@@ -112,9 +122,13 @@ public class IO implements MouseListener, MouseMotionListener, MouseWheelListene
 	
 	@Override
 	public void keyTyped(KeyEvent e) {
-		for (Submitter<KeyEvent> s : keyListeners.values()) s.submit(e);
-
-		if (e.getExtendedKeyCode()==KeyEvent.VK_C) {
+		//Disperse key events to listeners
+		if (hasOverrideKeyListener()) overrideKeyListener.submit(e);
+		else {
+			for (Submitter<KeyEvent> s : keyListeners.values()) s.submit(e);
+		}
+		
+		/*if (e.getExtendedKeyCode()==KeyEvent.VK_C) {
 			if (CLI.viewerActive()) CLI.showViewer(false);
 			else CLI.showViewer(true);
 		}
@@ -126,28 +140,28 @@ public class IO implements MouseListener, MouseMotionListener, MouseWheelListene
 		if (e.getExtendedKeyCode()==KeyEvent.VK_V) {
 			CLI.setVerbose(!CLI.isVerbose());
 			CLI.getViewer().repaint();
-		}
+		}*/
 		if (e.getExtendedKeyCode()==KeyEvent.VK_S) GUI.getInstance().scanDOM(GUI.getInstance().getCurrentRoot(), "");
-
+		
 		for (Map.Entry<KeyEvent, Runnable> m : keyActions.entrySet()) {
 			if (e.getExtendedKeyCode()==m.getKey().getExtendedKeyCode()) m.getValue().run();
 		} 
 		finishEvent();
 	}
-
+	
 	@Override
 	public void mousePressed(MouseEvent e) {}
-
+	
 	@Override
 	public void mouseEntered(MouseEvent e) {}
-
+	
 	@Override
 	public void mouseExited(MouseEvent e) {}
-
+	
 	@Override
 	public void keyPressed(KeyEvent e) {}
-
+	
 	@Override
 	public void keyReleased(KeyEvent e) {}
-
+	
 }

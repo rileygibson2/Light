@@ -6,8 +6,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.sound.midi.Patch;
-
 import light.Programmer;
 import light.fixtures.Attribute;
 import light.fixtures.FeatureGroup;
@@ -42,7 +40,6 @@ public class FixtureWindowGUI extends SimpleBox implements FixtureWindowGUIInter
     private FixtureWindow fixtureWindow;
     private Map<Fixture, SimpleBox> fixtureGUIs;
     private Table fixtureTable;
-    private boolean tableView = true;
     
     public FixtureWindowGUI(UnitRectangle r, FixtureWindow fixtureWindow) {
         super(r);
@@ -82,7 +79,7 @@ public class FixtureWindowGUI extends SimpleBox implements FixtureWindowGUIInter
         addComponent(topBar);
         
         //Create fixtues
-        if (tableView) buildFixturesTableView();
+        if (fixtureWindow.getTableMode()) buildFixturesTableView();
         else buildFixturesBlockView();
     }
     
@@ -309,14 +306,14 @@ public class FixtureWindowGUI extends SimpleBox implements FixtureWindowGUIInter
         
         for (Fixture fixture : fixtures) {
             if (fixtureGUIs.get(fixture)==null) continue;
-            if (tableView) populateFixtureBoxTableView(fixture);
+            if (fixtureWindow.getTableMode()) populateFixtureBoxTableView(fixture);
             else populateFixtureBoxBlockView(fixture);
         }
     }
     
     @Override
     public void update() {
-        if (tableView) buildFixturesTableView();
+        if (fixtureWindow.getTableMode()) buildFixturesTableView();
         else buildFixturesBlockView();
     }
 }
