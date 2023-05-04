@@ -6,8 +6,11 @@ import java.util.Iterator;
 import java.util.Set;
 
 import light.commands.Command;
-import light.commands.commandcontrol.CommandProxy.CommandProxyType;
-import light.commands.commandcontrol.CommandProxy.Operator;
+import light.commands.commandcontrol.commandproxys.CommandProxy;
+import light.commands.commandcontrol.commandproxys.CommandTypeProxy;
+import light.commands.commandcontrol.commandproxys.OperatorTypeProxy;
+import light.commands.commandcontrol.commandproxys.OperatorTypeProxy.Operator;
+import light.commands.commandcontrol.commandproxys.ValueTypeProxy;
 import light.guipackage.cli.CLI;
 import light.guipackage.gui.IO;
 
@@ -58,7 +61,7 @@ public class CommandController {
     public void addToCommand(CommandProxy cP) {
         if (cP==null) return;
         //Check (if proxy is command) if command is accepted
-        if (cP.getType()==CommandProxyType.Command&&!commandAccepted((Class<? extends Command>) cP.getResolveType())) {
+        if (cP instanceof CommandTypeProxy&&!commandAccepted((Class<? extends Command>) cP.getResolveType())) {
             CLI.error("This command controller cannot accept the command class "+cP.getResolveType());
             return;
         }
@@ -82,7 +85,7 @@ public class CommandController {
             
             if (lastNonTerminal==null) { //This only occurs in one of the below edge cases
                 //plus and thru edge case
-                if (cP.getType()==Operator.PLUS||cP.getType()==Operator.THRU) {
+                if (cP instanceof OperatorTypeProxy && ((OperatorTypeProxy) cP).getOperator()==Operator.PLUS||((OperatorTypeProxy) cP).getOperator()==Operator.THRU) {
                     CommandProxy prevProxy = commandStack.pop();
                     cP.addChild(prevProxy);
                     //Need to check if previous was root because if so then cP needs to become root
@@ -97,7 +100,6 @@ public class CommandController {
         }
         
         if (hasCommandUpdatedAction()) commandUpdatedAction.run();
-        CLI.debug("Command controller updated:\n"+getTreeString());
     }
     
     /**
@@ -126,7 +128,7 @@ public class CommandController {
         //Check for operator
         for (Operator o : Operator.values()) {
             if (workingText.toLowerCase().equals(o.getText().toLowerCase())) {
-                parsed = new CommandProxy(o);
+                parsed = new OperatorTypeProxy(o);
             }
         }
         
@@ -134,7 +136,7 @@ public class CommandController {
         Double d;
         try {
             d = Double.parseDouble(workingText);
-            parsed = new CommandProxy(d);
+            parsed = new ValueTypeProxy(d);
         }
         catch (NumberFormatException ex) {}
         
@@ -163,6 +165,11 @@ public class CommandController {
     }
     
     public Set<Class<? extends Command>> acceptedCommands() {return acceptedCommands;}
+
+    public boolean containsProxyOfType(Class<? extends CommandProxy> type) {
+        if (commandRoot==null) return false;
+        return commandRoot.subtreeContainsType(type);
+    }
 
     public void executeCommand() throws CommandFormatException {
         Command c = null;

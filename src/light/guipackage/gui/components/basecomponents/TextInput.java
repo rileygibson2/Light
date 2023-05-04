@@ -5,9 +5,7 @@ import java.awt.Cursor;
 import java.awt.Font;
 import java.awt.event.KeyEvent;
 
-import light.general.Getter;
 import light.general.ThreadController;
-import light.guipackage.cli.CLI;
 import light.guipackage.general.GUIUtils;
 import light.guipackage.general.UnitRectangle;
 import light.guipackage.gui.IO;
@@ -45,6 +43,7 @@ public class TextInput extends InputComponent<String> {
 	
 	@Override
 	public void actionsUpdated() {
+		setValue(getAction().get());
 		label.setText(getValue());
 	}
 	

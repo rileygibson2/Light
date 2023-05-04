@@ -7,14 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import light.commands.ClearCommand;
-import light.commands.CopyCommand;
-import light.commands.DeleteCommand;
-import light.commands.EditCommand;
-import light.commands.LabelCommand;
-import light.commands.ModulateCommand;
-import light.commands.MoveCommand;
-import light.commands.StoreCommand;
 import light.commands.commandcontrol.CommandLine;
 import light.encoders.Encoders;
 import light.executors.Executor;
@@ -26,6 +18,7 @@ import light.fixtures.profile.ProfileManager;
 import light.fixtures.profile.ProfileParseException;
 import light.general.Addressable;
 import light.general.ConsoleAddress;
+import light.general.DataStore;
 import light.guipackage.cli.CLI;
 import light.guipackage.general.Rectangle;
 import light.guipackage.gui.GUI;
@@ -167,6 +160,7 @@ public class Light {
 
 
         //Generate static gui elements
+        staticGUIs.add(GUI.getInstance().addStaticElementToGUI(Light.class));
         staticGUIs.add(GUI.getInstance().addStaticElementToGUI(CommandLine.class));
         staticGUIs.add(GUI.getInstance().addStaticElementToGUI(UDA.getInstance()));        
         staticGUIs.add(GUI.getInstance().addStaticElementToGUI(View.class));
@@ -175,9 +169,7 @@ public class Light {
     }
     
     private void mock() {
-        Preset preset = new Preset(PresetType.COLOR.getBaseAddress().setSuffix(2), PresetType.COLOR);
-        getPresetPool(PresetType.COLOR).add(preset);
-        
+        //Mock profiles
         ProfileManager pro = ProfileManager.getInstance();
         Profile pro1 = null;
         Profile pro2 = null;
@@ -187,6 +179,7 @@ public class Light {
         }
         catch (ProfileParseException e) {CLI.error(e.toString());}
         
+        //Mock fixtures
         Fixture fixture1 = null;
         Fixture fixture2 = null;
         int i=0;
@@ -199,6 +192,7 @@ public class Light {
             PatchManager.getInstance().addFixture(fixture2);
         }
         
+        //Mock prog values
         Programmer prog = Programmer.getInstance();
         prog.select(fixture1);
 
@@ -213,8 +207,24 @@ public class Light {
         prog.set(fixture1, Attribute.COLORRGB3, 100d, false);
         prog.set(fixture1, Attribute.GOBO1_INDEX, 20d, false);
 
-        //Mock zones
+        //Mock presets
+        Preset preset = new Preset(PresetType.DIMMER.getBaseAddress().setSuffix(2), PresetType.DIMMER);
+        DataStore store = new DataStore();
+        store.set(fixture2, Attribute.DIM, 0d, true);
+        store.set(fixture1, Attribute.DIM, 0d, true);
+        preset.setStore(store);
+        preset.setLabel("All Off");
+        getPresetPool(PresetType.DIMMER).add(preset);
 
+        preset = new Preset(PresetType.DIMMER.getBaseAddress().setSuffix(3), PresetType.DIMMER);
+        store = new DataStore();
+        store.set(fixture2, Attribute.DIM, 100d, true);
+        store.set(fixture1, Attribute.DIM, 100d, true);
+        preset.setStore(store);
+        preset.setLabel("All On");
+        getPresetPool(PresetType.DIMMER).add(preset);
+
+        //Mock views
         View view = new View(new ConsoleAddress(View.class, viewPool.getAddress().getPrefix(), 1));
         view.setLabel("Pools");
         int x = 0, y = 0;
@@ -234,7 +244,7 @@ public class Light {
         view.add(new FixtureWindow(), new Rectangle(0, 0, 8, 7));
         view.add(Encoders.getInstance(), new Rectangle(0, 9, 9, 2));
         view.add(new KeyWindow(), new Rectangle(9, 0, 9, 8));
-        view.add(getPresetPool(Preset.PresetType.COLOR), new Rectangle(9,8, 9, 3));
+        view.add(getPresetPool(Preset.PresetType.DIMMER), new Rectangle(9,8, 9, 3));
         viewPool.add(view);
 
         view = new View(new ConsoleAddress(View.class, viewPool.getAddress().getPrefix(), 3));

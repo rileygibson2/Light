@@ -5,19 +5,21 @@ import java.awt.Font;
 
 import light.Pool;
 import light.commands.commandcontrol.CommandLine;
-import light.commands.commandcontrol.CommandProxy;
+import light.commands.commandcontrol.commandproxys.AddressTypeProxy;
+import light.commands.commandcontrol.commandproxys.CommandTypeProxy;
 import light.executors.Executor;
+import light.general.Addressable;
 import light.general.ConsoleAddress;
-import light.general.Submitter;
 import light.general.Utils;
+import light.guipackage.cli.CLI;
 import light.guipackage.general.GUIUtils;
-import light.guipackage.general.Point;
 import light.guipackage.general.UnitRectangle;
 import light.guipackage.gui.Styles;
 import light.guipackage.gui.components.Component;
 import light.guipackage.gui.components.basecomponents.Image;
 import light.guipackage.gui.components.basecomponents.Label;
 import light.guipackage.gui.components.boxes.SimpleBox;
+import light.stores.AbstractStore;
 import light.stores.Group;
 import light.stores.Preset;
 import light.stores.View;
@@ -151,7 +153,13 @@ public class PoolCellGUI extends Component {
     public void removeDragIcon() {mainBox.removeComponent(dragIcon);}
     
     public void click() {
-        CommandLine.getInstance().getCommandController().addToCommand(new CommandProxy(address));
+        if (CommandLine.getInstance().containsProxyOfType(CommandTypeProxy.class)) { //Add to command line
+            //TODO add or guard condition
+            CommandLine.getInstance().addToCommand(new AddressTypeProxy(address));
+        }
+        else { //Load datastore if pool object is one
+            Addressable a = pool.get(address);
+            if (a!=null&&a instanceof AbstractStore) ((AbstractStore) a).load();
+        }
     }
-    
 }

@@ -6,8 +6,9 @@ import java.util.Map;
 
 import light.commands.commandcontrol.CommandController;
 import light.commands.commandcontrol.CommandFormatException;
-import light.commands.commandcontrol.CommandProxy;
-import light.commands.commandcontrol.CommandProxy.Operator;
+import light.commands.commandcontrol.commandproxys.OperatorTypeProxy;
+import light.commands.commandcontrol.commandproxys.OperatorTypeProxy.Operator;
+import light.commands.commandcontrol.commandproxys.ValueTypeProxy;
 import light.encoders.Encoders;
 import light.encoders.Encoders.Encoder;
 import light.encoders.Encoders.EncoderDefaultCalculatorMacros;
@@ -203,7 +204,7 @@ public class EncodersGUI extends Component implements EncodersGUIInterface {
                         case NUM9: calculatorCommand.updateWorkingText("9"); break;
                         case PLUS: 
                         calculatorCommand.parseWorkingText();
-                        calculatorCommand.addToCommand(new CommandProxy(Operator.PLUS));
+                        calculatorCommand.addToCommand(new OperatorTypeProxy(Operator.PLUS));
                         break;
                         case PLEASE:
                         calculatorCommand.parseWorkingText();
@@ -220,7 +221,8 @@ public class EncodersGUI extends Component implements EncodersGUIInterface {
                             Encoders.getInstance().set(encoder, d);
                             openCalculator.close(false);
                         }
-                        break;   
+                        break;
+                        default: break;   
                     }
                 });
                 bankBox.addComponent(b);
@@ -255,7 +257,7 @@ public class EncodersGUI extends Component implements EncodersGUIInterface {
             b.setRounded(true);
             b.setBorder(new Color(255, 200, 0));
             b.setTextCentered(true);
-            b.setClickAction(() -> calculatorCommand.addToCommand(new CommandProxy(macro.getValue().a)));
+            b.setClickAction(() -> calculatorCommand.addToCommand(new ValueTypeProxy(macro.getValue().a)));
             macroBox.addComponent(b);
             
             if (macro.getValue().b!=null) {

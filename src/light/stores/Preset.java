@@ -6,10 +6,10 @@ import java.util.Set;
 import light.Programmer;
 import light.fixtures.Attribute;
 import light.fixtures.Fixture;
-import light.fixtures.profile.Profile;
 import light.fixtures.profile.ProfileChannel;
 import light.general.ConsoleAddress;
 import light.general.DataStore;
+import light.guipackage.cli.CLI;
 import light.persistency.PersistencyCapable;
 
 public class Preset extends AbstractStore implements PersistencyCapable {
@@ -78,16 +78,15 @@ public class Preset extends AbstractStore implements PersistencyCapable {
      * Cleans this preset's DataStore of all fixture values that should not be present in
      * this preset.
      */
-    public void clean() {
+    private void clean() {
         DataStore store = getStore();
 
         for (Fixture fixture : store.getFixtureSet()) {
             Set<Attribute> toRemove = new HashSet<>();
-            Profile profile = fixture.getProfile();
 
             //Find fixture attributes that shouldn't be in this preset
             for (Attribute attribute : store.getFixtureValues(fixture).keySet()) {
-                if (!profile.getChannelWithAttribute(attribute).getPresetType().equals(type)) toRemove.add(attribute);
+                if (!isValidForPresetType(fixture, attribute, type)) toRemove.add(attribute);
             }
             //Remove those attributes
             for (Attribute attribute : toRemove) store.remove(fixture, attribute);
@@ -109,6 +108,7 @@ public class Preset extends AbstractStore implements PersistencyCapable {
     @Override
     public void load() {
         //Load into programmer
+        CLI.debug("Loading into prog:\n"+getStore().toStoreString());
         Programmer.getInstance().combine(getStore(), true);
     }
 

@@ -3,26 +3,22 @@ package light.commands.commandcontrol;
 import java.awt.event.KeyEvent;
 
 import light.Light;
-import light.commands.Command;
 import light.general.Submitter;
 import light.guipackage.cli.CLI;
 import light.guipackage.gui.IO;
 import light.uda.guiinterfaces.CommandLineGUIInterface;
 import light.uda.guiinterfaces.GUIInterface;
 
-public class CommandLine {
+public class CommandLine extends CommandController {
 
     private static CommandLine singleton;
 
-    private CommandController controller;
-
     private CommandLine() {
-        controller = new CommandController();
-        controller.acceptAllCommands(true);
-        controller.setCommandUpdatedAction(() -> {
+        acceptAllCommands(true);
+        setCommandUpdatedAction(() -> {
             GUIInterface gui = Light.getInstance().getStaticGUIElement(CommandLineGUIInterface.class);
             if (gui!=null) {
-                ((CommandLineGUIInterface) gui).setCommandString(controller.getCommandAsString());
+                ((CommandLineGUIInterface) gui).setCommandString(getCommandAsString());
             }
         });
 
@@ -37,11 +33,9 @@ public class CommandLine {
         return singleton;
     }
 
-    public CommandController getCommandController() {return controller;}
-
     private void keyPressed(KeyEvent e) {
         CLI.debug("Commandline recieved "+e.getExtendedKeyCode());
-        controller.updateWorkingText(KeyEvent.getKeyText(e.getExtendedKeyCode()));
+        updateWorkingText(KeyEvent.getKeyText(e.getExtendedKeyCode()));
         
         //Check for command
         /*for (Map.Entry<Class<? extends Command>, String> c : registeredCommands.entrySet()) {

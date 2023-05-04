@@ -2,6 +2,7 @@ package light;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -11,7 +12,6 @@ import java.util.Set;
 import light.encoders.EncoderCapable;
 import light.encoders.Encoders;
 import light.encoders.Encoders.Encoder;
-import light.fixtures.Attribute;
 import light.fixtures.FeatureGroup;
 import light.fixtures.Fixture;
 import light.fixtures.PatchManager;
@@ -20,6 +20,7 @@ import light.fixtures.profile.ProfileChannelMacro;
 import light.fixtures.profile.ProfileWheelSlot;
 import light.general.ConsoleAddress;
 import light.general.DataStore;
+import light.guipackage.cli.CLI;
 import light.guipackage.general.Pair;
 import light.output.Output;
 import light.output.OutputCapable;
@@ -42,6 +43,11 @@ public class Programmer extends DataStore implements OutputCapable, EncoderCapab
         Output.getInstance().register(this);
         Encoders.getInstance().aquireEncoders(this);
         Encoders.getInstance().setPage(0, this);
+
+        setUpdateAction((s) -> {
+            CLI.debug("Programmer updated "+s);
+            updateFixturesGUI(s);
+        });
     }
     
     public static Programmer getInstance() {
@@ -52,7 +58,8 @@ public class Programmer extends DataStore implements OutputCapable, EncoderCapab
     public void select(Fixture fixture) {
         if (fixture!=null) selectedFixtures.add(fixture);
         Encoders.getInstance().update();
-        updateFixtureGUI(fixture);
+        //updateFixtureGUI(Collections.singleton(fixture));
+        updateFixturesGUI(Collections.singleton(fixture));
     }
     
     public void select(Collection<Fixture> fixtures) {
@@ -69,10 +76,10 @@ public class Programmer extends DataStore implements OutputCapable, EncoderCapab
         updateFixturesGUI(selectedFixtures);
     }
     
-    public void deselect(Fixture f) {
-        selectedFixtures.remove(f);
+    public void deselect(Fixture fixture) {
+        selectedFixtures.remove(fixture);
         Encoders.getInstance().update();
-        updateFixtureGUI(f);
+        updateFixturesGUI(Collections.singleton(fixture));
     }
     
     public void deselect(List<Fixture> f) {
@@ -92,28 +99,10 @@ public class Programmer extends DataStore implements OutputCapable, EncoderCapab
         Encoders.getInstance().update();
         updateFixturesGUI(PatchManager.getInstance().allFixtureList()); //Update all fixtures in gui
     }
-
-    @Override
-    public void set(Fixture fixture, Map<Attribute, Double> attributes, boolean overwritePriority) {
-        super.set(fixture, attributes, overwritePriority);
-        updateFixtureGUI(fixture);
-    }
-
-    @Override
-    public void set(Fixture fixture, Attribute attribute, Double value, boolean overwritePriority) {
-        super.set(fixture, attribute, value, overwritePriority);
-        updateFixtureGUI(fixture);
-    }
     
     public void addEffect(Effect e) {activeEffects.add(e);}
     
     public void removeEffect(Effect e) {activeEffects.remove(e);}
-    
-    private void updateFixtureGUI(Fixture changed) {
-        List<Fixture> fixture = new ArrayList<>();
-        fixture.add(changed);
-        updateFixturesGUI(fixture);
-    }
     
     private void updateFixturesGUI(Collection<Fixture> changed) {
         for (GUIInterface gui : UDA.getInstance().getGUIInterfacesOfClass(FixtureWindowGUIInterface.class)) {

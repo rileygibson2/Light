@@ -53,7 +53,6 @@ public class ViewGUI extends SimpleBox implements ViewGUIInterface {
     }
     
     private void viewCellClicked(PoolCellGUI viewCell) {
-        CLI.debug("clicked: "+viewCell.getAddress());
         View view = Light.getInstance().getViewPool().get(viewCell.getAddress());
         if (view!=null) view.load();
     }

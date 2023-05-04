@@ -1,9 +1,12 @@
 package light.general;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+
+import org.w3c.dom.Attr;
 
 import light.fixtures.Attribute;
 import light.fixtures.FeatureGroup;
@@ -17,15 +20,15 @@ public class DataStore implements PersistencyCapable {
     public final static double NONE = -12345d;
 
     protected Map<Fixture, Map<Attribute, Double>> store;
-    private Runnable updateAction; //Action run when store is updated
+    private Submitter<Set<Fixture>> updateAction; //Action run when store is updated
     
     public DataStore() {
         store = new HashMap<Fixture, Map<Attribute, Double>>();
     }
 
-    public void setUpdateAction(Runnable action) {this.updateAction = action;}
+    public void setUpdateAction(Submitter<Set<Fixture>> action) {this.updateAction = action;}
     public boolean hasUpdateAction() {return updateAction!=null;}
-    public Runnable getUpdateAction() {return updateAction;}
+    public Submitter<Set<Fixture>> getUpdateAction() {return updateAction;}
     
     /**
      * 
@@ -50,7 +53,7 @@ public class DataStore implements PersistencyCapable {
             store.put(fixture, attributes);
         }
 
-        if (hasUpdateAction()) updateAction.run();
+        if (hasUpdateAction()) updateAction.submit(Collections.singleton(fixture));
     }
 
     public void set(Fixture fixture, Map<Attribute, Double> attributes, boolean overwritePriority) {
@@ -62,7 +65,7 @@ public class DataStore implements PersistencyCapable {
         for (Map.Entry<Attribute, Double> v : attributes.entrySet()) {
             if (!fixture.hasAttribute(v.getKey())) toRemove.add(v.getKey());
 
-            //Check value not present if overwrite
+            //Check value not present if not overwrite
             if (!overwritePriority&&contains(fixture, v.getKey())) toRemove.add(v.getKey());
         }
         attributes.keySet().removeAll(toRemove);
@@ -75,10 +78,10 @@ public class DataStore implements PersistencyCapable {
         //Assign values to this fixture's mapping
         store.put(fixture, attributes);
 
-        if (hasUpdateAction()) updateAction.run();
+        if (hasUpdateAction()) updateAction.submit(Collections.singleton(fixture));
     }
 
-    public double validate(Fixture fixture, Attribute attribute, double value) {
+    private double validate(Fixture fixture, Attribute attribute, double value) {
         ProfileChannel channel = fixture.getProfile().getChannelWithAttribute(attribute);
         if (!channel.valueInRange(value)) {
             if (value>channel.getMaxValue()) return channel.getMaxValue();
@@ -99,12 +102,13 @@ public class DataStore implements PersistencyCapable {
             if (store.get(fixture).isEmpty()) remove(fixture);
         }
 
-        if (hasUpdateAction()) updateAction.run();
+        if (hasUpdateAction()) updateAction.submit(Collections.singleton(fixture));
     }
 
     public void clear() {
+        Set<Fixture> fixtures = getFixtureSet();
         store.clear();
-        if (hasUpdateAction()) updateAction.run();
+        if (hasUpdateAction()) updateAction.submit(fixtures);
     }
 
     public Double get(Fixture fixture, Attribute attribute) {
@@ -112,7 +116,11 @@ public class DataStore implements PersistencyCapable {
         return store.get(fixture).get(attribute);
     }
 
-    public Set<Fixture> getFixtureSet() {return store.keySet();}
+    public Set<Fixture> getFixtureSet() {
+        Set<Fixture> copy = new HashSet<>();
+        copy.addAll(store.keySet());
+        return copy;
+    }
 
     public Map<Attribute, Double> getFixtureValues(Fixture fixture) {return store.get(fixture);}
 
@@ -145,7 +153,9 @@ public class DataStore implements PersistencyCapable {
      */
     public DataStore combine(DataStore o, boolean overwritePriority) {
         for (Fixture f : o.getFixtureSet()) {
-            set(f, o.getFixtureValues(f), overwritePriority);
+            for (Map.Entry<Attribute, Double> values : o.getFixtureValues(f).entrySet()) {
+                set(f, values.getKey(), values.getValue(), overwritePriority);
+            }
         }
         return this;
     }
@@ -195,6 +205,10 @@ public class DataStore implements PersistencyCapable {
         DataStore clone = new DataStore();
         clone.store = newStore;
         return clone;
+    }
+
+    public String toStoreString() {
+        return store.toString();
     }
 
     @Override

@@ -9,7 +9,8 @@ public class ClearCommand implements Command {
 
     @Override
     public void execute() {
-        if (!CommandLine.getInstance().getCommandController().isEmpty()) CommandLine.getInstance().getCommandController().clear();
+        if (!CommandLine.getInstance().isEmpty()) CommandLine.getInstance().clear();
+        else if (Programmer.getInstance().hasSelectedFixtures()) Programmer.getInstance().clearSelected();
         else Programmer.getInstance().clear();
     }
 }

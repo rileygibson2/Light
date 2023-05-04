@@ -1,16 +1,9 @@
 package light.commands;
 
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
 import light.Light;
 import light.Programmer;
-import light.fixtures.Attribute;
-import light.fixtures.Fixture;
-import light.fixtures.profile.Profile;
 import light.general.ConsoleAddress;
-import light.general.DataStore;
+import light.guipackage.cli.CLI;
 import light.stores.Cue;
 import light.stores.Preset;
 import light.stores.Preset.PresetType;
@@ -33,6 +26,7 @@ public class StoreCommand implements Command {
     private void storePreset() {
         if (address==null) return;
 
+        CLI.debug("storing command!!!!");
         //Make new preset of correct type
         PresetType t = Preset.getTypeFromAddress(address);
         if (t==null) return;

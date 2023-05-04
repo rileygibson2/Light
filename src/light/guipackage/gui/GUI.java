@@ -13,6 +13,7 @@ import java.util.List;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
+import light.Light;
 import light.Pool;
 import light.commands.commandcontrol.CommandLine;
 import light.encoders.Encoders;
@@ -25,6 +26,7 @@ import light.guipackage.general.UnitValue;
 import light.guipackage.gui.components.Component;
 import light.guipackage.gui.components.basecomponents.MessageBox;
 import light.guipackage.gui.components.complexcomponents.CommandLineGUI;
+import light.guipackage.gui.components.complexcomponents.ControlBarGUI;
 import light.guipackage.gui.components.complexcomponents.EncodersGUI;
 import light.guipackage.gui.components.complexcomponents.FixtureWindowGUI;
 import light.guipackage.gui.components.complexcomponents.KeyWindowGUI;
@@ -92,7 +94,8 @@ public class GUI extends JPanel {
 	public GUIInterface addStaticElementToGUI(Object o) {
 		GUIInterface inter = null;
 		
-		if (o==CommandLine.class) inter = new CommandLineGUI(new UnitRectangle(5, 93, 80, 5));
+		if (o==Light.class) inter = new ControlBarGUI(new UnitRectangle(0, 1, 4.5, 97));
+		else if (o==CommandLine.class) inter = new CommandLineGUI(new UnitRectangle(5, 93, 80, 5));
 		//Special case for View screen as this does not have a controlling class but is a normal pool, so View class is used as the signifier
 		else if (o==View.class) inter = new ViewGUI(new UnitRectangle(95, 0, 5, 100));
 		else if (o instanceof UDA) {

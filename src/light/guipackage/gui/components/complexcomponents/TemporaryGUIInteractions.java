@@ -27,7 +27,7 @@ public class TemporaryGUIInteractions implements TemporyGUIInteractionsInterface
         
         SimpleBox box = new SimpleBox(new UnitRectangle(0, Unit.vw, 0, Unit.vh, 100, Unit.pcw, 10, Unit.vh));
 
-        TextInput input = new TextInput(new UnitRectangle(0, Unit.vw, 0, Unit.vh, 8, Unit.vw, 5, Unit.vh));
+        TextInput input = new TextInput(new UnitRectangle(0, Unit.vw, 0, Unit.vh, 60, Unit.pcw, 50, Unit.pch));
         input.setCentered(Center.xyCentered);
 
         input.setActions(() -> Light.getInstance().resolveAddress(command.target).getLabel(), v -> {

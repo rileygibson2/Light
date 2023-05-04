@@ -7,10 +7,11 @@ import java.util.List;
 
 import light.general.Addressable;
 import light.general.ConsoleAddress;
+import light.guipackage.cli.CLI;
 import light.guipackage.gui.components.complexcomponents.PoolGUI;
-import light.guipackage.gui.components.complexcomponents.ViewGUI;
 import light.persistency.PersistencyCapable;
 import light.persistency.PersistencyWriter;
+import light.stores.AbstractStore;
 import light.stores.View;
 import light.uda.UDA;
 import light.uda.UDACapable;
@@ -43,12 +44,13 @@ public class Pool<T extends Addressable & PersistencyCapable> extends Addressabl
         t.setUpdateAction(() -> updateGUI());
         elements.add(t);
         Collections.sort(elements);
+        CLI.debug("adding to pool "+t.getAddress());
         updateGUI();
     }
 
     public void remove(T t) {
         if (!contains(t)) return;
-        t.setUpdateAction(null); //Will stop updates to this element updating this pool anymore
+        if (t instanceof AbstractStore) ((AbstractStore) t).setUpdateAction(null); //Will stop updates to this element updating this pool anymore
         elements.remove(t);
         Collections.sort(elements);
         updateGUI();

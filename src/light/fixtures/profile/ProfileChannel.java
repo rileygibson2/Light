@@ -7,7 +7,6 @@ import java.util.List;
 import light.fixtures.Attribute;
 import light.fixtures.Feature;
 import light.general.Utils;
-import light.guipackage.cli.CLI;
 import light.stores.Preset.PresetType;
 
 public class ProfileChannel extends ProfileElement {
@@ -20,8 +19,8 @@ public class ProfileChannel extends ProfileElement {
     private double minValue;
     private double maxValue;
     private double defaultValue;
+    private double userSetHighlightValue;
 
-    private double highlightValue;
     private PresetType presetType;
     
     private List<ProfileChannelFunction> functions;
@@ -31,6 +30,7 @@ public class ProfileChannel extends ProfileElement {
         functions = new ArrayList<ProfileChannelFunction>();
         minValue = 0;
         maxValue = 100;
+        userSetHighlightValue = Double.MAX_VALUE;
         defaultValue = 0;
     }
     
@@ -102,8 +102,11 @@ public class ProfileChannel extends ProfileElement {
     public void setDefaultValue(double v) {this.defaultValue = v;}
     public double getDefaultValue() {return this.defaultValue;}
 
-    public void setHighlightValue(double d) {this.highlightValue = d;}
-    public double getHighlightValue() {return highlightValue;}
+    public void setHighlightValue(double d) {this.userSetHighlightValue = d;}
+    public double getHighlightValue() {
+        if (userSetHighlightValue==Double.MAX_VALUE) return getMaxValue(); //No user set value
+        return userSetHighlightValue;
+    }
 
     public boolean valueInRange(double value) {
         return value>=minValue&&value<=maxValue;
