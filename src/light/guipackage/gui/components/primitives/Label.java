@@ -1,4 +1,4 @@
-package light.guipackage.gui.components.basecomponents;
+package light.guipackage.gui.components.primitives;
 
 import java.awt.Color;
 import java.awt.Font;
@@ -6,7 +6,8 @@ import java.awt.Graphics2D;
 
 import light.guipackage.general.UnitRectangle;
 import light.guipackage.gui.GUI;
-import light.guipackage.gui.components.boxes.SimpleBox;
+import light.guipackage.gui.IO;
+import light.guipackage.gui.components.primitives.boxes.SimpleBox;
 
 public class Label extends SimpleBox {
 
@@ -36,9 +37,15 @@ public class Label extends SimpleBox {
 
 	public String getText() {return text;}
 
-	public void setText(String t) {text = t;}
+	public void setText(String t) {
+		text = t;
+		appearanceUpdated();
+	}
 
-	public void setTextColor(Color textCol) {this.textCol = textCol;}
+	public void setTextColor(Color textCol) {
+		this.textCol = textCol;
+		appearanceUpdated();
+	}
 	
 	public boolean isTextXCentered() {return xCentered;}
 
@@ -47,11 +54,18 @@ public class Label extends SimpleBox {
 	public void setTextCentered(boolean c) {
 		xCentered = c;
 		yCentered = c;
+		appearanceUpdated();
 	}
 
-	public void setTextXCentered(boolean c) {xCentered = c;}
+	public void setTextXCentered(boolean c) {
+		xCentered = c;
+		appearanceUpdated();
+	}
 
-	public void setTextYCentered(boolean c) {yCentered = c;}
+	public void setTextYCentered(boolean c) {
+		yCentered = c;
+		appearanceUpdated();
+	}
 
 	/**
 	 * Will change the font size so that it fits to the label's height

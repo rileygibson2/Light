@@ -1,5 +1,6 @@
-package light.guipackage.gui.components.boxes;
+package light.guipackage.gui.components.primitives.boxes;
 
+import java.awt.Color;
 import light.guipackage.general.UnitPoint;
 import light.guipackage.gui.components.Component;
 
@@ -11,6 +12,7 @@ public class CollumnBox extends FlexBox {
 
     public CollumnBox(UnitPoint pos) {
         super(pos);
+        //setColor(Color.CYAN);
     }
     
     @Override

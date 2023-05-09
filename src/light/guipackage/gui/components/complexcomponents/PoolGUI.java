@@ -12,7 +12,7 @@ import light.guipackage.general.UnitValue;
 import light.guipackage.general.UnitValue.Unit;
 import light.guipackage.gui.GUI;
 import light.guipackage.gui.components.Component;
-import light.guipackage.gui.components.boxes.SimpleBox;
+import light.guipackage.gui.components.primitives.boxes.SimpleBox;
 import light.uda.UDA;
 import light.uda.guiinterfaces.PoolGUIInterface;
 

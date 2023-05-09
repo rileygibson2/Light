@@ -24,7 +24,6 @@ import light.guipackage.general.UnitPoint;
 import light.guipackage.general.UnitRectangle;
 import light.guipackage.general.UnitValue;
 import light.guipackage.gui.components.Component;
-import light.guipackage.gui.components.basecomponents.MessageBox;
 import light.guipackage.gui.components.complexcomponents.CommandLineGUI;
 import light.guipackage.gui.components.complexcomponents.ControlBarGUI;
 import light.guipackage.gui.components.complexcomponents.EncodersGUI;
@@ -34,6 +33,7 @@ import light.guipackage.gui.components.complexcomponents.PoolGUI;
 import light.guipackage.gui.components.complexcomponents.TemporaryGUIInteractions;
 import light.guipackage.gui.components.complexcomponents.UDAGUI;
 import light.guipackage.gui.components.complexcomponents.ViewGUI;
+import light.guipackage.gui.components.primitives.MessageBox;
 import light.stores.View;
 import light.uda.FixtureWindow;
 import light.uda.KeyWindow;
@@ -109,6 +109,11 @@ public class GUI extends JPanel {
 		}
 		
 		currentRoot.addComponent((Component) inter);
+		
+		if (o==Light.class) {
+			CLI.debug("DIM CHECK: "+inter);
+			scanDOM((Component) inter, "");
+		}
 		return inter;
 	}
 	
@@ -172,13 +177,15 @@ public class GUI extends JPanel {
 		
 		public void scanDOM(Element e, String indent) {
 			if (indent.equals("")) {
-				CLI.debug("Scanning DOM:");
-				CLI.debug("Screen Dims: "+screen.toString());
+				CLI.debug("\nScanning DOM\nScreen Dims: "+screen.toString()+"\n..........\n");
 			}
+
 			CLI.debug(indent+e.toString());
 			for (Component c : e.getComponents()) scanDOM(c, indent+" - ");
-		}
 
+			if (indent.equals("")) CLI.debug("\n.........\nEnd DOM Scan");
+		}
+		
 		public TemporyGUIInteractionsInterface getTemporyActionsImplementation() {return new TemporaryGUIInteractions();}
 		
 		@Override

@@ -1,4 +1,4 @@
-package light.guipackage.gui.components.basecomponents;
+package light.guipackage.gui.components.primitives;
 
 import java.awt.Color;
 
@@ -6,7 +6,7 @@ import light.guipackage.general.Point;
 import light.guipackage.general.UnitRectangle;
 import light.guipackage.general.UnitValue;
 import light.guipackage.general.UnitValue.Unit;
-import light.guipackage.gui.components.boxes.SimpleBox;
+import light.guipackage.gui.components.primitives.boxes.SimpleBox;
 
 public class ScrollBar extends SimpleBox {
 	

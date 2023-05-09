@@ -5,9 +5,11 @@ import java.awt.Color;
 import light.guipackage.general.UnitRectangle;
 import light.guipackage.general.UnitValue;
 import light.guipackage.general.UnitValue.Unit;
-import light.guipackage.gui.components.basecomponents.Image;
-import light.guipackage.gui.components.boxes.CollumnBox;
-import light.guipackage.gui.components.boxes.SimpleBox;
+import light.guipackage.gui.GUI;
+import light.guipackage.gui.components.primitives.Image;
+import light.guipackage.gui.components.primitives.TempWindow;
+import light.guipackage.gui.components.primitives.boxes.CollumnBox;
+import light.guipackage.gui.components.primitives.boxes.SimpleBox;
 import light.uda.guiinterfaces.ControlBarGUIInterface;
 
 public class ControlBarGUI extends SimpleBox implements ControlBarGUIInterface {
@@ -19,14 +21,26 @@ public class ControlBarGUI extends SimpleBox implements ControlBarGUIInterface {
         setBorder(new Color(50, 50, 50));
 
         CollumnBox mainBox = new CollumnBox();
-        mainBox.setMaxWidth(r.width);
-        mainBox.setMaxHeight(r.height);
+        mainBox.setMinWidth(new UnitValue(100, Unit.pcw));
+        mainBox.setMinHeight(new UnitValue(100, Unit.pch));
+        mainBox.setMaxWidth(new UnitValue(100, Unit.pcw));
+        mainBox.setMaxHeight(new UnitValue(100, Unit.pch));
         addComponent(mainBox);
 
         //Buttons
-        Image patch = new Image(new UnitRectangle(0, Unit.pcw, 0, Unit.pch, 5, Unit.vw, 5, Unit.vh), "patchicon.png");
-        patch.setColor(Color.BLUE);
-        //mainBox.addComponent(patch);
+        SimpleBox button = new SimpleBox(new UnitRectangle(0, Unit.pcw, 0, Unit.pch, 100, Unit.pcw, 100, Unit.pcw));
+        button.setColor(new Color(100, 100, 100));
+        button.setRounded(true);
+        button.setClickAction(() -> openPatch());
+        mainBox.addComponent(button);
+
+        Image patch = new Image(new UnitRectangle(10, Unit.pcw, 10, Unit.pch, 80, Unit.pcw, 80, Unit.pch), "patchicon.png");
+        button.addComponent(patch);
+    }
+
+    private void openPatch() {
+        TempWindow tW = new TempWindow("Fixture Patch");
+        GUI.getInstance().getCurrentRoot().addComponent(tW);
     }
 
     @Override

@@ -1,4 +1,4 @@
-package light.guipackage.gui.components.basecomponents;
+package light.guipackage.gui.components.primitives;
 
 import java.awt.Color;
 import java.awt.Font;
@@ -13,7 +13,7 @@ import light.guipackage.general.UnitValue.Unit;
 import light.guipackage.gui.GUI;
 import light.guipackage.gui.Styles;
 import light.guipackage.gui.components.Component;
-import light.guipackage.gui.components.boxes.SimpleBox;
+import light.guipackage.gui.components.primitives.boxes.SimpleBox;
 
 public class Dialog extends Component {
 
@@ -31,13 +31,15 @@ public class Dialog extends Component {
 		//setAbsolute(true);
 
 		//Main box
-		mainBox = new SimpleBox(new UnitRectangle(0, 0, 100, 100), Styles.fg);
+		mainBox = new SimpleBox(new UnitRectangle(0, 0, 100, 100));
+		mainBox.setColor(Styles.fg);
 		mainBox.setRounded(true);
 		mainBox.increasePriority();
 		addComponent(mainBox);
 
 		//Top bar
-		SimpleBox tB = new SimpleBox(new UnitRectangle(getX(), getY(), getWidth(), new UnitValue(12.5, Unit.pch)), Styles.focus);
+		SimpleBox tB = new SimpleBox(new UnitRectangle(getX(), getY(), getWidth(), new UnitValue(12.5, Unit.pch)));
+		tB.setColor(Styles.focus);
 		//tB.setAbsolute(true);
 		tB.setRounded(new int[]{1, 4});
 		mainBox.addComponent(tB);
@@ -64,7 +66,8 @@ public class Dialog extends Component {
 
 	public void addSmother(double opacity) {
 		//Smother
-		SimpleBox smother = new SimpleBox(new UnitRectangle(0, 0, 100, 100), new Color(0, 0, 0));
+		SimpleBox smother = new SimpleBox(new UnitRectangle(0, 0, 100, 100));
+		smother.setColor(new Color(0, 0, 0));
 		smother.setOpacity(opacity);
 		//smother.setAbsolute(true);
 		addComponent(smother);
@@ -80,7 +83,8 @@ public class Dialog extends Component {
 		double x = 0;
 		if (!tabs.isEmpty()) x = tabs.get(tabs.size()-1).getX().v+tabs.get(tabs.size()-1).getWidth().v;
 		
-		SimpleBox tab = new SimpleBox(new UnitRectangle(x, 16-h, w, h), Styles.fg);
+		SimpleBox tab = new SimpleBox(new UnitRectangle(x, 16-h, w, h));
+		tab.setColor(Styles.fg);
 		tab.setClickAction(() -> {
 			for (SimpleBox t : tabs) t.setColor(Styles.focus2);
 			tab.setColor(Styles.fg);

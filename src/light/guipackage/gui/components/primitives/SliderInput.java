@@ -1,4 +1,4 @@
-package light.guipackage.gui.components.basecomponents;
+package light.guipackage.gui.components.primitives;
 
 import java.awt.Color;
 
@@ -8,7 +8,7 @@ import light.guipackage.general.UnitRectangle;
 import light.guipackage.general.UnitValue;
 import light.guipackage.general.UnitValue.Unit;
 import light.guipackage.gui.components.InputComponent;
-import light.guipackage.gui.components.boxes.SimpleBox;
+import light.guipackage.gui.components.primitives.boxes.SimpleBox;
 
 public class SliderInput extends InputComponent<Double> {
 
@@ -22,13 +22,14 @@ public class SliderInput extends InputComponent<Double> {
 		super(r);
 
 		//Main box
-		mainBox = new SimpleBox(new UnitRectangle(0, 0, 100, 100), new Color(70, 70, 70));
+		mainBox = new SimpleBox(new UnitRectangle(0, 0, 100, 100));
+		mainBox.setColor(new Color(70, 70, 70));
 		mainBox.setRounded(new int[]{4, 3});
 		mainBox.increasePriority();
 		addComponent(mainBox);
 
 		//Groove
-		groove = new SimpleBox(new UnitRectangle(10, 40, 80, 20), new Color(100, 100, 100));
+		/*groove = new SimpleBox(new UnitRectangle(10, 40, 80, 20), new Color(100, 100, 100));
 		mainBox.addComponent(groove);
 		
 		//Coloured Groove
@@ -38,7 +39,7 @@ public class SliderInput extends InputComponent<Double> {
 		//Ball
 		ball = new SimpleBox(new UnitRectangle(groove.getX().v, 20, 14, 60), new Color(255, 100, 100));
 		ball.setOval(true);
-		mainBox.addComponent(ball);
+		mainBox.addComponent(ball);*/
 
 		//Click action
 		setClickAction(p -> click(p));

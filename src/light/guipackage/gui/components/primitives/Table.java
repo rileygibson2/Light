@@ -1,4 +1,4 @@
-package light.guipackage.gui.components.basecomponents;
+package light.guipackage.gui.components.primitives;
 
 import java.awt.Color;
 import java.awt.Font;
@@ -12,8 +12,8 @@ import light.guipackage.general.UnitValue;
 import light.guipackage.general.UnitValue.Unit;
 import light.guipackage.gui.Styles;
 import light.guipackage.gui.components.Component;
-import light.guipackage.gui.components.boxes.CollumnBox;
-import light.guipackage.gui.components.boxes.FlexBox;
+import light.guipackage.gui.components.primitives.boxes.CollumnBox;
+import light.guipackage.gui.components.primitives.boxes.FlexBox;
 
 public class Table extends FlexBox {
     

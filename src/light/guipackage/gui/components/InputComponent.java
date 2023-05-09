@@ -3,7 +3,7 @@ package light.guipackage.gui.components;
 import light.general.Getter;
 import light.general.Submitter;
 import light.guipackage.general.UnitRectangle;
-import light.guipackage.gui.components.boxes.SimpleBox;
+import light.guipackage.gui.components.primitives.boxes.SimpleBox;
 
 public abstract class InputComponent<T> extends SimpleBox {
     

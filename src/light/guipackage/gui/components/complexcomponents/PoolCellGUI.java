@@ -11,14 +11,13 @@ import light.executors.Executor;
 import light.general.Addressable;
 import light.general.ConsoleAddress;
 import light.general.Utils;
-import light.guipackage.cli.CLI;
 import light.guipackage.general.GUIUtils;
 import light.guipackage.general.UnitRectangle;
 import light.guipackage.gui.Styles;
 import light.guipackage.gui.components.Component;
-import light.guipackage.gui.components.basecomponents.Image;
-import light.guipackage.gui.components.basecomponents.Label;
-import light.guipackage.gui.components.boxes.SimpleBox;
+import light.guipackage.gui.components.primitives.Image;
+import light.guipackage.gui.components.primitives.Label;
+import light.guipackage.gui.components.primitives.boxes.SimpleBox;
 import light.stores.AbstractStore;
 import light.stores.Group;
 import light.stores.Preset;
@@ -105,11 +104,14 @@ public class PoolCellGUI extends Component {
              mainBox.setBorderColor(getTypeColor());
              idLabel.setTextColor(Styles.textMain);
              
-             //Bottom gray and dividor
-             SimpleBox bottom = new SimpleBox(new UnitRectangle(0, 50, 100, 50), new Color(80, 80, 80));
+             //Bottom gray and divider
+             SimpleBox bottom = new SimpleBox(new UnitRectangle(0, 50, 100, 50));
+             bottom.setColor(new Color(80, 80, 80));
              bottom.setRounded(new int[] {2, 3}, 20);
              mainBox.addComponent(bottom);
-             mainBox.addComponent(new SimpleBox(new UnitRectangle(0, 49, 100, 2), new Color(150, 150, 150)));
+             SimpleBox divider = new SimpleBox(new UnitRectangle(0, 49, 100, 2));
+             divider.setColor(new Color(150, 150, 150));
+             mainBox.addComponent(divider);
              
              //Name
              Label name = new Label(new UnitRectangle(0, 25, 100, 50), "aaa", new Font("Geneva", Font.PLAIN, 20), Styles.textMain);

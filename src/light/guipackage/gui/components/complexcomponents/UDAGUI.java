@@ -20,10 +20,10 @@ import light.guipackage.general.UnitValue.Unit;
 import light.guipackage.gui.GUI;
 import light.guipackage.gui.Styles;
 import light.guipackage.gui.components.Component;
-import light.guipackage.gui.components.basecomponents.Label;
-import light.guipackage.gui.components.basecomponents.TempWindow;
-import light.guipackage.gui.components.boxes.CollumnBox;
-import light.guipackage.gui.components.boxes.SimpleBox;
+import light.guipackage.gui.components.primitives.Label;
+import light.guipackage.gui.components.primitives.TempWindow;
+import light.guipackage.gui.components.primitives.boxes.CollumnBox;
+import light.guipackage.gui.components.primitives.boxes.SimpleBox;
 import light.stores.Group;
 import light.stores.Preset.PresetType;
 import light.stores.View;
@@ -75,7 +75,8 @@ public class UDAGUI extends SimpleBox implements UDAGUIInterface {
                 dot.setPosition(Position.Relative);
                 dot.setTag("udaDot");
                 addComponent(dot);
-                SimpleBox oval = new SimpleBox(new UnitRectangle(48, 48, 4, 4), new Color(100, 100, 100));
+                SimpleBox oval = new SimpleBox(new UnitRectangle(48, 48, 4, 4));
+                oval.setColor(new Color(100, 100, 100));
                 oval.setOval(true);
                 dot.addComponent(oval);
                 

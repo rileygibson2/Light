@@ -1,13 +1,12 @@
-package light.guipackage.gui.components.basecomponents;
+package light.guipackage.gui.components.primitives;
 
-import light.general.Submitter;
 import light.general.ThreadController;
 import light.guipackage.general.Point;
 import light.guipackage.general.Rectangle;
 import light.guipackage.general.UnitRectangle;
 import light.guipackage.gui.Styles;
 import light.guipackage.gui.components.InputComponent;
-import light.guipackage.gui.components.boxes.SimpleBox;
+import light.guipackage.gui.components.primitives.boxes.SimpleBox;
 import light.guipackage.threads.AnimationFactory;
 import light.guipackage.threads.AnimationFactory.Animations;
 
@@ -24,7 +23,8 @@ public class CheckBoxInput extends InputComponent<Boolean> {
 		setRounded(true);
 
 		//Inner box
-		innerBox = new SimpleBox(new UnitRectangle(50, 50, 0, 0), Styles.focus2);
+		innerBox = new SimpleBox(new UnitRectangle(50, 50, 0, 0));
+		innerBox.setColor(Styles.focus2);
 		innerBox.setRounded(true);
 		addComponent(innerBox);
 		

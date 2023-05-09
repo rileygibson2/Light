@@ -1,7 +1,6 @@
 package light.guipackage.gui;
 
 import java.awt.Graphics2D;
-import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -18,9 +17,9 @@ import light.guipackage.general.UnitRectangle;
 import light.guipackage.general.UnitValue;
 import light.guipackage.general.UnitValue.Unit;
 import light.guipackage.gui.components.Component;
-import light.guipackage.gui.components.basecomponents.ScrollBar;
-import light.guipackage.gui.components.basecomponents.ScrollBar.ScrollDir;
-import light.guipackage.gui.components.boxes.FlexBox;
+import light.guipackage.gui.components.primitives.ScrollBar;
+import light.guipackage.gui.components.primitives.ScrollBar.ScrollDir;
+import light.guipackage.gui.components.primitives.boxes.FlexBox;
 
 public abstract class Element {
 	
@@ -109,21 +108,21 @@ public abstract class Element {
 	public void setX(UnitValue p) {
 		r.x = p;
 		//doPositioning();
-		if (hasParent()) parent.subtreeUpdated(this);
+		triggerUpdateFromRoot();
 	}
 	public void setY(UnitValue p) {
 		r.y = p;
-		if (hasParent()) parent.subtreeUpdated(this);
+		triggerUpdateFromRoot();
 	}
 	public void setWidth(UnitValue p) {
 		r.width = p;
 		//doPositioning();
-		if (hasParent()) parent.subtreeUpdated(this);
+		triggerUpdateFromRoot();
 	}
 	public void setHeight(UnitValue p) {
 		r.height = p;
 		//doPositioning();
-		if (hasParent()) parent.subtreeUpdated(this);
+		triggerUpdateFromRoot();
 	}
 	
 	/**
@@ -133,51 +132,51 @@ public abstract class Element {
 	*/
 	public void setXNQ(UnitValue p) {
 		r.x = p;
-		doPositioning();
+		//doPositioning();
 	}
 	public void setYNQ(UnitValue p) {
 		r.y = p;
-		doPositioning();
+		//doPositioning();
 	}
 	public void setWidthNQ(UnitValue p) {
 		r.width = p;
-		doPositioning();
+		//doPositioning();
 	}
 	public void setHeightNQ(UnitValue p) {
 		r.height = p;
-		doPositioning();
+		//doPositioning();
 	}
 	
 	public void setMinWidth(UnitValue p) {
 		minSize.x = p;
 		doPositioning();
-		if (hasParent()) parent.subtreeUpdated(this);
+		triggerUpdateFromRoot();
 	}
 	public void setMinHeight(UnitValue p) {
 		minSize.y = p;
 		doPositioning();
-		if (hasParent()) parent.subtreeUpdated(this);
+		triggerUpdateFromRoot();
 	}
 	public void setMinSize(UnitPoint p) {
 		this.minSize = p;
 		doPositioning();
-		if (hasParent()) parent.subtreeUpdated(this);
+		triggerUpdateFromRoot();
 	}
 	
 	public void setMaxWidth(UnitValue p) {
 		maxSize.x = p;
 		doPositioning();
-		if (hasParent()) parent.subtreeUpdated(this);
+		triggerUpdateFromRoot();
 	}
 	public void setMaxHeight(UnitValue p) {
 		maxSize.y = p;
 		doPositioning();
-		if (hasParent()) parent.subtreeUpdated(this);
+		triggerUpdateFromRoot();
 	}
 	public void setMaxSize(UnitPoint p)  {
 		this.maxSize = p;
 		doPositioning();
-		if (hasParent()) parent.subtreeUpdated(this);
+		triggerUpdateFromRoot();
 	}
 	
 	public UnitValue getX() {return r.x;}
@@ -196,7 +195,7 @@ public abstract class Element {
 	public void setRec(UnitRectangle r) {
 		this.r = r;
 		doPositioning();
-		if (hasParent()) parent.subtreeUpdated(this);
+		triggerUpdateFromRoot();
 	}
 	public UnitRectangle getRec() {return r;}
 	public UnitRectangle getFunctionalRec() {return rFunc;}
@@ -369,7 +368,8 @@ public abstract class Element {
 		
 		if (inDOM()) {
 			c.triggerDOMEntry();
-			subtreeUpdated(this); //Don't need to update subtree till in dom
+			c.triggerUpdateFromRoot(); //Don't need to update subtree till in dom
+			IO.getInstance().requestPaint();
 		}
 	}
 	
@@ -379,8 +379,11 @@ public abstract class Element {
 		components.remove(c);
 		componentsLock.unlock();
 		
-		if (inDOM) c.triggerDOMExit();
-		subtreeUpdated(this);
+		if (inDOM()) {
+			triggerUpdateFromRoot();
+			c.triggerDOMExit();
+			IO.getInstance().requestPaint();
+		}
 	}
 	
 	public void removeComponents(Collection<Component> toRemove) {
@@ -390,13 +393,15 @@ public abstract class Element {
 		componentsLock.unlock();
 		
 		if (inDOM) for (Component c : toRemove) c.triggerDOMExit();
-		subtreeUpdated(this);
+		triggerUpdateFromRoot();
+		if (inDOM()) IO.getInstance().requestPaint();
 	}
 	
 	public void clearComponents() {
 		componentsLock.lock();
 		components.clear();
 		componentsLock.unlock();
+		if (inDOM()) IO.getInstance().requestPaint();
 	}
 	
 	/**
@@ -433,28 +438,63 @@ public abstract class Element {
 	* 
 	* To get around this there are public methods which change an elements propertys with no propogation and no consequence.
 	*/
-	protected void subtreeUpdated(Element updatedElement) {
+	/*protected void subtreUpdated(Element updatedElement) {
 		if (parent!=null) parent.subtreeUpdated(updatedElement); //Propogate upwards
 		positionSubtree();
 		/*for (Component child : components) {
 			if (child.elementInSubtree(updatedElement)) child.positionSubtree();
 		}*/
-	}
+	//}
 	
 	/**
 	* Trigger sibling updated hook in all children
 	*/
-	protected void positionSubtree() {
+	/*protected void positonSubtree() {
 		doPositioning();
 		for (Component c : getComponents()) c.positionSubtree();
-	}
+	}*/
 	
-	public boolean elementInSubtree(Element toCheck) {
-		if (equals(toCheck)) return true;
+	/**
+	 * Checks whether the provided element is visible to this element - i.e whether it is or is
+	 * in the subtree of this element.
+	 * If this method returns null then the provided element is not in this element/ in this element'
+	 * subtree.
+	 * 
+	 * @param toCheck
+	 * @return the child element of this object which is/has a reference to the provided element
+	 */
+	public Element elementExistsInSubtree(Element toCheck) {
+		if (equals(toCheck)) return this;
 		for (Component child : components) {
-			if (child.elementInSubtree(toCheck)) return true;
+			if (child.elementExistsInSubtree(toCheck)!=null) return child;
 		}
-		return false;
+		return null;
+	}
+
+	protected void elementUpdated(Element updatedElement) {
+		/*Element childWithReference = elementExistsInSubtree(updatedElement);
+		if (childWithReference==null) return;
+		doPositioning();
+		if (childWithReference==this) return; //End of chain
+
+
+		//Continue chain
+		childWithReference.elementUpdated(updatedElement);
+
+		//Fill styles special case
+		for (Component child : components) {
+			//if (child!=childWithReference&&child.getFill()!=Fill.None) child.doPositioning();
+			child.doPositioning();
+		}*/
+		
+
+		doPositioning();
+		for (Component child : components) child.elementUpdated(updatedElement);
+	}
+
+	protected void triggerUpdateFromRoot() {
+		if (GUI.getInstance().getCurrentRoot()==null) return;
+		GUI.getInstance().getCurrentRoot().elementUpdated(this);
 	}
 	
 	/**

@@ -1,4 +1,4 @@
-package light.guipackage.gui.components.basecomponents;
+package light.guipackage.gui.components.primitives;
 
 import java.awt.Color;
 import java.awt.Font;
@@ -9,12 +9,11 @@ import light.guipackage.general.UnitPoint;
 import light.guipackage.general.UnitRectangle;
 import light.guipackage.general.UnitValue;
 import light.guipackage.general.UnitValue.Unit;
-import light.guipackage.gui.GUI;
 import light.guipackage.gui.Styles;
 import light.guipackage.gui.components.Component;
-import light.guipackage.gui.components.boxes.CollumnBox;
-import light.guipackage.gui.components.boxes.FlexBox;
-import light.guipackage.gui.components.boxes.SimpleBox;
+import light.guipackage.gui.components.primitives.boxes.CollumnBox;
+import light.guipackage.gui.components.primitives.boxes.FlexBox;
+import light.guipackage.gui.components.primitives.boxes.SimpleBox;
 
 public class TempWindow extends CollumnBox {
 	
@@ -67,7 +66,8 @@ public class TempWindow extends CollumnBox {
 		tabBar = new FlexBox(new UnitPoint());
 		tabBar.setMinWidth(new UnitValue(100, Unit.pcw));
 		tabBar.setColor(Styles.focus);
-		SimpleBox tBB = new SimpleBox(new UnitRectangle(0, 96.7, 100, 5, Unit.pcw, Unit.pch), Styles.focusOrange);
+		SimpleBox tBB = new SimpleBox(new UnitRectangle(0, 96.7, 100, 5, Unit.pcw, Unit.pch));
+		tBB.setColor(Styles.focusOrange);
 		//tabBar.addComponent(tBB);
 		addComponent(tabBar);
 		
@@ -148,7 +148,8 @@ public class TempWindow extends CollumnBox {
 
 	public void addSmother(double opacity) {
 		//Smother
-		SimpleBox smother = new SimpleBox(new UnitRectangle(0, 0, 100, 100), new Color(0, 0, 0));
+		SimpleBox smother = new SimpleBox(new UnitRectangle(0, 0, 100, 100));
+		smother.setColor(new Color(0, 0, 0));
 		smother.setOpacity(opacity);
 		smother.setPosition(Position.GlobalFixed);
 		smother.decreasePriority();

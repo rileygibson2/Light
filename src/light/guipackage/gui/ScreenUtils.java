@@ -35,9 +35,9 @@ import light.guipackage.general.UnitRectangle;
 import light.guipackage.general.UnitValue;
 import light.guipackage.general.UnitValue.Unit;
 import light.guipackage.gui.components.Component;
-import light.guipackage.gui.components.basecomponents.Image;
-import light.guipackage.gui.components.basecomponents.Label;
-import light.guipackage.gui.components.boxes.SimpleBox;
+import light.guipackage.gui.components.primitives.Image;
+import light.guipackage.gui.components.primitives.Label;
+import light.guipackage.gui.components.primitives.boxes.SimpleBox;
 
 public class ScreenUtils {
 	
@@ -106,6 +106,7 @@ public class ScreenUtils {
 		if (i.getSource()==null) return;
 		doClip(g, i);
 		Rectangle r = i.getRealRec();
+		if (r.width<=0||r.height<=0) return; //Prevent image transformations throwing errors
 		
 		BufferedImage img = null;
 		

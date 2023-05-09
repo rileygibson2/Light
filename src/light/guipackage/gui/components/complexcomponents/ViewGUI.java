@@ -13,8 +13,8 @@ import light.guipackage.general.UnitRectangle;
 import light.guipackage.general.UnitValue;
 import light.guipackage.general.UnitValue.Unit;
 import light.guipackage.gui.GUI;
-import light.guipackage.gui.components.boxes.CollumnBox;
-import light.guipackage.gui.components.boxes.SimpleBox;
+import light.guipackage.gui.components.primitives.boxes.CollumnBox;
+import light.guipackage.gui.components.primitives.boxes.SimpleBox;
 import light.stores.View;
 import light.uda.guiinterfaces.ViewGUIInterface;
 

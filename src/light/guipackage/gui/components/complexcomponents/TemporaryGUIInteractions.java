@@ -9,9 +9,9 @@ import light.guipackage.general.UnitRectangle;
 import light.guipackage.general.UnitValue.Unit;
 import light.guipackage.gui.Element.Center;
 import light.guipackage.gui.GUI;
-import light.guipackage.gui.components.basecomponents.TempWindow;
-import light.guipackage.gui.components.basecomponents.TextInput;
-import light.guipackage.gui.components.boxes.SimpleBox;
+import light.guipackage.gui.components.primitives.TempWindow;
+import light.guipackage.gui.components.primitives.TextInput;
+import light.guipackage.gui.components.primitives.boxes.SimpleBox;
 import light.uda.guiinterfaces.TemporyGUIInteractionsInterface;
 
 /**

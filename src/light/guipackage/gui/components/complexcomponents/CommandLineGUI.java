@@ -5,9 +5,9 @@ import java.awt.Font;
 import light.guipackage.general.UnitRectangle;
 import light.guipackage.gui.Styles;
 import light.guipackage.gui.components.Component;
-import light.guipackage.gui.components.basecomponents.Image;
-import light.guipackage.gui.components.basecomponents.Label;
-import light.guipackage.gui.components.boxes.SimpleBox;
+import light.guipackage.gui.components.primitives.Image;
+import light.guipackage.gui.components.primitives.Label;
+import light.guipackage.gui.components.primitives.boxes.SimpleBox;
 import light.uda.guiinterfaces.CommandLineGUIInterface;
 
 
@@ -20,7 +20,8 @@ public class CommandLineGUI extends Component implements CommandLineGUIInterface
     public CommandLineGUI(UnitRectangle r) {
         super(r);
 
-        mainBox = new SimpleBox(new UnitRectangle(0, 0, 100, 100), Styles.fg);
+        mainBox = new SimpleBox(new UnitRectangle(0, 0, 100, 100));
+        mainBox.setColor(Styles.fg);
         mainBox.setRounded(true);
         
         addComponent(mainBox);

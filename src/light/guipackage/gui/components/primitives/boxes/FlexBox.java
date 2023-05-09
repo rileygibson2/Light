@@ -1,16 +1,18 @@
-package light.guipackage.gui.components.boxes;
+package light.guipackage.gui.components.primitives.boxes;
+
+import java.awt.Color;
 
 import light.guipackage.general.UnitPoint;
 import light.guipackage.general.UnitRectangle;
 import light.guipackage.general.UnitValue;
 import light.guipackage.general.UnitValue.Unit;
-import light.guipackage.gui.Element;
 import light.guipackage.gui.components.Component;
 
 public class FlexBox extends SimpleBox {
     
     public FlexBox(UnitPoint pos) {
         super(new UnitRectangle(pos, new UnitValue(0, pos.x.u), new UnitValue(0, pos.y.u)));
+        //setColor(Color.ORANGE);
     }
     
     @Override
@@ -32,9 +34,9 @@ public class FlexBox extends SimpleBox {
     }
 
     @Override
-    public void subtreeUpdated(Element updatedElement) {
+    public void doPositioning() {
         resize(); //Trigger resize
-        super.subtreeUpdated(updatedElement);
+        super.doPositioning();
     }
 
     /**
@@ -62,7 +64,7 @@ public class FlexBox extends SimpleBox {
 
         UnitValue width = translateToUnit(new UnitValue(newWidth, Unit.vw), this, getWidth().u, this);
         UnitValue height = translateToUnit(new UnitValue(newHeight, Unit.vh), this, getHeight().u, this);
-        setWidth(width);
-        setHeight(height);
+        setWidthNQ(width);
+        setHeightNQ(height);
     }
 }

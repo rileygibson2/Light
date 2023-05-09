@@ -18,7 +18,7 @@ import light.guipackage.general.Rectangle;
 import light.guipackage.general.UnitRectangle;
 import light.guipackage.general.UnitValue;
 import light.guipackage.gui.components.Component;
-import light.guipackage.gui.components.basecomponents.TextInput;
+import light.guipackage.gui.components.primitives.TextInput;
 
 public class AnimationFactory {
 

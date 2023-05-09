@@ -1,10 +1,11 @@
-package light.guipackage.gui.components.basecomponents;
+package light.guipackage.gui.components.primitives;
 
 import java.awt.Graphics2D;
 
 import light.guipackage.general.UnitRectangle;
 import light.guipackage.gui.GUI;
-import light.guipackage.gui.components.boxes.SimpleBox;
+import light.guipackage.gui.IO;
+import light.guipackage.gui.components.primitives.boxes.SimpleBox;
 
 public class Image extends SimpleBox {
 
@@ -22,13 +23,17 @@ public class Image extends SimpleBox {
 	public void setSource(String src) {
 		this.src = src;
 		ignoreCache = true;
+		appearanceUpdated();
 	}
 	public String getSource() {return src;}
 
 	public void setIgnoreCache(boolean ignoreCache) {this.ignoreCache = ignoreCache;}
 	public boolean getIgnoreCache() {return ignoreCache;}
 
-	public void setMakeImageTransparent(boolean b) {this.makeImageTransparent = b;}
+	public void setMakeImageTransparent(boolean b) {
+		this.makeImageTransparent = b;
+		appearanceUpdated();
+	}
 	public boolean getMakeImageTransparent() {return makeImageTransparent;}
 
 	@Override

@@ -1,4 +1,4 @@
-package light.guipackage.gui.components.basecomponents;
+package light.guipackage.gui.components.primitives;
 
 import java.awt.Color;
 import java.awt.Font;
@@ -12,7 +12,7 @@ import light.guipackage.general.UnitValue;
 import light.guipackage.gui.GUI;
 import light.guipackage.gui.Styles;
 import light.guipackage.gui.components.Component;
-import light.guipackage.gui.components.boxes.SimpleBox;
+import light.guipackage.gui.components.primitives.boxes.SimpleBox;
 import light.guipackage.threads.AnimationFactory;
 import light.guipackage.threads.AnimationFactory.Animations;
 
@@ -40,7 +40,8 @@ public class MessageBox extends Component {
 		addComponent(smother);*/
 
 		//Main box
-		mainBox = new SimpleBox(new UnitRectangle(0, 0, 100, 100), col);
+		mainBox = new SimpleBox(new UnitRectangle(0, 0, 100, 100));
+		mainBox.setColor(col);
 		mainBox.setRounded(true);
 		mainBox.increasePriority();
 		addComponent(mainBox);
