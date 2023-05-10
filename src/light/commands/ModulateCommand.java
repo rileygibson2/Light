@@ -57,7 +57,7 @@ public class ModulateCommand implements Command {
         if (source instanceof ConsoleAddress) { //Set all values of target fixture/s to values of source fixture's
             //Resolve source addresses into fixtures
             Fixture sourceFixture = PatchManager.getInstance().getFixture((ConsoleAddress) source);
-            Map<Attribute, Double> attributes = prog.getFixtureValues(sourceFixture);
+            Map<Attribute, Double> attributes = prog.get(sourceFixture);
             //TODO Clone values
             
             for (Fixture f : fixtures) prog.set(f, attributes, true);

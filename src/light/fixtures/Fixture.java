@@ -58,21 +58,25 @@ public class Fixture extends Addressable implements PersistencyCapable {
 
         //Name and dmx address
         pW.put(getLabel().getBytes());
-        pW.put(dmxAddress.getBytes());
-
-        //Attributes
-        pW.openSegment();
-        //for (Feature a : profile.getAttributes()) pW.put(a.getBytes());
-        pW.closeSegmenet();
+        if (dmxAddress!=null) pW.put(dmxAddress.getBytes());
+        pW.put(profile.getFileName().getBytes());
         pW.wrapInSegment();
 
-        return pW.toArray();
-        
+        return pW.getBytes();
     }
 
     @Override
     public void generateFromBytes(byte[] bytes) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'generateFromBytes'");
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((profile == null) ? 0 : profile.hashCode());
+        result = prime * result + ((dmxAddress == null) ? 0 : dmxAddress.hashCode());
+        return result;
     }
 }

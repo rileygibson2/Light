@@ -85,7 +85,7 @@ public class Preset extends AbstractStore implements PersistencyCapable {
             Set<Attribute> toRemove = new HashSet<>();
 
             //Find fixture attributes that shouldn't be in this preset
-            for (Attribute attribute : store.getFixtureValues(fixture).keySet()) {
+            for (Attribute attribute : store.get(fixture).keySet()) {
                 if (!isValidForPresetType(fixture, attribute, type)) toRemove.add(attribute);
             }
             //Remove those attributes

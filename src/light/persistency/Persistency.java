@@ -10,15 +10,15 @@ import java.util.Set;
 import light.Light;
 import light.fixtures.Fixture;
 import light.fixtures.PatchManager;
-import light.general.Addressable;
 
 public class Persistency {
     
     private static Persistency singleton;
     
-    public static final byte segmentOpenCode = (byte) '[';
-    public static final byte segmentCloseCode = (byte) ']';
-    public static final byte delimiter = (byte) ',';
+    public static final byte[] segementHeader = new byte[] {(byte) 1, (byte) 1, (byte) 1, (byte) 1};
+    public static final byte[] segementOpenCode = new byte[] {(byte) 2, (byte) '[', (byte) '[', (byte) '['};
+    public static final byte[] segmentCloseCode = new byte[] {(byte) ']', (byte) ']', (byte) ']', (byte) ']'};
+    public static final byte[] delimiter = new byte[] {(byte) ',', (byte) ',', (byte) ',', (byte) ','};;
     
     private Persistency() {
         
@@ -42,7 +42,7 @@ public class Persistency {
     * Settings
     */
 
-    public byte[] generateBytes(Addressable element) {
+    public byte[] generateBytes() {
         PersistencyWriter pW = new PersistencyWriter();
         Light light = Light.getInstance();
         
@@ -52,16 +52,12 @@ public class Persistency {
         pW.closeSegmenet();
 
         //Groups
-        pW.put(light.getGroupPool().getBytes());
+        //pW.put(light.getGroupPool().getBytes());
 
-        return pW.toArray();
+        return pW.getBytes();
     }
 
-    public static boolean isCode(byte b) {
-        return b==delimiter||b==segmentOpenCode||b==segmentCloseCode;
-    }
-
-    public static byte[] combineAndDelimit(byte... args) {
+    /*public static byte[] combineAndDelimit(byte... args) {
 		byte[] result = new byte[(args.length*2)-1];
 
 		for (int i=0; i<result.length; i+=2) {
@@ -93,7 +89,7 @@ public class Persistency {
         result[0] = segmentOpenCode;
         result[result.length-1] = segmentCloseCode;
         return result;
-    }
+    }*/
 
     /**
      * Tree structure is used to unpack split codes and delimiteres into a tree of child nodes an element can work with
@@ -101,7 +97,7 @@ public class Persistency {
      * 
      */
 
-     public ByteNode generateByteTree(byte[] data) {
+     /*public ByteNode generateByteTree(byte[] data) {
         ByteNode root = new ByteNode();
         ArrayDeque<ByteNode> nodeStack = new ArrayDeque<>();
         nodeStack.push(root);
@@ -125,7 +121,7 @@ public class Persistency {
         }
 
         return root;
-     }
+     }*/
 }
 
 class ByteNode {

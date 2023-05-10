@@ -73,7 +73,7 @@ public class Output {
         Map<DMXAddress, List<Pair<DMXAddress, Integer>>> dmx = new LinkedHashMap<>(); //Universe map
         
         for (Fixture f : data.getFixtureSet()) {
-            for (Map.Entry<Attribute, Double> v : data.getFixtureValues(f).entrySet()) {
+            for (Map.Entry<Attribute, Double> v : data.get(f).entrySet()) {
                 DMXAddress d = f.getAddressForAttribute(v.getKey());
                 ProfileChannel channel = f.getProfile().getChannelWithAttribute(v.getKey());
                 

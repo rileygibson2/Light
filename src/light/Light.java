@@ -1,5 +1,7 @@
 package light;
 
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -23,6 +25,7 @@ import light.guipackage.cli.CLI;
 import light.guipackage.general.Rectangle;
 import light.guipackage.gui.GUI;
 import light.guipackage.gui.IO;
+import light.persistency.Persistency;
 import light.stores.AbstractStore;
 import light.stores.Group;
 import light.stores.Preset;
@@ -253,6 +256,20 @@ public class Light {
         
         //currentView.getUDA().createZone(Encoders.class, new Rectangle(0, 7, 10, 2));
         //currentView.getUDA().createZone(FixtureWindow.class, new Rectangle(0, 0, 11, 7));
+
+        //Persitency mock
+        byte[] save = Persistency.getInstance().generateBytes();
+        for (byte b : save) CLI.debug(b);
+
+        String fileName = "output.txt";
+        try (FileOutputStream fos = new FileOutputStream(fileName)) {
+            fos.write(save);
+            fos.close();
+            System.out.println("Byte array has been written to " + fileName);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        //CLI.debug("save: "+Arrays.dee(save));
     }
     
     public static void main(String args[]) {

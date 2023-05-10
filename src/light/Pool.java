@@ -97,7 +97,7 @@ public class Pool<T extends Addressable & PersistencyCapable> extends Addressabl
         }
 
         pW.wrapInSegment();
-        return pW.toArray();
+        return pW.getBytes();
     }
 
     @Override

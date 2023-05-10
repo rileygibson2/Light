@@ -102,7 +102,7 @@ public class FixtureWindowGUI extends SimpleBox implements FixtureWindowGUIInter
 
     private void populateFixtureBoxTableView(Fixture f) {
         DataStore outputStore = Output.getInstance().generateOutputStore();
-        for (Map.Entry<Attribute, Double> values : outputStore.getFixtureValues(f).entrySet()) {
+        for (Map.Entry<Attribute, Double> values : outputStore.get(f).entrySet()) {
             fixtureTable.setText(values.getKey(), f, Math.round(values.getValue())+"");
         }
 

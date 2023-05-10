@@ -71,6 +71,7 @@ public class ProfileManager {
     private Profile parse(String filePath) throws ProfileParseException {
         CLI.debug("Parsing file "+filePath+" for fixture profile...");
         Profile profile = new Profile();
+        profile.setFileName(filePath);
         
         try {
             File xml = new File("profiles/"+filePath);

@@ -39,6 +39,7 @@ public class Profile implements PersistencyCapable {
     private String name; //Profile name
     private String modeName; //Mode name
     private String manufacturerName;
+    private String fileName;
 
     private Set<ProfileChannel> channels;
 
@@ -61,6 +62,9 @@ public class Profile implements PersistencyCapable {
 
     public void setFixtureType(FixtureType type) {this.type = type;}
     public FixtureType getFixtureType() {return type;}
+
+    public void setFileName(String fileName) {this.fileName = fileName;}
+    public String getFileName() {return fileName;}
     
     public boolean hasFeature(Feature feature) {
         if (channels==null) return false;
@@ -189,7 +193,7 @@ public class Profile implements PersistencyCapable {
      * @return
      */
     public boolean validate() {
-        if (type==null||name==null||modeName==null||manufacturerName==null) return false;
+        if (type==null||name==null||modeName==null||manufacturerName==null||fileName==null) return false;
         for (ProfileChannel channel : channels) if (!channel.validate()) return false;
         for (ProfileWheel wheel : wheels) if (!wheel.validate()) return false;
         return true;

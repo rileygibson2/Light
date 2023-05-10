@@ -5,41 +5,62 @@ import java.util.List;
 
 public class PersistencyWriter {
     
-    List<Byte> buff;
+    private List<Byte> buff;
+
+    private boolean segmentOpen;
+    private int lastSegmentHeader;
+    private int segmentSize;
 
     public PersistencyWriter() {
         buff = new ArrayList<Byte>();
     }
 
     public void put(byte b) {
-        if (shouldDelimit()) buff.add(Persistency.delimiter);
+        addInternal(Persistency.delimiter, buff.size());
         buff.add(b);
     }
 
     public void put(byte[] bArr) {
-        if (shouldDelimit()) buff.add(Persistency.delimiter);
+        addInternal(Persistency.delimiter, buff.size());
         for (byte b : bArr) buff.add(b);
     }
 
     public void openSegment() {
-        if (shouldDelimit()) buff.add(Persistency.delimiter);
-        buff.add(Persistency.segmentOpenCode);
+        if (segmentOpen) closeSegmenet();
+
+        lastSegmentHeader = buff.size()-1;
+        addInternal(Persistency.segementHeader, buff.size());
+        addInternal(Persistency.segementOpenCode, buff.size());
+
+        segmentOpen = true;
+        segmentSize = 0;
     }
 
     public void closeSegmenet() {
-        buff.add(Persistency.segmentCloseCode);
+        if (segmentOpen) addInternal(Persistency.segmentCloseCode, buff.size());
+        //Add size
+        buff.add(lastSegmentHeader+Persistency.segementHeader.length, (byte) segmentSize);
     }
 
     public void wrapInSegment() {
-        buff.add(0, Persistency.segmentOpenCode);
-        buff.add(Persistency.segmentCloseCode);
+        List<Byte> nBuff = new ArrayList<>();
+        for (byte c : Persistency.segementHeader) nBuff.add(c);
+        nBuff.add((byte) buff.size());
+        for (byte c : Persistency.segementOpenCode) nBuff.add(c);
+        for (byte c : buff) nBuff.add(c);
+        for (byte c : Persistency.segmentCloseCode) nBuff.add(c);
+        buff = nBuff;
     }
 
-    private boolean shouldDelimit() {
-        return !buff.isEmpty()&&!Persistency.isCode(buff.get(buff.size()-1));
+    private void addInternal(byte[] code, int position) {
+        int i = position;
+        for (byte b : code) {
+            buff.add(i, b);
+            i++;
+        }
     }
 
-    public byte[] toArray() {
+    public byte[] getBytes() {
         byte[] result = new byte[buff.size()];
         for (int i=0; i<result.length; i++) result[i] = buff.get(i);
         return result;

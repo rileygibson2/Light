@@ -16,7 +16,7 @@ public class EffectManager {
             effect.addFixture(f);
 
             //Activate effect line for all attributes this fixture has a value for in programmer
-            for (Attribute a : prog.getFixtureValues(f).keySet()) effect.activeLine(a);
+            for (Attribute a : prog.get(f).keySet()) effect.activeLine(a);
         }
         return effect;
     }

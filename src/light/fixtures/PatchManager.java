@@ -42,6 +42,7 @@ public class PatchManager {
     }
     
     public Fixture getFixture(ConsoleAddress address) {
+        if (!address.matchesScope(Fixture.class)) return null;
         for (Set<Fixture> profile : patch.values()) {
             for (Fixture f : profile) {
                 if (f.getAddress().equals(address)) return f;

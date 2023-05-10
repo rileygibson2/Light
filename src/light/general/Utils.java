@@ -5,7 +5,6 @@ import java.net.URL;
 import java.nio.ByteBuffer;
 
 import light.executors.Executor.ExecType;
-import light.guipackage.cli.CLI;
 import light.executors.ExecutorCapable;
 
 public class Utils {
@@ -17,28 +16,35 @@ public class Utils {
 	public static URL getURL(String path) {
 		return Utils.class.getClassLoader().getResource(path);
 	}
-
+	
 	public static boolean validateDMX(double dmx) {return dmx>=0&&dmx<=255;}
-
+	
 	public static int castToDMX(double dmx) {
 		return (int) (dmx<0 ? 0 : (dmx>255 ? 255 : dmx));
 	}
-
+	
 	public static String capitaliseFirst(String s) {
 		if (s.length()==0) return s;
 		if (s.length()==1) return s.toUpperCase();
 		return s.substring(0, 1).toUpperCase()+s.substring(1, s.length()).toLowerCase();
 	}
-
+	
+	public static int hashString(String s) {
+		final int prime = 31;
+		int result = 1;
+		for (char c : s.toCharArray()) result = prime * result + c;
+		return result;
+	}
+	
 	public static byte[] combineByteArrays(byte[]... args) {
 		int l = 0;
 		for (byte[] b : args) l += b.length;
-
+		
 		ByteBuffer buff = ByteBuffer.allocate(l);
 		for (byte[] b : args) buff.put(b);
 		return buff.array();
 	}
-
+	
 	public static byte[] generateByteArray(byte... args) {
 		byte[] result = new byte[args.length];
 		for (int i=0; i<result.length; i++) result[i] = args[i];
