@@ -255,13 +255,12 @@ public class DataStore implements PersistencyCapable {
     public byte[] getBytes() {
         PersistencyWriter pW = new PersistencyWriter();
         
-        for (Fixture f : getFixtureSet()) {
+        for (ConsoleAddress a : getAddressSet()) {
             pW.openSegment();
-            pW.put(f.getAddress().getBytes());
-            
-            for (Map.Entry<Attribute, Double> e : get(f).entrySet()) {
-                //pW.put(e.getKey().getBytes());
-                pW.put(e.getValue().byteValue());
+            pW.putObject(a);
+            for (Map.Entry<Attribute, Double> e : get(a).entrySet()) {
+                pW.putInt(e.getKey().ordinal());
+                pW.putDouble(e.getValue());
             }
             pW.closeSegmenet();
         }

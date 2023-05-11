@@ -1,7 +1,5 @@
 package light.fixtures;
 
-import java.util.Set;
-
 import light.fixtures.profile.Profile;
 import light.fixtures.profile.ProfileChannel;
 import light.general.Addressable;
@@ -57,9 +55,10 @@ public class Fixture extends Addressable implements PersistencyCapable {
         PersistencyWriter pW = new PersistencyWriter();
 
         //Name and dmx address
-        pW.put(getLabel().getBytes());
-        if (dmxAddress!=null) pW.put(dmxAddress.getBytes());
-        pW.put(profile.getFileName().getBytes());
+        pW.putObject(getAddress());
+        pW.putString(getLabel());
+        if (dmxAddress!=null) pW.putObject(dmxAddress);
+        pW.putString(profile.getFileName());
         pW.wrapInSegment();
 
         return pW.getBytes();

@@ -44,8 +44,7 @@ public class Group extends AbstractStore implements PersistencyCapable {
 
     @Override
     public byte[] getBytes() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getBytes'");
+        return new byte[0];
     }
 
     @Override

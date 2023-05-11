@@ -98,6 +98,17 @@ public class Light {
         if (scope==View.class) return viewPool;
         return null;
     }
+
+    public Set<Pool<?>> allPoolSet() {
+        Set<Pool<?>> pools = new HashSet<>();
+        for (Pool<?> pool : presetPools.values()) pools.add(pool);
+        pools.add(effectPool);
+        pools.add(viewPool);
+        pools.add(sequencePool);
+        pools.add(groupPool);
+        pools.add(executorPool);
+        return pools;
+    }
     
     /**
     * Resolves an address to a real object if it can be
@@ -258,18 +269,8 @@ public class Light {
         //currentView.getUDA().createZone(FixtureWindow.class, new Rectangle(0, 0, 11, 7));
 
         //Persitency mock
-        byte[] save = Persistency.getInstance().generateBytes();
-        for (byte b : save) CLI.debug(b);
-
-        String fileName = "output.txt";
-        try (FileOutputStream fos = new FileOutputStream(fileName)) {
-            fos.write(save);
-            fos.close();
-            System.out.println("Byte array has been written to " + fileName);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        //CLI.debug("save: "+Arrays.dee(save));
+        Persistency.getInstance().saveToFile("output.txt");
+        Persistency.getInstance().loadFromFile("output.txt");
     }
     
     public static void main(String args[]) {

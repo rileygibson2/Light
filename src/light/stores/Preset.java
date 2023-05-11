@@ -11,6 +11,7 @@ import light.general.ConsoleAddress;
 import light.general.DataStore;
 import light.guipackage.cli.CLI;
 import light.persistency.PersistencyCapable;
+import light.persistency.PersistencyWriter;
 
 public class Preset extends AbstractStore implements PersistencyCapable {
     
@@ -126,8 +127,12 @@ public class Preset extends AbstractStore implements PersistencyCapable {
 
     @Override
     public byte[] getBytes() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getBytes'");
+        PersistencyWriter pW = new PersistencyWriter();
+        pW.putObject(getAddress());
+        pW.putString(getLabel());
+        pW.putObject(getStore());
+        pW.wrapInSegment();
+        return pW.getBytes();
     }
 
     @Override

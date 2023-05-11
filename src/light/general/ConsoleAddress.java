@@ -85,9 +85,9 @@ public class ConsoleAddress implements Comparable<ConsoleAddress>, PersistencyCa
     @Override
     public byte[] getBytes() {
         PersistencyWriter pW = new PersistencyWriter();
-        pW.put(this.scope.getName().getBytes());
-        pW.put((byte) prefix);
-        pW.put((byte) suffix);
+        pW.putString(this.scope.getSimpleName());
+        pW.putInt(prefix);
+        pW.putInt(suffix);
         pW.wrapInSegment();
         return pW.getBytes();
     }

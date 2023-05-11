@@ -10,7 +10,6 @@ import light.general.ConsoleAddress;
 import light.guipackage.cli.CLI;
 import light.guipackage.gui.components.complexcomponents.PoolGUI;
 import light.persistency.PersistencyCapable;
-import light.persistency.PersistencyWriter;
 import light.stores.AbstractStore;
 import light.stores.View;
 import light.uda.UDA;
@@ -19,7 +18,7 @@ import light.uda.guiinterfaces.GUIInterface;
 import light.uda.guiinterfaces.PoolGUIInterface;
 import light.uda.guiinterfaces.ViewGUIInterface;
 
-public class Pool<T extends Addressable & PersistencyCapable> extends Addressable implements PersistencyCapable, UDACapable, Iterable<T> {
+public class Pool<T extends Addressable & PersistencyCapable> extends Addressable implements UDACapable, Iterable<T> {
 
     private List<T> elements;
 
@@ -87,23 +86,6 @@ public class Pool<T extends Addressable & PersistencyCapable> extends Addressabl
             GUIInterface inter = Light.getInstance().getStaticGUIElement(ViewGUIInterface.class);
             if (inter!=null) ((ViewGUIInterface) inter).update();
         }
-    }
-
-    @Override
-    public byte[] getBytes() {
-        PersistencyWriter pW = new PersistencyWriter();
-        for (T t : elements) {
-            pW.put(t.getBytes());
-        }
-
-        pW.wrapInSegment();
-        return pW.getBytes();
-    }
-
-    @Override
-    public void generateFromBytes(byte[] bytes) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'generateFromBytes'");
     }
 
     @Override
