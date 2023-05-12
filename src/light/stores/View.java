@@ -56,8 +56,7 @@ public class View extends AbstractStore implements PersistencyCapable {
         return new byte[0];
     }
 
-    @Override
-    public void generateFromBytes(byte[] bytes) {
+    public static View generateFromBytes(byte[] bytes) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'generateFromBytes'");
     }

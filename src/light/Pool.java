@@ -7,7 +7,6 @@ import java.util.List;
 
 import light.general.Addressable;
 import light.general.ConsoleAddress;
-import light.guipackage.cli.CLI;
 import light.guipackage.gui.components.complexcomponents.PoolGUI;
 import light.persistency.PersistencyCapable;
 import light.stores.AbstractStore;
@@ -43,7 +42,6 @@ public class Pool<T extends Addressable & PersistencyCapable> extends Addressabl
         t.setUpdateAction(() -> updateGUI());
         elements.add(t);
         Collections.sort(elements);
-        CLI.debug("adding to pool "+t.getAddress());
         updateGUI();
     }
 

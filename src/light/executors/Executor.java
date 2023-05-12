@@ -63,8 +63,7 @@ public class Executor extends Addressable implements PersistencyCapable {
         throw new UnsupportedOperationException("Unimplemented method 'getBytes'");
     }
 
-    @Override
-    public void generateFromBytes(byte[] bytes) {
+    public static Executor generateFromBytes(byte[] bytes) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'generateFromBytes'");
     }

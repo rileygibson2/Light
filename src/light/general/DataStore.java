@@ -6,6 +6,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import javax.xml.crypto.Data;
+
 import light.fixtures.Attribute;
 import light.fixtures.FeatureGroup;
 import light.fixtures.Fixture;
@@ -257,10 +259,10 @@ public class DataStore implements PersistencyCapable {
         
         for (ConsoleAddress a : getAddressSet()) {
             pW.openSegment();
-            pW.putObject(a);
+            pW.writeObject(a);
             for (Map.Entry<Attribute, Double> e : get(a).entrySet()) {
-                pW.putInt(e.getKey().ordinal());
-                pW.putDouble(e.getValue());
+                pW.writeInt(e.getKey().ordinal());
+                pW.writeDouble(e.getValue());
             }
             pW.closeSegmenet();
         }
@@ -269,8 +271,7 @@ public class DataStore implements PersistencyCapable {
         return pW.getBytes();
     }
     
-    @Override
-    public void generateFromBytes(byte[] bytes) {
+    public static DataStore generateFromBytes(byte[] bytes) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'generateFromBytes'");
     }

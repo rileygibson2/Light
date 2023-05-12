@@ -20,37 +20,32 @@ public class PersistencyWriter {
         doubleWorker = ByteBuffer.allocate(Double.BYTES);
     }
     
-    public void putString(String str) {
+    public void writeString(String str) {
         if (shouldDelimit()) buff.add(Code.DELIMITER.getCode());
         byte[] encodedStr = str.getBytes();
         for (byte b : encodedStr) buff.add(b);
     }
     
-    public void putInt(int i) {
+    public void writeInt(int i) {
         if (shouldDelimit()) buff.add(Code.DELIMITER.getCode());
         intWorker.clear();
         intWorker.putInt(i);
-        CLI.debug("putting byte array for int "+i+": ");
-        for (byte b : intWorker.array()) {
-            CLI.debug(b);
-            buff.add(b);
-        }
-        //addInternal(intWorker.array(), buff.size());
+
+        String s = "";
+        for (byte b : intWorker.array()) s += b+" ";
+        CLI.debug("writing int: "+s);
+
+        for (byte b : intWorker.array()) buff.add(b);
     }
     
-    public void putDouble(double d) {
+    public void writeDouble(double d) {
         if (shouldDelimit()) buff.add(Code.DELIMITER.getCode());
         doubleWorker.clear();
         doubleWorker.putDouble(d);
-        CLI.debug("putting byte array for double "+d+": ");
-        for (byte b : doubleWorker.array()) {
-            CLI.debug(b);
-            buff.add(b);
-        }
-        //addInternal(doubleWorker.array(), buff.size());
+        for (byte b : doubleWorker.array()) buff.add(b);
     }
     
-    public void putObject(PersistencyCapable o) {
+    public void writeObject(PersistencyCapable o) {
         if (shouldDelimit()) buff.add(Code.DELIMITER.getCode());
         for (byte b : o.getBytes()) buff.add(b);
     }
@@ -69,16 +64,8 @@ public class PersistencyWriter {
         buff.add(Code.SEGMENTCLOSECODE.getCode());
     }
     
-    public boolean shouldDelimit() {
-        return !buff.isEmpty()&&Persistency.getCode(buff.get(buff.size()-1))==null;
-    }
-    
-    private void addInternal(byte[] code, int position) {
-        int i = position;
-        for (byte b : code) {
-            buff.add(i, b);
-            i++;
-        }
+    private boolean shouldDelimit() {
+        return !buff.isEmpty()&&(Persistency.getCode(buff.get(buff.size()-1))==null||Persistency.getCode(buff.get(buff.size()-1))==Code.SEGMENTCLOSECODE);
     }
     
     public byte[] getBytes() {
@@ -86,5 +73,4 @@ public class PersistencyWriter {
         for (int i=0; i<result.length; i++) result[i] = buff.get(i);
         return result;
     }
-    
 }

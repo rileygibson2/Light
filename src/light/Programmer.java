@@ -20,7 +20,6 @@ import light.fixtures.profile.ProfileChannelMacro;
 import light.fixtures.profile.ProfileWheelSlot;
 import light.general.ConsoleAddress;
 import light.general.DataStore;
-import light.guipackage.cli.CLI;
 import light.guipackage.general.Pair;
 import light.output.Output;
 import light.output.OutputCapable;
@@ -44,10 +43,7 @@ public class Programmer extends DataStore implements OutputCapable, EncoderCapab
         Encoders.getInstance().aquireEncoders(this);
         Encoders.getInstance().setPage(0, this);
 
-        setUpdateAction((s) -> {
-            CLI.debug("Programmer updated "+s);
-            updateFixturesGUI(s);
-        });
+        setUpdateAction((s) -> updateFixturesGUI(s));
     }
     
     public static Programmer getInstance() {

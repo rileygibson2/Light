@@ -218,8 +218,7 @@ public class Sequence extends AbstractStore implements ExecutorCapable, Persiste
         return new byte[0];
     }
 
-    @Override
-    public void generateFromBytes(byte[] bytes) {
+    public static Sequence generateFromBytes(byte[] bytes) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'generateFromBytes'");
     }

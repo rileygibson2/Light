@@ -69,7 +69,6 @@ public class ProfileManager {
     }
     
     private Profile parse(String filePath) throws ProfileParseException {
-        CLI.debug("Parsing file "+filePath+" for fixture profile...");
         Profile profile = new Profile();
         profile.setFileName(filePath);
         
@@ -253,7 +252,7 @@ public class ProfileManager {
             throw new ProfileParseException(e.getMessage());
         }
         
-        if (!profile.validate()) throw new ProfileParseException("Profile did not pass validation");
+        if (!profile.validate()) throw new ProfileParseException("Profile "+profile.toString()+" did not pass validation");
         else CLI.debug("Profile "+profile.toString()+" passed validation");
         return profile;
     }

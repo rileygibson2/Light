@@ -1,8 +1,10 @@
 package light.general;
 
-import java.io.Console;
-
+import light.fixtures.Fixture;
+import light.guipackage.cli.CLI;
 import light.persistency.PersistencyCapable;
+import light.persistency.PersistencyReadException;
+import light.persistency.PersistencyReader;
 import light.persistency.PersistencyWriter;
 
 public class ConsoleAddress implements Comparable<ConsoleAddress>, PersistencyCapable {
@@ -13,8 +15,8 @@ public class ConsoleAddress implements Comparable<ConsoleAddress>, PersistencyCa
     
     public ConsoleAddress(Class<? extends Addressable> scope) {
         this.scope = scope;
-        this.prefix = 0;
-        this.suffix = 0;
+        this.prefix = -1;
+        this.suffix = -1;
     }
     
     public ConsoleAddress(Class<? extends Addressable> scope, int prefix, int suffix) {
@@ -85,17 +87,27 @@ public class ConsoleAddress implements Comparable<ConsoleAddress>, PersistencyCa
     @Override
     public byte[] getBytes() {
         PersistencyWriter pW = new PersistencyWriter();
-        pW.putString(this.scope.getSimpleName());
-        pW.putInt(prefix);
-        pW.putInt(suffix);
+        pW.writeString(this.scope.getSimpleName());
+        pW.writeInt(prefix);
+        pW.writeInt(suffix);
         pW.wrapInSegment();
+        String r = "";
+        for (byte b : pW.getBytes()) r += b+" ";
+        CLI.debug("writing consoleaddress: "+r);
         return pW.getBytes();
     }
+
+    protected boolean validate() {
+        return scope!=null&&prefix>=0&&prefix<1000&&suffix>=0&&suffix<1000;
+    }
     
-    @Override
-    public void generateFromBytes(byte[] bytes) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'generateFromBytes'");
+    public static ConsoleAddress generateFromBytes(byte[] bytes) throws PersistencyReadException {
+        PersistencyReader pR = new PersistencyReader(bytes);
+        pR.readString();
+        ConsoleAddress cA = new ConsoleAddress(Fixture.class, pR.readInt(), pR.readInt());
+        if (cA.validate()) return cA;
+
+        else throw new PersistencyReadException("ConsoleAddress did not pass validation");
     }
     
     public class GenericAddressScope extends Addressable {

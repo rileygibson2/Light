@@ -141,8 +141,7 @@ public class Effect extends AbstractStore implements ExecutorCapable, Persistenc
 		return new byte[0];
 	}
 
-	@Override
-	public void generateFromBytes(byte[] bytes) {
+	public static Effect generateFromBytes(byte[] bytes) {
 		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException("Unimplemented method 'generateFromBytes'");
 	}

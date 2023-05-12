@@ -214,6 +214,5 @@ public class Profile implements PersistencyCapable {
     @Override
     public byte[] getBytes() {return null;}
     
-    @Override
-    public void generateFromBytes(byte[] bytes) {}
+    public static Profile generateFromBytes(byte[] bytes) {return null;}
 }

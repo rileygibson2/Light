@@ -55,17 +55,16 @@ public class Fixture extends Addressable implements PersistencyCapable {
         PersistencyWriter pW = new PersistencyWriter();
 
         //Name and dmx address
-        pW.putObject(getAddress());
-        pW.putString(getLabel());
-        if (dmxAddress!=null) pW.putObject(dmxAddress);
-        pW.putString(profile.getFileName());
+        pW.writeObject(getAddress());
+        pW.writeString(getLabel());
+        if (dmxAddress!=null) pW.writeObject(dmxAddress);
+        pW.writeString(profile.getFileName());
         pW.wrapInSegment();
 
         return pW.getBytes();
     }
 
-    @Override
-    public void generateFromBytes(byte[] bytes) {
+    public static Fixture generateFromBytes(byte[] bytes) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'generateFromBytes'");
     }

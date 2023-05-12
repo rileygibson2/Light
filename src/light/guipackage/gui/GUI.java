@@ -109,11 +109,6 @@ public class GUI extends JPanel {
 		}
 		
 		currentRoot.addComponent((Component) inter);
-		
-		if (o==Light.class) {
-			CLI.debug("DIM CHECK: "+inter);
-			scanDOM((Component) inter, "");
-		}
 		return inter;
 	}
 	

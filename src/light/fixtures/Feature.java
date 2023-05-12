@@ -1,8 +1,6 @@
 package light.fixtures;
 
-import light.persistency.PersistencyCapable;
-
-public enum Feature implements PersistencyCapable {
+public enum Feature {
     //Super attributes
     DIMMER(FeatureGroup.DIMMER),
     SHUTTER(FeatureGroup.DIMMER),
@@ -32,14 +30,6 @@ public enum Feature implements PersistencyCapable {
         }
         return null;
     }
-    
-    @Override
-    public byte[] getBytes() {
-        return new byte[] {(byte) this.ordinal()};
-    }
-    
-    @Override
-    public void generateFromBytes(byte[] bytes) {}
 }
 
 /*public boolean isIntensity() {

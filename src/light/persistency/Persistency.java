@@ -1,16 +1,8 @@
 package light.persistency;
 
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.HashSet;
-import java.util.Set;
-
 import light.Light;
 import light.Pool;
-import light.fixtures.Fixture;
-import light.fixtures.PatchManager;
+import light.general.ConsoleAddress;
 import light.guipackage.cli.CLI;
 
 public class Persistency {
@@ -64,7 +56,7 @@ public class Persistency {
         Light light = Light.getInstance();
         
         //Fixtures
-        for (Fixture f : PatchManager.getInstance().allFixtureList()) pW.putObject(f);
+        /*for (Fixture f : PatchManager.getInstance().allFixtureList()) pW.putObject(f);
         
         //Groups
         //pW.put(light.getGroupPool().getBytes());
@@ -83,72 +75,66 @@ public class Persistency {
             System.out.println("Byte array has been written to " + fileName);
         } catch (IOException e) {
             e.printStackTrace();
+        }*/
+        
+        
+        /*pW.writeInt(10);
+        pW.writeString("hellomynameisriley");
+        pW.writeDouble(68.2);
+        
+        pW.openSegment();
+        pW.writeDouble(1042.2992);
+        pW.writeString("aaaahello");
+        pW.closeSegmenet();
+        pW.writeObject(new ConsoleAddress(Pool.class, 15, 2));
+        pW.writeObject(light.ge);
+        
+        //pW.writeString("hellomynameisriley");
+        byte[] data = pW.getBytes();
+        String r = "";
+        for (byte b : data) r += b+" ";
+        CLI.debug("data: "+r);
+        CLI.debug("data: "+new String(data));
+        
+        PersistencyReader pR = new PersistencyReader(pW.getBytes());
+        try {
+            int i = pR.readInt();
+            CLI.debug("d: "+i);
+            String s = pR.readString();
+            CLI.debug("d: "+s);
+            double d = pR.readDouble();
+            CLI.debug("d: "+d);
+            
+            byte[] seg = pR.readSegment();
+            
+            String segs = "";
+            for (byte b : seg) segs += b+" ";
+            CLI.debug("seg bytes: "+segs);
+            
+            PersistencyReader pR1 = new PersistencyReader(seg);
+            d = pR1.readDouble();
+            CLI.debug("dSeg: "+d);
+            s = pR1.readString();
+            CLI.debug("dSeg: "+s);
+
+            ConsoleAddress cA = ConsoleAddress.generateFromBytes(pR.readSegment());
+            CLI.debug("d: "+cA);
         }
+        catch (PersistencyReadException e) {CLI.error(e);}*/
     }
     
     public void loadFromFile(String fileName) {
         //Get bytes from file
-        byte[] bytes = null;
+        /*byte[] bytes = null;
         try {
             bytes = Files.readAllBytes(Path.of(fileName));
             CLI.debug("read bytes from file:\n"+new String(bytes));
         }
         catch (IOException e) {e.printStackTrace();}
-
+        
         if (bytes==null) return;
-
+        
         PersistencyReader pR = new PersistencyReader(bytes);
-        //pR.rea
+        //pR.rea*/
     }
-    
-    /**
-    * Tree structure is used to unpack split codes and delimiteres into a tree of child nodes an element can work with
-    * 
-    * 
-    */
-    
-    /*public ByteNode generateByteTree(byte[] data) {
-        ByteNode root = new ByteNode();
-        ArrayDeque<ByteNode> nodeStack = new ArrayDeque<>();
-        nodeStack.push(root);
-        
-        List<Byte> buff = new ArrayList<Byte>();
-        
-        for (byte b : data) {
-            if (b==segmentOpenCode) {
-                ByteNode child = new ByteNode();
-                nodeStack.peek().addChild(child);
-                nodeStack.push(child);
-            }
-            if (b==segmentCloseCode) {
-                nodeStack.pop();
-            }
-            if (b==delimiter) {
-                nodeStack.peek().addChild(new ByteNode((Byte[]) buff.toArray()));
-                buff.clear();
-            }
-            else buff.add(b);
-        }
-        
-        return root;
-    }*/
-}
-
-class ByteNode {
-    Set<ByteNode> children;
-    
-    Byte[] content;
-    
-    public ByteNode() {}
-    
-    public ByteNode(Byte[] content) {
-        this.content = content;
-    }
-    
-    public void addChild(ByteNode child) {
-        if (children==null) children = new HashSet<ByteNode>();
-        children.add(child);
-    }
-    
-    public void addContent(Byte[] content) {this.content = content;}
 }

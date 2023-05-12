@@ -128,15 +128,14 @@ public class Preset extends AbstractStore implements PersistencyCapable {
     @Override
     public byte[] getBytes() {
         PersistencyWriter pW = new PersistencyWriter();
-        pW.putObject(getAddress());
-        pW.putString(getLabel());
-        pW.putObject(getStore());
+        pW.writeObject(getAddress());
+        pW.writeString(getLabel());
+        pW.writeObject(getStore());
         pW.wrapInSegment();
         return pW.getBytes();
     }
 
-    @Override
-    public void generateFromBytes(byte[] bytes) {
+    public static Preset generateFromBytes(byte[] bytes) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'generateFromBytes'");
     }

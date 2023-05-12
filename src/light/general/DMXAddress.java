@@ -4,24 +4,26 @@ public class DMXAddress extends ConsoleAddress {
 
     public DMXAddress(int universe, int address) {
         super(GenericAddressScope.class, universe, address);
-        validate();
+        validateDMX();
     }
 
     public int getUniverse() {return getPrefix();}
+
     public void setUniverse(int universe) {
         setPrefix(universe);
-        validate();
+        validateDMX();
     }
 
     public int getAddress() {return getSuffix();}
+
     public void setAddress(int address) {
         setSuffix(address);
-        validate();
+        validateDMX();
     }
 
     public DMXAddress getBaseUniverseAddress() {return new DMXAddress(getPrefix(), 0);}
 
-    public void validate() {
+    public void validateDMX() {
         if (getPrefix()<0) setPrefix(0);
         if (getSuffix()<0) setSuffix(0);
         if (getSuffix()>512) setSuffix(512);
