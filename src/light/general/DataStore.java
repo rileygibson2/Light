@@ -6,14 +6,15 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import javax.xml.crypto.Data;
-
 import light.fixtures.Attribute;
 import light.fixtures.FeatureGroup;
 import light.fixtures.Fixture;
 import light.fixtures.PatchManager;
 import light.fixtures.profile.ProfileChannel;
+import light.guipackage.cli.CLI;
 import light.persistency.PersistencyCapable;
+import light.persistency.PersistencyReadException;
+import light.persistency.PersistencyReader;
 import light.persistency.PersistencyWriter;
 
 public class DataStore implements PersistencyCapable {
@@ -184,6 +185,8 @@ public class DataStore implements PersistencyCapable {
         &&store.containsKey(address)&&store.get(address)!=null
         &&store.get(address).containsKey(attribute);
     }
+
+    public int size() {return store.size();}
     
     /**
     * Combine the given datastore into this data store.
@@ -256,23 +259,34 @@ public class DataStore implements PersistencyCapable {
     @Override
     public byte[] getBytes() {
         PersistencyWriter pW = new PersistencyWriter();
-        
+        pW.writeInt(size()); //Store num addresses
+
         for (ConsoleAddress a : getAddressSet()) {
-            pW.openSegment();
             pW.writeObject(a);
+            pW.writeInt(get(a).size()); //Store num of data pairs for this address
+            
             for (Map.Entry<Attribute, Double> e : get(a).entrySet()) {
                 pW.writeInt(e.getKey().ordinal());
                 pW.writeDouble(e.getValue());
             }
-            pW.closeSegmenet();
         }
-        
-        pW.wrapInSegment();
         return pW.getBytes();
     }
     
-    public static DataStore generateFromBytes(byte[] bytes) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'generateFromBytes'");
+    public static DataStore generateFromBytes(byte[] bytes) throws PersistencyReadException {
+        PersistencyReader pR = new PersistencyReader(bytes);
+        DataStore store = new DataStore();
+
+        int numAddresses = pR.readInt();
+        for (int y=0; y<numAddresses; y++) {
+            ConsoleAddress a = ConsoleAddress.generateFromBytes(pR.readObject());
+            int numPairs = pR.readInt();
+
+            for (int i=0; i<numPairs; i++) { //Read data pairs for num specified as prefixed length
+                store.set(a, Attribute.values()[pR.readInt()], pR.readDouble(), false);
+            }
+        }
+
+        return store;
     }
 }

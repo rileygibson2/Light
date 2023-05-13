@@ -1,7 +1,6 @@
 package light.general;
 
-import light.fixtures.Fixture;
-import light.guipackage.cli.CLI;
+import light.persistency.Persistency;
 import light.persistency.PersistencyCapable;
 import light.persistency.PersistencyReadException;
 import light.persistency.PersistencyReader;
@@ -68,6 +67,10 @@ public class ConsoleAddress implements Comparable<ConsoleAddress>, PersistencyCa
         ConsoleAddress c = (ConsoleAddress) o;
         return c.scope==this.scope&&c.prefix==this.prefix&&c.suffix==this.suffix;
     }
+
+    public ConsoleAddress getBaseAddress() {
+        return new ConsoleAddress(scope);
+    }
     
     public String toAddressString() {return prefix+"."+suffix;}
     
@@ -87,13 +90,9 @@ public class ConsoleAddress implements Comparable<ConsoleAddress>, PersistencyCa
     @Override
     public byte[] getBytes() {
         PersistencyWriter pW = new PersistencyWriter();
-        pW.writeString(this.scope.getSimpleName());
+        pW.writeInt(Persistency.getInstance().getScopeMapping(scope));
         pW.writeInt(prefix);
         pW.writeInt(suffix);
-        pW.wrapInSegment();
-        String r = "";
-        for (byte b : pW.getBytes()) r += b+" ";
-        CLI.debug("writing consoleaddress: "+r);
         return pW.getBytes();
     }
 
@@ -103,10 +102,11 @@ public class ConsoleAddress implements Comparable<ConsoleAddress>, PersistencyCa
     
     public static ConsoleAddress generateFromBytes(byte[] bytes) throws PersistencyReadException {
         PersistencyReader pR = new PersistencyReader(bytes);
-        pR.readString();
-        ConsoleAddress cA = new ConsoleAddress(Fixture.class, pR.readInt(), pR.readInt());
+        Class<?> scope = Persistency.getInstance().getScopeFromMapping(pR.readInt());
+        if (scope==null) throw new PersistencyReadException("A relevant scope for the stored mapping was not found.");
+        
+        ConsoleAddress cA = new ConsoleAddress((Class<? extends Addressable>) scope, pR.readInt(), pR.readInt());
         if (cA.validate()) return cA;
-
         else throw new PersistencyReadException("ConsoleAddress did not pass validation");
     }
     

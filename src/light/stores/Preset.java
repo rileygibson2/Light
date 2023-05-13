@@ -11,6 +11,8 @@ import light.general.ConsoleAddress;
 import light.general.DataStore;
 import light.guipackage.cli.CLI;
 import light.persistency.PersistencyCapable;
+import light.persistency.PersistencyReadException;
+import light.persistency.PersistencyReader;
 import light.persistency.PersistencyWriter;
 
 public class Preset extends AbstractStore implements PersistencyCapable {
@@ -129,14 +131,21 @@ public class Preset extends AbstractStore implements PersistencyCapable {
     public byte[] getBytes() {
         PersistencyWriter pW = new PersistencyWriter();
         pW.writeObject(getAddress());
+        pW.writeInt(getType().ordinal());
         pW.writeString(getLabel());
         pW.writeObject(getStore());
-        pW.wrapInSegment();
         return pW.getBytes();
     }
 
-    public static Preset generateFromBytes(byte[] bytes) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'generateFromBytes'");
+    public static Preset generateFromBytes(byte[] bytes) throws PersistencyReadException {
+       PersistencyReader pR = new PersistencyReader(bytes);
+       ConsoleAddress a = ConsoleAddress.generateFromBytes(pR.readObject());
+       int pT = pR.readInt();
+       if (pT<0||pT>PresetType.values().length) throw new PersistencyReadException("Stored preset type is outside of accepted values");
+
+       Preset p = new Preset(a, PresetType.values()[pT]);
+       p.setLabel(pR.readString());
+       p.setStore(DataStore.generateFromBytes(pR.readObject()));
+       return p;
     }
 }

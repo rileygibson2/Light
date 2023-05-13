@@ -228,7 +228,7 @@ public class Light {
         store.set(fixture1, Attribute.DIM, 0d, true);
         preset.setStore(store);
         preset.setLabel("All Off");
-        getPresetPool(PresetType.DIMMER).add(preset);
+        //getPresetPool(PresetType.DIMMER).add(preset);
 
         preset = new Preset(PresetType.DIMMER.getBaseAddress().setSuffix(3), PresetType.DIMMER);
         store = new DataStore();
@@ -236,7 +236,7 @@ public class Light {
         store.set(fixture1, Attribute.DIM, 100d, true);
         preset.setStore(store);
         preset.setLabel("All On");
-        getPresetPool(PresetType.DIMMER).add(preset);
+        //getPresetPool(PresetType.DIMMER).add(preset);
 
         //Mock views
         View view = new View(new ConsoleAddress(View.class, viewPool.getAddress().getPrefix(), 1));
@@ -269,7 +269,7 @@ public class Light {
         //currentView.getUDA().createZone(FixtureWindow.class, new Rectangle(0, 0, 11, 7));
 
         //Persitency mock
-        Persistency.getInstance().saveToFile("output.txt");
+        //Persistency.getInstance().saveToFile("output.txt");
         Persistency.getInstance().loadFromFile("output.txt");
     }
     

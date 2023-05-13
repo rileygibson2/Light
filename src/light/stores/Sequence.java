@@ -9,6 +9,7 @@ import light.executors.ExecutorCapable;
 import light.general.ConsoleAddress;
 import light.general.DataStore;
 import light.persistency.PersistencyCapable;
+import light.persistency.PersistencyReadException;
 
 public class Sequence extends AbstractStore implements ExecutorCapable, PersistencyCapable {
     
@@ -218,7 +219,7 @@ public class Sequence extends AbstractStore implements ExecutorCapable, Persiste
         return new byte[0];
     }
 
-    public static Sequence generateFromBytes(byte[] bytes) {
+    public static Sequence generateFromBytes(byte[] bytes) throws PersistencyReadException {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'generateFromBytes'");
     }

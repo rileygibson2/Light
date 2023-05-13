@@ -59,8 +59,6 @@ public class Fixture extends Addressable implements PersistencyCapable {
         pW.writeString(getLabel());
         if (dmxAddress!=null) pW.writeObject(dmxAddress);
         pW.writeString(profile.getFileName());
-        pW.wrapInSegment();
-
         return pW.getBytes();
     }
 
