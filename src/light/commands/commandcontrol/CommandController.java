@@ -2,7 +2,6 @@ package light.commands.commandcontrol;
 
 import java.util.ArrayDeque;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Set;
 
 import light.commands.Command;
@@ -19,25 +18,22 @@ public class CommandController {
     private Set<Class<? extends Command>> acceptedCommands; //Register of commands this controller will accept
     private boolean acceptAllCommands;
     
-    private CommandProxy commandRoot;
-    private ArrayDeque<CommandProxy> commandStack; //Working stack of all parts of this command
+    private ArrayDeque<CommandProxy> commandStack; //Working stack used to help build this command
     private Runnable commandUpdatedAction;
     private String workingText; //Used for typed input, will fill up until a command proxy type can be extracted from it
     
-    private boolean allowLeadingTerminals; //When set the controller will allow the leading proxy to be a terminal
+    private Class<? extends Command> defaultCommand; //When a proxy resolves without a specified command as the root then this command class will be used as the root command proxy
     
     public CommandController() {
         acceptAllCommands = false;
         acceptedCommands = new HashSet<Class<? extends Command>>();
-        commandRoot = null;
         commandStack = new ArrayDeque<CommandProxy>();
         workingText = "";
     }
     
-    public boolean isEmpty() {return commandRoot==null&&workingText=="";}
+    public boolean isEmpty() {return commandStack.isEmpty()&&workingText=="";}
     
     public void clear() {
-        commandRoot = null;
         commandStack.clear();
         workingText = "";
         if (hasCommandUpdatedAction()) commandUpdatedAction.run();
@@ -55,52 +51,12 @@ public class CommandController {
     public boolean hasCommandUpdatedAction() {return commandUpdatedAction!=null;}
     
     /**
-    * Used to add a component to this command
-    * @param cP
+    * Sets the default command type proxy.
+    * When a command tree is built from an inputted command and it is found to not have a root
+    * CommandTypeProxy then this default proxy will be used instead.
     */
-    public void addToCommand(CommandProxy cP) {
-        if (cP==null) return;
-        //Check (if proxy is command) if command is accepted
-        if (cP instanceof CommandTypeProxy&&!commandAccepted((Class<? extends Command>) cP.getResolveType())) {
-            CLI.error("This command controller cannot accept the command class "+cP.getResolveType());
-            return;
-        }
-        
-        if (commandRoot==null) { //Start new command
-            commandRoot = cP;
-            commandStack.push(cP);
-        }
-        else { //Continue current command
-            //Work back through command stack to find last non-terminal proxy
-            CommandProxy lastNonTerminal = null;
-            Iterator<CommandProxy> i = commandStack.iterator();
-            
-            while (i.hasNext()) {
-                CommandProxy next = i.next();
-                if (!next.isTerminal()) {
-                    lastNonTerminal = next;
-                    break;
-                }
-            }
-            
-            if (lastNonTerminal==null) { //This only occurs in one of the below edge cases
-                //plus and thru edge case
-                if (cP instanceof OperatorTypeProxy && ((OperatorTypeProxy) cP).getOperator()==Operator.PLUS||((OperatorTypeProxy) cP).getOperator()==Operator.THRU) {
-                    CommandProxy prevProxy = commandStack.pop();
-                    cP.addChild(prevProxy);
-                    //Need to check if previous was root because if so then cP needs to become root
-                    if (commandRoot==prevProxy) commandRoot = cP;
-                    commandStack.push(cP);
-                }
-            }
-            else { //General case
-                lastNonTerminal.addChild(cP);
-                commandStack.push(cP);
-            }
-        }
-        
-        if (hasCommandUpdatedAction()) commandUpdatedAction.run();
-    }
+    public void setDefaultCommand(Class<? extends Command> defaultCommand) {this.defaultCommand = defaultCommand;}
+    public boolean hasDefaultCommand() {return defaultCommand!=null;}
     
     /**
     * Simply updates the local working text store.
@@ -165,12 +121,105 @@ public class CommandController {
     }
     
     public Set<Class<? extends Command>> acceptedCommands() {return acceptedCommands;}
-
+    
     public boolean containsProxyOfType(Class<? extends CommandProxy> type) {
-        if (commandRoot==null) return false;
-        return commandRoot.subtreeContainsType(type);
+        for (CommandProxy proxy : commandStack) {
+            if (proxy.getClass()==type) return true;
+        }
+        return false;
     }
 
+     /**
+    * Used to add a component to this command
+    * @param cP
+    */
+    public void addToCommand(CommandProxy cP) {
+        if (cP==null) return;
+        //Check (if proxy is command) if command is accepted
+        if (cP instanceof CommandTypeProxy&&!commandAccepted((Class<? extends Command>) cP.getResolveType())) {
+            CLI.error("This command controller cannot accept the command class "+cP.getResolveType());
+            return;
+        }
+        commandStack.push(cP);
+        
+        if (hasCommandUpdatedAction()) commandUpdatedAction.run();
+    }
+    
+    /**
+     * Will attempt to turn the build Command Proxy stack into a tree with a CommandTypeProxy
+     * as the root.
+     * 
+     * Works on a and validates a few assumptions;
+     * That commands must be the first element added to the command stack
+     * That there may not be more than one command type proxy present in the command
+     * That terminals cannot follow each other - there must be at most one terminal in a row.
+     * This last point is realised in the fact that an exception will be raised if a terminal is parsed
+     * before the last terminal was aquired by another part of the command.
+     * 
+     * @return The CommandProxy that is the root of the generated tree
+     * @throws CommandFormatException if building a tree was unsuccesful due to an error in the command format
+    */
+    private CommandProxy generateCommandTree() throws CommandFormatException {
+        CommandProxy bankedTerminal = null;
+        ArrayDeque<CommandProxy> workingStack = new ArrayDeque<>();
+        CommandProxy rootProxy = null;
+        
+        for (CommandProxy current : commandStack) {
+            CommandProxy workingHead = workingStack.peek();
+            
+            if (current instanceof CommandTypeProxy) rootProxy = current;
+            else if (current.isTerminal()) {
+                //Check if working stack head will take it
+                if (workingHead!=null&&workingHead.willAcceptProxy(current)) workingHead.addChild(current);
+                else {
+                    if (bankedTerminal!=null) throw new CommandFormatException("Banked terminal was not aquired before another terminal was encountered");
+                    bankedTerminal = current;
+                }
+            }
+            else {
+                /**
+                * SPECIAL CASE - operator duplication.
+                * If an operator is already working head then this new copy of it shouldn't be considered.
+                * Conside 1+2+3 should create a tree with one operator proxy with 3 children.
+                */
+                if (workingHead!=null&&workingHead.equals(current)) continue;
+                
+                //Check if cP will take any of terminal stack
+                if (bankedTerminal!=null&&current.willAcceptProxy(bankedTerminal)) {
+                    current.addChild(bankedTerminal);
+                    bankedTerminal = null;
+                }
+                
+                //Check if head of working stack will take cP
+                if (workingHead!=null&&workingHead.willAcceptProxy(current)) workingHead.addChild(current);
+                //Check if cP will accept working head
+                else if (workingHead!=null&&current.willAcceptProxy(workingHead)) {
+                    current.addChild(workingHead);
+                    workingStack.remove(workingHead);
+                    workingStack.push(current);
+                }
+                else workingStack.push(current);
+            }
+        }
+        
+        if (rootProxy==null) { //A command type wasn't found so try default
+            if (defaultCommand==null) throw new CommandFormatException("A command stack must resolve to a command");
+            rootProxy = new CommandTypeProxy(defaultCommand);
+        }
+        else { //A command type was found so assert is command and was first in stack
+            if (!(rootProxy instanceof CommandTypeProxy)) throw new CommandFormatException("The root proxy must be a command type proxy at this point.");
+            if (commandStack.peekLast()!=rootProxy) throw new CommandFormatException("The command type proxy must be the first proxy added to the command");
+        }
+        //Give root proxy banked terminal and all working stack elements
+        if (bankedTerminal!=null&&rootProxy.willAcceptProxy(bankedTerminal)) rootProxy.addChild(bankedTerminal);
+        for (CommandProxy workingProxy : workingStack) {
+            if (rootProxy.willAcceptProxy(workingProxy)) rootProxy.addChild(workingProxy);
+        }
+
+        CLI.debug("Generated command tree:\n"+rootProxy.toTreeString(""));
+        return rootProxy;
+    }
+    
     public void executeCommand() throws CommandFormatException {
         Command c = null;
         c = resolveForCommand();
@@ -179,27 +228,21 @@ public class CommandController {
     }
     
     public Command resolveForCommand() throws CommandFormatException {
-        if (commandRoot==null) throw new CommandFormatException("Cannot resolve command - no command root");
-        Object o = commandRoot.resolve();
+        CommandProxy root = generateCommandTree();
+        if (root==null) throw new CommandFormatException("A working command proxy tree could not be generated");
+        Object o = root.resolve();
         
         if (o instanceof Command) return ((Command) o);
         else throw new CommandFormatException("Did not resolve to an object of class Command");
     }
     
-    public Double resolveForDouble() throws CommandFormatException {
-        if (commandRoot==null) throw new CommandFormatException("Cannot resolve command - no command root");
-        Object o = commandRoot.resolve();
-        
-        if (o instanceof Double) return ((Double) o);
-        else throw new CommandFormatException("Did not resolve to an object of class double");
-    }
-    
-    public String getTreeString() {
+    /*public String getTreeString() {
         return commandRoot!=null ? commandRoot.getTreeString("") : "Cannot create tree string as no command root";
-    }
+    }*/
     
     public String getCommandAsString() {
-        if (commandRoot==null) return workingText;
-        return commandRoot.toString()+" "+workingText;
+        String s = "";
+        for (CommandProxy cP : commandStack) s += " "+cP.toDisplayString();
+        return s+" "+workingText;
     }
 }

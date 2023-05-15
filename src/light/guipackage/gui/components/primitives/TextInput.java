@@ -26,6 +26,8 @@ public class TextInput extends InputComponent<String> {
 		
 		setColor(Styles.focus);
 		setRounded(true);
+		setSelectAction(() -> select());
+		setSelectAction(() -> deselect());
 		
 		label = new Label(new UnitRectangle(0, 0, 100, 100), new Font(Styles.baseFont, Font.BOLD, 12), new Color(200, 200, 200));
 		label.setColor(new Color(20, 20, 20));
@@ -36,7 +38,6 @@ public class TextInput extends InputComponent<String> {
 		addComponent(label);
 
 		if (getValue()==null) setValue(""); 
-		setClickAction(() -> click());
 	}
 
 	public Label getLabel() {return label;}
@@ -53,27 +54,15 @@ public class TextInput extends InputComponent<String> {
 		label.setText(getValue()+cursor);
 	}
 	
-	public void click() {
-		setSelected(true);
+	public void select() {
 		IO.getInstance().setOverrideKeyListener(e -> keyPressed(e));
 		
 		//cursorAni = AnimationFactory.getAnimation(this, Animations.CursorBlip);
 		//cursorAni.start();
 	}
-
-	public void keyPressed(KeyEvent e) {
-		//Submit on enter
-		if (e.getExtendedKeyCode()==10) submitAction().submit(getValue());
-		//Backspace
-		else if (e.getExtendedKeyCode()==8&&!getValue().isEmpty()) setValue(getValue().substring(0, getValue().length()-1));
-		else setValue(getValue()+e.getKeyChar());
-		label.setText(getValue()+cursor);
-	}
 	
-	@Override
-	public void doDeselect() {
+	public void deselect() {
 		IO.getInstance().deregisterKeyListener(label);
-		setSelected(false);
 		if (cursorAni!=null) cursorAni.end();
 		
 		//Submit input
@@ -88,6 +77,15 @@ public class TextInput extends InputComponent<String> {
 		}
 		else descriptionLabel.setVisible(false);*/
 	}
+
+	public void keyPressed(KeyEvent e) {
+		//Submit on enter
+		if (e.getExtendedKeyCode()==10) submitAction().submit(getValue());
+		//Backspace
+		else if (e.getExtendedKeyCode()==8&&!getValue().isEmpty()) setValue(getValue().substring(0, getValue().length()-1));
+		else setValue(getValue()+e.getKeyChar());
+		label.setText(getValue()+cursor);
+	}
 	
 	@Override
 	public void destroy() {
@@ -95,12 +93,10 @@ public class TextInput extends InputComponent<String> {
 		super.destroy();
 	}
 	
-	@Override
 	public void doHover() {
 		GUIUtils.setCursor(Cursor.HAND_CURSOR);
 	}
 	
-	@Override
 	public void doUnhover() {
 		GUIUtils.setCursor(Cursor.DEFAULT_CURSOR);
 	}

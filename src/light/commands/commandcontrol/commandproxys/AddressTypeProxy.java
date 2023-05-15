@@ -11,6 +11,11 @@ public class AddressTypeProxy extends CommandProxy {
         super(true);
         this.consoleAddress = consoleAddress;
     }
+
+    @Override
+    public boolean willAcceptProxy(CommandProxy proxy) {
+        return false; //This proxy is terminal
+    }
     
     @Override
     public Class<?> getResolveType() {
@@ -21,22 +26,37 @@ public class AddressTypeProxy extends CommandProxy {
     public Object resolve() throws CommandFormatException {
         return consoleAddress;
     }
+
+    @Override
+    public AddressTypeProxy clone() {
+        return new AddressTypeProxy(consoleAddress);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        return o instanceof AddressTypeProxy&&((AddressTypeProxy) o).consoleAddress==this.consoleAddress; 
+    }
     
     @Override
-    public String getTreeString(String indent) {
+    public String toTreeString(String indent) {
         String result = "[Proxy: type="+getClass().getSimpleName()+" real=";
         result += consoleAddress.getScope().getSimpleName()+" "+consoleAddress.toAddressString();
         result += "]";
         indent += "     ";
-        for (CommandProxy child : children) result += "\n"+indent+child.getTreeString(indent);
+        for (CommandProxy child : children) result += "\n"+indent+child.toTreeString(indent);
         return result;
+    }
+
+    @Override
+    public String toDisplayString() {
+        return consoleAddress.toDisplayString();
     }
     
     @Override
     public String toString() {
-        String result = "";
-        result =  consoleAddress.toDisplayString();
-        for (CommandProxy child : children) result += " "+child.toString();
+        String result = "[Proxy: type="+getClass().getSimpleName()+" real=";
+        result += consoleAddress.getScope().getSimpleName()+" "+consoleAddress.toAddressString();
+        result += "]";
         return result;
     }
 }

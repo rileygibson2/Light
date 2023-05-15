@@ -1,7 +1,5 @@
 package light;
 
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -9,7 +7,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import light.commands.Command;
+import light.commands.DummyArithmeticCommand;
+import light.commands.LabelCommand;
+import light.commands.ModulateCommand;
+import light.commands.MoveCommand;
+import light.commands.commandcontrol.CommandFormatException;
 import light.commands.commandcontrol.CommandLine;
+import light.commands.commandcontrol.commandproxys.AddressTypeProxy;
+import light.commands.commandcontrol.commandproxys.CommandTypeProxy;
+import light.commands.commandcontrol.commandproxys.OperatorTypeProxy;
+import light.commands.commandcontrol.commandproxys.OperatorTypeProxy.Operator;
+import light.commands.commandcontrol.commandproxys.ValueTypeProxy;
 import light.encoders.Encoders;
 import light.executors.Executor;
 import light.fixtures.Attribute;
@@ -25,7 +34,6 @@ import light.guipackage.cli.CLI;
 import light.guipackage.general.Rectangle;
 import light.guipackage.gui.GUI;
 import light.guipackage.gui.IO;
-import light.persistency.Persistency;
 import light.stores.AbstractStore;
 import light.stores.Group;
 import light.stores.Preset;
@@ -155,7 +163,7 @@ public class Light {
         UDA.getInstance();
         Encoders.getInstance();
         Programmer.getInstance();
-        CommandLine.getInstance();
+        CommandLine.getInstance().setDefaultCommand(ModulateCommand.class);;
         
         //Make pools
         presetPools = new HashMap<PresetType, Pool<Preset>>();
@@ -270,7 +278,67 @@ public class Light {
 
         //Persitency mock
         //Persistency.getInstance().saveToFile("output.txt");
-        Persistency.getInstance().loadFromFile("output.txt");
+        //Persistency.getInstance().loadFromFile("output.txt");
+
+        CommandLine cl = CommandLine.getInstance();
+        cl.addToCommand(new CommandTypeProxy(MoveCommand.class));
+        cl.addToCommand(new ValueTypeProxy(1));
+        cl.addToCommand(new OperatorTypeProxy(Operator.PLUS));
+        cl.addToCommand(new ValueTypeProxy(2));
+        cl.addToCommand(new OperatorTypeProxy(Operator.PLUS));
+        cl.addToCommand(new ValueTypeProxy(3));
+        cl.addToCommand(new OperatorTypeProxy(Operator.AT));
+        cl.addToCommand(new ValueTypeProxy(4));
+        cl.addToCommand(new OperatorTypeProxy(Operator.PLUS));
+        cl.addToCommand(new ValueTypeProxy(5));
+        cl.addToCommand(new OperatorTypeProxy(Operator.PLUS));
+        cl.addToCommand(new ValueTypeProxy(8));
+        try {cl.resolveForCommand();}
+        catch (CommandFormatException e) { e.printStackTrace();}
+
+        cl.clear();
+
+        cl.addToCommand(new CommandTypeProxy(LabelCommand.class));
+        cl.addToCommand(new AddressTypeProxy(new ConsoleAddress(Fixture.class)));
+        try {cl.resolveForCommand();}
+        catch (CommandFormatException e) { e.printStackTrace();}
+
+        cl.clear();
+
+        cl.addToCommand(new ValueTypeProxy(1));
+        cl.addToCommand(new OperatorTypeProxy(Operator.PLUS));
+        cl.addToCommand(new ValueTypeProxy(2));
+        cl.addToCommand(new OperatorTypeProxy(Operator.PLUS));
+        cl.addToCommand(new ValueTypeProxy(3));
+        cl.addToCommand(new OperatorTypeProxy(Operator.AT));
+        cl.addToCommand(new ValueTypeProxy(4));
+        cl.addToCommand(new OperatorTypeProxy(Operator.PLUS));
+        cl.addToCommand(new ValueTypeProxy(5));
+        cl.addToCommand(new OperatorTypeProxy(Operator.PLUS));
+        cl.addToCommand(new ValueTypeProxy(9));
+        try {cl.resolveForCommand();}
+        catch (CommandFormatException e) { e.printStackTrace();}
+
+        cl.clear();
+        cl.setDefaultCommand(DummyArithmeticCommand.class);
+
+        cl.addToCommand(new ValueTypeProxy(1));
+        cl.addToCommand(new OperatorTypeProxy(Operator.PLUS));
+        cl.addToCommand(new ValueTypeProxy(2));
+        cl.addToCommand(new OperatorTypeProxy(Operator.PLUS));
+        cl.addToCommand(new ValueTypeProxy(3));
+        cl.addToCommand(new OperatorTypeProxy(Operator.PLUS));
+        cl.addToCommand(new ValueTypeProxy(4));
+        cl.addToCommand(new OperatorTypeProxy(Operator.PLUS));
+        cl.addToCommand(new ValueTypeProxy(5));
+        cl.addToCommand(new OperatorTypeProxy(Operator.PLUS));
+        cl.addToCommand(new ValueTypeProxy(9));
+        try {
+            Command c = cl.resolveForCommand();
+            double d = ((DummyArithmeticCommand) c).getDouble();
+            CLI.debug("Result double: "+d);
+        }
+        catch (CommandFormatException e) { e.printStackTrace();}
     }
     
     public static void main(String args[]) {

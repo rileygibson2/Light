@@ -51,20 +51,25 @@ public abstract class CommandProxy {
     private boolean isTerminal;
     
     public CommandProxy(boolean isTerminal) {
+        this.isTerminal = isTerminal;
         children = new ArrayList<CommandProxy>();
     }
     
     public void addChild(CommandProxy child) {
-        if (child!=null&&!isTerminal()) children.add(child);
+        if (child!=null&&willAcceptProxy(child)) children.add(child);
     }
     
     public List<CommandProxy> getChildren() {return children;}
+
+    public int numberChildren() {return children.size();}
     
     /**
     * If this command proxy is a terminal (i.e will not accept arguments) this method will return true.
     * @return
     */
     public boolean isTerminal() {return isTerminal;}
+
+    public abstract boolean willAcceptProxy(CommandProxy proxy);
     
     public boolean subtreeContainsType(Class<? extends CommandProxy> typeClass) {
         if (getClass()==typeClass) return true;
@@ -75,7 +80,7 @@ public abstract class CommandProxy {
     }
 
     /**
-     * Returns type this proxy will resolve to.
+     * @return The type this proxy will resolve to.
      */
     public abstract Class<?> getResolveType();
     
@@ -85,6 +90,11 @@ public abstract class CommandProxy {
      * @throws CommandFormatException
      */
     public abstract Object resolve() throws CommandFormatException;
+
+    @Override
+    public abstract CommandProxy clone();
     
-    public abstract String getTreeString(String indent);
+    public abstract String toTreeString(String indent);
+
+    public abstract String toDisplayString();
 }

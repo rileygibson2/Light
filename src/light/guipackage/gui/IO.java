@@ -12,8 +12,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import light.general.Submitter;
-import light.guipackage.cli.CLI;
-import light.guipackage.general.Pair;
 import light.guipackage.general.Point;
 import light.guipackage.threads.GUIThreadController;
 

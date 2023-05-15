@@ -17,6 +17,16 @@ public class CommandTypeProxy extends CommandProxy {
         super(false);
         this.commandClass = commandClass;
     }
+
+    @Override
+    public boolean willAcceptProxy(CommandProxy proxy) {
+        /**
+         * Command type should accept any number of arguments of any type.
+         * User should be able to see their entire command sprayed out on CLI.
+         * Any problems will be dealt with at resolve time.
+         */
+        return true;
+    }
     
     @Override
     public Class<?> getResolveType() {
@@ -45,23 +55,40 @@ public class CommandTypeProxy extends CommandProxy {
         } catch (Exception e) {CLI.error("While resolving command, a constructor for "+commandClass+" could not be found for args "+Arrays.deepToString(childTypes)+"\nSpecific construction problem: "+e.toString());}
         return null;
     }
+
+    @Override
+    public CommandTypeProxy clone() {
+        CommandTypeProxy clone = new CommandTypeProxy(commandClass);
+        for (CommandProxy child : children) clone.addChild(child);
+        return clone;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        return o instanceof CommandTypeProxy&&((CommandTypeProxy) o).commandClass==this.commandClass; 
+    }
     
     @Override
-    public String getTreeString(String indent) {
+    public String toTreeString(String indent) {
         String result = "[Proxy: type="+getClass().getSimpleName()+" real=";
         result += commandClass.getSimpleName();
         result += "]";
         
         indent += "     ";
-        for (CommandProxy child : children) result += "\n"+indent+child.getTreeString(indent);
+        for (CommandProxy child : children) result += "\n"+indent+child.toTreeString(indent);
         return result;
+    }
+
+    @Override
+    public String toDisplayString() {
+        return commandClass.getSimpleName().replace("Command", "");
     }
     
     @Override
     public String toString() {
-        String result = "";
-        result = commandClass.getSimpleName().replace("Command", "");
-        for (CommandProxy child : children) result += " "+child.toString();
+        String result = "[Proxy: type="+getClass().getSimpleName()+" real=";
+        result += commandClass.getSimpleName();
+        result += "]";
         return result;
     }
 }

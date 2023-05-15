@@ -6,12 +6,15 @@ public class ValueTypeProxy extends CommandProxy {
     
     private double value;
     
-    
     public ValueTypeProxy(double value) {
         super(true);
         this.value = value;
     }
-    
+
+    @Override
+    public boolean willAcceptProxy(CommandProxy proxy) {
+        return false; //This proxy is terminal
+    }
     
     @Override
     public Class<?> getResolveType() {
@@ -23,28 +26,38 @@ public class ValueTypeProxy extends CommandProxy {
     public Object resolve() throws CommandFormatException {
         return value;
     }
-    
+
+    @Override
+    public ValueTypeProxy clone() {
+        return new ValueTypeProxy(value);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        return o instanceof ValueTypeProxy&&((ValueTypeProxy) o).value==this.value; 
+    }
     
     @Override
-    public String getTreeString(String indent) {
+    public String toTreeString(String indent) {
         String result = "[Proxy: type="+getClass().getSimpleName()+" real=";
         result +=  Double.toString(value);
         result += "]";
         
         indent += "     ";
-        for (CommandProxy child : children) result += "\n"+indent+child.getTreeString(indent);
+        for (CommandProxy child : children) result += "\n"+indent+child.toTreeString(indent);
         return result;
+    }
+
+    @Override
+    public String toDisplayString() {
+        return Double.toString(value);
     }
     
     @Override
     public String toString() {
-        String result = "";
-        result =  Double.toString(value);
-        for (CommandProxy child : children) result += " "+child.toString();
+        String result = "[Proxy: type="+getClass().getSimpleName()+" real=";
+        result +=  Double.toString(value);
+        result += "]";
         return result;
     }
-    
-    /*public CommandProxy(String valueString) {
-        this.valueString = valueString;
-    }*/
 }

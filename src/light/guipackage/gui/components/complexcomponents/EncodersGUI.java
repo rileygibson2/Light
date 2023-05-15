@@ -4,6 +4,8 @@ import java.awt.Color;
 import java.awt.Font;
 import java.util.Map;
 
+import light.commands.Command;
+import light.commands.DummyArithmeticCommand;
 import light.commands.commandcontrol.CommandController;
 import light.commands.commandcontrol.CommandFormatException;
 import light.commands.commandcontrol.commandproxys.OperatorTypeProxy;
@@ -160,6 +162,7 @@ public class EncodersGUI extends Component implements EncodersGUIInterface {
         
         //Command
         calculatorCommand = new CommandController();
+        calculatorCommand.setDefaultCommand(DummyArithmeticCommand.class);
         calculatorCommand.setCommandUpdatedAction(() -> {input.setText(calculatorCommand.getCommandAsString());});
         
         //Button banks
@@ -191,17 +194,18 @@ public class EncodersGUI extends Component implements EncodersGUIInterface {
                 b.setBorder(new Color(255, 200, 0));
                 b.setTextCentered(true);
                 b.setClickAction(() -> {
+                    
                     switch (button) {
-                        case NUM0: calculatorCommand.updateWorkingText("0"); break;
-                        case NUM1: calculatorCommand.updateWorkingText("1"); break;
-                        case NUM2: calculatorCommand.updateWorkingText("2"); break;
-                        case NUM3: calculatorCommand.updateWorkingText("3"); break;
-                        case NUM4: calculatorCommand.updateWorkingText("4"); break;
-                        case NUM5: calculatorCommand.updateWorkingText("5"); break;
-                        case NUM6: calculatorCommand.updateWorkingText("6"); break;
-                        case NUM7: calculatorCommand.updateWorkingText("7"); break;
-                        case NUM8: calculatorCommand.updateWorkingText("8"); break;
-                        case NUM9: calculatorCommand.updateWorkingText("9"); break;
+                        case NUM0:
+                        case NUM1: 
+                        case NUM2: 
+                        case NUM3: 
+                        case NUM4: 
+                        case NUM5: 
+                        case NUM6: 
+                        case NUM7: 
+                        case NUM8: 
+                        case NUM9: calculatorCommand.updateWorkingText(button.getText()); break;
                         case PLUS: 
                         calculatorCommand.parseWorkingText();
                         calculatorCommand.addToCommand(new OperatorTypeProxy(Operator.PLUS));
@@ -209,7 +213,11 @@ public class EncodersGUI extends Component implements EncodersGUIInterface {
                         case PLEASE:
                         calculatorCommand.parseWorkingText();
                         Double d = null;
-                        try {d = calculatorCommand.resolveForDouble();}
+                        try {
+                            Command c = calculatorCommand.resolveForCommand();
+                            if (c==null||!(c instanceof DummyArithmeticCommand)) throw new CommandFormatException("Didn't resolve to dummy arithmetic");
+                            d = ((DummyArithmeticCommand) c).getDouble();
+                        }
                         catch (CommandFormatException e) {
                             CLI.error("calculator command did not resolve - "+e.getMessage());
                             calculatorCommand.clear();

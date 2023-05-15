@@ -5,6 +5,7 @@ import java.util.List;
 
 import light.commands.commandcontrol.CommandFormatException;
 import light.general.ConsoleAddress;
+import light.guipackage.cli.CLI;
 
 public class OperatorTypeProxy extends CommandProxy {
     
@@ -30,8 +31,26 @@ public class OperatorTypeProxy extends CommandProxy {
         super(false);
         this.operator = operator;
     }
-
+    
     public Operator getOperator() {return operator;}
+    
+    @Override
+    public boolean willAcceptProxy(CommandProxy proxy) {
+        switch (operator) {
+            case AT:
+            return numberChildren()<1
+            &&(proxy.isTerminal()||(proxy instanceof OperatorTypeProxy
+            &&(((OperatorTypeProxy) proxy).getOperator()==Operator.PLUS
+            ||((OperatorTypeProxy) proxy).getOperator()==Operator.THRU)));
+            case IF:
+            case MINUS:
+            case PLUS:
+            return proxy.isTerminal();
+            case THRU:
+            return numberChildren()<2&&proxy.isTerminal();
+            default: return false;
+        }
+    }
     
     @Override
     public Class<?> getResolveType() {
@@ -73,16 +92,13 @@ public class OperatorTypeProxy extends CommandProxy {
     }
     
     private double resolveNumberPlus() throws CommandFormatException {
-        if (children.size()!=2) throw new CommandFormatException("Number plus operator requires specifically two address arguments");
-        
-        Object a = children.get(0).resolve();
-        if (!(a instanceof Double)) throw new CommandFormatException("First argument of number plus must be double");
-        
-        Object b = children.get(1).resolve();
-        if (!(b instanceof Double)) throw new CommandFormatException("Second argument of numnber plus must be double");
-        
-        
-        return (double) a + (double) b;
+        double d = 0;
+        for (CommandProxy child : children) {
+            Object o = child.resolve();
+            if (!(o instanceof Double)) throw new CommandFormatException("An child proxy of number plus didn't resolve to a double");
+            d += (double) o;
+        }
+        return d;
     }
     
     private List<ConsoleAddress> resolveAddressPlus() throws CommandFormatException {
@@ -123,24 +139,38 @@ public class OperatorTypeProxy extends CommandProxy {
     }
     
     @Override
-    public String getTreeString(String indent) {
+    public OperatorTypeProxy clone() {
+        OperatorTypeProxy clone = new OperatorTypeProxy(operator);
+        for (CommandProxy child : children) clone.addChild(child);
+        return clone;
+    }
+    
+    @Override
+    public boolean equals(Object o) {
+        return o instanceof OperatorTypeProxy&&((OperatorTypeProxy) o).operator==this.operator; 
+    }
+    
+    @Override
+    public String toTreeString(String indent) {
         String result = "[Proxy: type="+getClass().getSimpleName()+" real=";
         result += operator.toString();
         result += "]";
         
         indent += "     ";
-        for (CommandProxy child : children) result += "\n"+indent+child.getTreeString(indent);
+        for (CommandProxy child : children) result += "\n"+indent+child.toTreeString(indent);
         return result;
     }
     
     @Override
+    public String toDisplayString() {
+        return operator.getText();
+    }
+    
+    @Override
     public String toString() {
-        String result = "";
-        if (children.size()==0) return operator.getText();
-        for (int i=0; i<children.size(); i++) {
-            if (i==children.size()-1&&children.size()>1) result += " "+children.get(i).toString();
-            else result += " "+children.get(i).toString()+" "+operator.getText();
-        }
+        String result = "[Proxy: type="+getClass().getSimpleName()+" real=";
+        result += operator.toString();
+        result += "]";
         return result;
     }
 }

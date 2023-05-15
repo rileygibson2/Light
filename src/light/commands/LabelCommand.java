@@ -30,7 +30,6 @@ public class LabelCommand implements Command {
             GUI.getInstance().getTemporyActionsImplementation().openLabelCommandWindow(this);
             return;
         }
-
         //String has been set
         store.setLabel(label);
         

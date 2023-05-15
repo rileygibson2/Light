@@ -1,5 +1,8 @@
 package light.guipackage.gui.components;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import light.general.Submitter;
 import light.guipackage.general.Point;
 import light.guipackage.general.UnitRectangle;
@@ -8,14 +11,15 @@ import light.guipackage.gui.Element;
 
 public abstract class Component extends Element {
 
-	private boolean selected;
-	private boolean hovered;
-	private boolean pauseHover; //Hover effects are pause when this is true
+	//Static selection
+	private static Component selectedComponent;
 
 	private Submitter<Point> onClick;
 	private Runnable onClickSimple; //Runnable onclick method
 	private Runnable onHover;
-	private Runnable onUnHover;
+	private Runnable onUnhover;
+	private Runnable onSelect;
+	private Runnable onDeselect;
 
 	//Visual
 	private boolean visible;
@@ -29,9 +33,6 @@ public abstract class Component extends Element {
 
 	public Component(UnitRectangle r) {
 		super (r);
-		selected = false;
-		hovered = false;
-		pauseHover = false;
 		hasShadow = false;
 		freezeShadow = false;
 		shadowR = r.clone();
@@ -46,8 +47,22 @@ public abstract class Component extends Element {
 	public void setClickAction(Submitter<Point> s) {this.onClick = s;}
 	public void setClickAction(Runnable r) {this.onClickSimple = r;}
 	public boolean hasClickAction() {return this.onClick!=null||this.onClickSimple!=null;}
+
 	public void setHoverAction(Runnable r) {this.onHover = r;}
-	public void setUnHoverAction(Runnable r) {this.onUnHover = r;}
+	public boolean hasHoverAction() {return this.onHover!=null;}
+	public Runnable getHoverAction() {return this.onHover;}
+
+	public void setUnhoverAction(Runnable r) {this.onUnhover = r;}
+	public boolean hasUnhoverAction() {return this.onUnhover!=null;}
+	public Runnable getUnhoverAction() {return this.onUnhover;}
+
+	public void setSelectAction(Runnable r) {this.onSelect = r;}
+	public boolean hasSelectAction() {return this.onSelect!=null;}
+	public Runnable getSelectAction() {return this.onSelect;}
+
+	public void setDeselectAction(Runnable r) {this.onDeselect = r;}
+	public boolean hasDeselectAction() {return this.onDeselect!=null;}
+	public Runnable getDeselectAction() {return this.onDeselect;}
 
 	public void increasePriority() {this.priority += 1;}
 	public void decreasePriority() {this.priority -= 1;}
@@ -61,13 +76,7 @@ public abstract class Component extends Element {
 		return this; //To allow for chaining
 	}
 
-	public boolean isSelected() {return selected;}
-	public void setSelected(boolean s) {selected = s;}
-
-	public boolean isHovered() {return hovered;}
-	public boolean isHoverPaused() {return pauseHover;}
-	public void pauseHover() {pauseHover = true;}
-	public void unpauseHover() {pauseHover = false;}
+	public boolean isSelected() {return selectedComponent==this;}
 
 	public boolean hasShadow() {return hasShadow;}
 	public void hasShadow(boolean s) {hasShadow = s;} 
@@ -89,37 +98,29 @@ public abstract class Component extends Element {
 	 * Runs a click action.
 	 * If this element has no click action registered then this method will return false
 	 * Element super class does job of verifying click area and that all children subtrees don't
-	 * have a click action to preform. This is why method returns false if super method says dont preform action.
+	 * have a click action to preform. This is why method returns true if super method says dont preform action.
+	 * 
+	 * @return Whether this element or an element in the subtree has preformed a click action
 	 */
 	@Override
 	public boolean doClick(Point p) {
 		if (!super.doClick(p)) return true; //Super says cannot click as child has clicked so return signal saying this has clicked
-		selected = true;
+		/**
+		 * At the point this code is being run we are sure that no child/child subtree has
+		 * performed a click action so this element is next in line for a valid click.
+		 * With this we can confirm that only one element (or none) will run the following lines
+		 * per click event
+		 */
 		if (onClick!=null) onClick.submit(p);
 		if (onClickSimple!=null) onClickSimple.run();
+
+		//Handle selection
+		if (selectedComponent!=null&&selectedComponent!=this&&selectedComponent.hasDeselectAction()) {
+			selectedComponent.getDeselectAction().run();
+		}
+		selectedComponent = this;
+
 		return hasClickAction();
-	}
-
-	public void doDeselect() {selected = false;}
-
-	public void doHover() {
-		if (pauseHover) return;
-		if (!hovered) {
-			hovered = true;
-			if (onHover!=null) {
-				onHover.run();
-			}
-		}
-	}
-
-	public void doUnhover() {
-		if (pauseHover) return;
-		if (hovered) {
-			hovered = false;
-			if (onUnHover!=null) onUnHover.run();
-		}
-		
-		for (Component c : getComponents()) c.doUnhover();
 	}
 
 	@Override

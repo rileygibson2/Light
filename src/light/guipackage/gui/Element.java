@@ -1245,7 +1245,7 @@ public abstract class Element {
 	* Element class will check if children will preform a click
 	* This is done by calling onclick for all children components. Child call will first go to Component method
 	* which will call Element method and verify that child has no clickable children. Then component method will return
-	* true if a click action has been registered and run otherwise will return false.
+	* true if a click action has been registered and run the action, otherwise will return false.
 	* 
 	* The point of this being that a parent element will preform a click even if click happens over a child element,
 	* given that the child element and all it's decendents have no click action registered. Otherwise a click
@@ -1262,20 +1262,17 @@ public abstract class Element {
 		boolean hasClicked = false;
 		for (Component c : getSortedReversedComponents()) {
 			if (c.isVisible()&&c.isOver(p)) {
+				/**
+				 * The line below makes hasClicked represent whether any child element, or element in that
+				 * child's subtree has performed a click action.
+				 */
 				hasClicked = c.doClick(p); //Will recur down
 				if (hasClicked) break;
 			}
 		}
 		
-		//Deselect all non clicked components
-		/*for (Component c : getComponents()) {
-			if (clicked==null||c!=clicked) {
-				if (c.isVisible()&&c.isSelected()) c.doDeselect();
-			}
-		}*/
-		
 		componentsLock.unlock();
-		return !hasClicked;
+		return !hasClicked; //If a child/child subtree has peformed a click action then this element may not perform as click action
 	}
 	
 	protected void doMove(Point p) {
